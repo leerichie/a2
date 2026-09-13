@@ -3,6 +3,17 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.5.0+6 — 2026-09-13
+
+- Completed a global six-language UI audit and added an automated translation
+  coverage test for future interface changes.
+- Added real email registration, sign-in, persisted sessions and sign-out for
+  mobile app accounts backed by the private A2 server.
+- Replaced the invalid HTTPS-on-port-8094 address with the server's working
+  Tailscale HTTPS endpoint and migrated the previously saved bad address.
+- Added permanent repository rules requiring translations and forbidding empty
+  placeholder actions in user-facing features.
+
 ## 1.4.0+5 — 2026-09-13
 
 - Replaced the fixed demo meal result with quantity-aware nutrition estimates.

@@ -9,11 +9,13 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const publicDir = join(root, 'public');
 const dataFile = join(process.env.DATA_DIR || join(root, 'data'), 'content.json');
 const usersFile = join(process.env.DATA_DIR || join(root, 'data'), 'users.json');
+const appUsersFile = join(process.env.DATA_DIR || join(root, 'data'), 'app-users.json');
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
 const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
 const scrypt = promisify(scryptCallback);
 const sessions = new Map();
+const appSessions = new Map();
 
 const json = (res, status, body) => {
   res.writeHead(status, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'});
@@ -70,6 +72,22 @@ const loadUsers = async () => {
 const publicUser = user => ({id: user.id, username: user.username, role: user.role, createdAt: user.createdAt});
 const validUsername = value => /^[A-Za-z0-9_.-]{3,32}$/.test(value || '');
 const validPassword = value => typeof value === 'string' && value.length >= 8 && value.length <= 128;
+const validEmail = value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || '');
+const loadAppUsers = async () => {
+  try { return JSON.parse(await readFile(appUsersFile, 'utf8')).users || []; }
+  catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+};
+const saveAppUsers = async users => {
+  await mkdir(dirname(appUsersFile), {recursive: true});
+  await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
+};
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, createdAt: user.createdAt});
+const appSessionFor = req => {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  const session = appSessions.get(token);
+  if (!session || session.expiresAt < Date.now()) { if (token) appSessions.delete(token); return null; }
+  return {...session, token};
+};
 const targetMatches = (target, userId, deviceId, groups) =>
   target.type === 'all' ||
   (target.type === 'user' && target.ids.includes(userId)) ||
@@ -108,6 +126,45 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, {ok: true});
+    if (req.method === 'POST' && url.pathname === '/api/v1/auth/register') {
+      const {email, password, name = ''} = await readBody(req);
+      const normalEmail = String(email || '').trim().toLowerCase();
+      if (!validEmail(normalEmail)) return json(res, 400, {error: 'Enter a valid email address'});
+      if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
+      const users = await loadAppUsers();
+      if (users.some(item => item.email === normalEmail)) return json(res, 409, {error: 'An account already exists for this email'});
+      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
+      users.push(user); await saveAppUsers(users);
+      const token = randomBytes(32).toString('hex');
+      appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
+      return json(res, 201, {token, user: publicAppUser(user)});
+    }
+    if (req.method === 'POST' && url.pathname === '/api/v1/auth/login') {
+      const {email, password} = await readBody(req);
+      const users = await loadAppUsers();
+      const user = users.find(item => item.email === String(email || '').trim().toLowerCase());
+      if (!user || !(await verifyPassword(password, user.passwordHash))) return json(res, 401, {error: 'Incorrect email or password'});
+      const token = randomBytes(32).toString('hex');
+      appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
+      return json(res, 200, {token, user: publicAppUser(user)});
+    }
+    if (url.pathname.startsWith('/api/v1/auth/')) {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      if (req.method === 'GET' && url.pathname === '/api/v1/auth/me') {
+        const user = (await loadAppUsers()).find(item => item.id === appSession.userId);
+        return user ? json(res, 200, {user: publicAppUser(user)}) : json(res, 401, {error: 'Account no longer exists'});
+      }
+      if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
+        appSessions.delete(appSession.token); return json(res, 200, {ok: true});
+      }
+      if (req.method === 'DELETE' && url.pathname === '/api/v1/auth/account') {
+        const users = await loadAppUsers();
+        await saveAppUsers(users.filter(item => item.id !== appSession.userId));
+        for (const [token, item] of appSessions) if (item.userId === appSession.userId) appSessions.delete(token);
+        return json(res, 200, {ok: true});
+      }
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/content') {
       const userId = url.searchParams.get('userId') || '';
       const deviceId = url.searchParams.get('deviceId') || '';
@@ -135,6 +192,9 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/admin/api/users') {
       const users = await loadUsers();
       return json(res, 200, {users: users.map(publicUser)});
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/app-users') {
+      return json(res, 200, {users: (await loadAppUsers()).map(publicAppUser)});
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/users') {
       const {username, password, role = 'admin'} = await readBody(req);

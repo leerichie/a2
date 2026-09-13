@@ -1114,17 +1114,17 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
         const SizedBox(height: 16),
         TextField(
           controller: activity,
-          decoration: const InputDecoration(
-            labelText: 'Activity',
-            hintText: 'Walking, running, cycling…',
+          decoration: InputDecoration(
+            labelText: ui(context, 'Activity'),
+            hintText: ui(context, 'Walking, running, cycling…'),
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: minutes,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Duration',
+          decoration: InputDecoration(
+            labelText: ui(context, 'Duration'),
             suffixText: 'minutes',
           ),
         ),
@@ -2288,6 +2288,56 @@ class ContentUpdateService {
   }
 }
 
+const defaultServerUrl = 'https://aa-cloud-wp30.tail52a6fb.ts.net';
+
+class AccountService {
+  const AccountService();
+  Future<Map<String, dynamic>> authenticate({
+    required String serverUrl,
+    required String email,
+    required String password,
+    required bool register,
+    String name = '',
+  }) async {
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/${register ? 'register' : 'login'}'),
+          headers: {'content-type': 'application/json'},
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+            if (register) 'name': name,
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(body['error'] ?? 'Account request failed');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('account_token', body['token'] as String);
+    await prefs.setString('account_user', jsonEncode(body['user']));
+    return body['user'] as Map<String, dynamic>;
+  }
+
+  Future<void> logout(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token != null) {
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      try {
+        await http.post(
+          Uri.parse('$base/api/v1/auth/logout'),
+          headers: {'authorization': 'Bearer $token'},
+        );
+      } catch (_) {}
+    }
+    await prefs.remove('account_token');
+    await prefs.remove('account_user');
+  }
+}
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
     super.key,
@@ -2320,7 +2370,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.4.0+5';
+  String installedVersion = '1.5.0+6';
+  String? accountEmail;
 
   @override
   void initState() {
@@ -2370,7 +2421,17 @@ class _ProfilePageState extends State<ProfilePage> {
           )
           .toList();
       if (savedPlans.isEmpty) savedPlans = [plan];
-      contentServerUrl = prefs.getString('content_server_url') ?? '';
+      final storedServer = prefs.getString('content_server_url') ?? '';
+      contentServerUrl = storedServer == 'https://aa-cloud-wp30:8094'
+          ? defaultServerUrl
+          : storedServer.isEmpty
+          ? defaultServerUrl
+          : storedServer;
+      final accountRaw = prefs.getString('account_user');
+      accountEmail = accountRaw == null
+          ? null
+          : (jsonDecode(accountRaw) as Map<String, dynamic>)['email']
+                as String?;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
       if (cached != null) {
@@ -2393,16 +2454,14 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const LText(
-              'Use the HTTPS address pointing to the a2 service on aa-cloud-wp30.',
-            ),
+            const LText('Use the secure A2 server address below.'),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
               keyboardType: TextInputType.url,
               decoration: InputDecoration(
                 labelText: ui(context, 'Server URL'),
-                hintText: 'https://a2.example.com',
+                hintText: defaultServerUrl,
               ),
             ),
             const SizedBox(height: 8),
@@ -2542,11 +2601,17 @@ class _ProfilePageState extends State<ProfilePage> {
       const SizedBox(height: 22),
       Card(
         child: ListTile(
-          onTap: () => showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => const AccountSheet(),
-          ),
+          onTap: () async {
+            final changed = await showModalBottomSheet<bool>(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => AccountSheet(
+                serverUrl: contentServerUrl,
+                accountEmail: accountEmail,
+              ),
+            );
+            if (changed == true) await _restoreHealthSettings();
+          },
           contentPadding: EdgeInsets.all(16),
           leading: const CircleAvatar(
             radius: 27,
@@ -2560,11 +2625,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          title: const LText(
-            'Local profile',
+          title: LText(
+            accountEmail ?? 'Local profile',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
-          subtitle: const LText('No account required · tap to sign in'),
+          subtitle: LText(
+            accountEmail == null
+                ? 'No account required · tap to sign in'
+                : 'Signed in · tap to manage account',
+          ),
           trailing: const Icon(Icons.chevron_right),
         ),
       ),
@@ -3405,57 +3474,202 @@ class _ChatImportPageState extends State<ChatImportPage> {
   }
 }
 
-class AccountSheet extends StatelessWidget {
-  const AccountSheet({super.key});
+class AccountSheet extends StatefulWidget {
+  const AccountSheet({
+    super.key,
+    required this.serverUrl,
+    required this.accountEmail,
+  });
+  final String serverUrl;
+  final String? accountEmail;
+  @override
+  State<AccountSheet> createState() => _AccountSheetState();
+}
+
+class _AccountSheetState extends State<AccountSheet> {
+  final email = TextEditingController();
+  final password = TextEditingController();
+  final name = TextEditingController();
+  bool register = false, busy = false;
+  String? error;
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await const AccountService().authenticate(
+        serverUrl: widget.serverUrl,
+        email: email.text.trim(),
+        password: password.text,
+        register: register,
+        name: name.text.trim(),
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => error = exception.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const LText(
-            'Save your progress',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          const LText(
-            'An account is optional. Sign in when you want encrypted backup and access on another device.',
-            style: TextStyle(color: Colors.black54, height: 1.4),
-          ),
-          const SizedBox(height: 22),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.email_outlined),
-              label: const LText('Continue with email'),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.g_mobiledata, size: 28),
-              label: const LText('Continue with Google'),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const LText('Keep using a2 locally'),
-            ),
-          ),
-          const Center(
-            child: LText(
-              'Never upload health data without clear consent.',
-              style: TextStyle(fontSize: 11, color: Colors.black45),
-            ),
-          ),
-        ],
+    child: SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.viewInsetsOf(context).bottom + 24,
       ),
+      child: widget.accountEmail != null
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.verified_user, color: forest, size: 52),
+                const SizedBox(height: 12),
+                const LText(
+                  'You are signed in',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 7),
+                LText(widget.accountEmail!),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await const AccountService().logout(widget.serverUrl);
+                      if (context.mounted) Navigator.pop(context, true);
+                    },
+                    child: const LText('Sign out'),
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LText(
+                  register ? 'Create your account' : 'Save your progress',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 8),
+                const LText(
+                  'An account is optional. Sign in to prepare for secure backup and access on another device.',
+                  style: TextStyle(color: Colors.black54, height: 1.4),
+                ),
+                const SizedBox(height: 22),
+                if (register)
+                  TextField(
+                    controller: name,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(labelText: ui(context, 'Name')),
+                  ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: InputDecoration(
+                    labelText: ui(context, 'Email address'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: password,
+                  obscureText: true,
+                  autofillHints: [
+                    register
+                        ? AutofillHints.newPassword
+                        : AutofillHints.password,
+                  ],
+                  decoration: InputDecoration(
+                    labelText: ui(context, 'Password'),
+                    helperText: register
+                        ? ui(context, 'At least 8 characters')
+                        : null,
+                  ),
+                ),
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: LText(error!, style: const TextStyle(color: coral)),
+                  ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: busy ? null : _submit,
+                    icon: busy
+                        ? const SizedBox.square(
+                            dimension: 17,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.email_outlined),
+                    label: LText(
+                      register ? 'Create account' : 'Sign in with email',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: busy
+                        ? null
+                        : () => setState(() {
+                            register = !register;
+                            error = null;
+                          }),
+                    child: LText(
+                      register
+                          ? 'Already have an account? Sign in'
+                          : 'New to a2? Create an account',
+                    ),
+                  ),
+                ),
+                const Divider(height: 28),
+                const Row(
+                  children: [
+                    Icon(Icons.g_mobiledata, size: 28, color: Colors.black38),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: LText(
+                        'Google sign-in needs your Google client ID before it can be enabled.',
+                        style: TextStyle(fontSize: 12, color: Colors.black45),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const LText('Keep using a2 locally'),
+                  ),
+                ),
+                const Center(
+                  child: LText(
+                    'Never upload health data without clear consent.',
+                    style: TextStyle(fontSize: 11, color: Colors.black45),
+                  ),
+                ),
+              ],
+            ),
     ),
   );
 }

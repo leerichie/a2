@@ -60,5 +60,7 @@ void main() {
     expect(translateUi('pl', '2 ITEMS'), '2 ELEMENTÓW');
     expect(translateUi('pl', '1680 kcal left for today'), contains('1680'));
     expect(translateUi('pl', '2100 daily target'), contains('2100'));
+    expect(translateUi('pl', 'This device: a2-test'), 'To urządzenie: a2-test');
+    expect(translateUi('pl', 'Update check failed: test'), contains('test'));
   });
 }

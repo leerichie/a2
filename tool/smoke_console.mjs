@@ -12,6 +12,15 @@ const request = async (path, options = {}, token = '') => {
   if (!response.ok) throw new Error(`${path}: ${body.error}`);
   return body;
 };
+const appRequest = async (path, options = {}, token = '') => {
+  const response = await fetch(`${base}/api/v1/auth/${path}`, {
+    ...options,
+    headers: {'content-type': 'application/json', ...(token ? {authorization: `Bearer ${token}`} : {})},
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(`app ${path}: ${body.error}`);
+  return body;
+};
 
 const login = await request('login', {method: 'POST', body: JSON.stringify({username, password})});
 const me = await request('me', {}, login.token);
@@ -20,4 +29,9 @@ const users = await request('users', {}, login.token);
 if (me.user.username !== username || !users.users.some(user => user.id === created.user.id)) throw new Error('Account verification failed');
 await request(`users/${created.user.id}`, {method: 'DELETE'}, login.token);
 await request('logout', {method: 'POST'}, login.token);
-console.log('Console authentication and user-management smoke test passed.');
+const email = `smoke-${Date.now()}@example.test`;
+const appAccount = await appRequest('register', {method: 'POST', body: JSON.stringify({email, password: 'temporary-test-5568', name: 'Smoke Test'})});
+const appMe = await appRequest('me', {}, appAccount.token);
+if (appMe.user.email !== email) throw new Error('App account verification failed');
+await appRequest('account', {method: 'DELETE'}, appAccount.token);
+console.log('Console and app account smoke tests passed.');
