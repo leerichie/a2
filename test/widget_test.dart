@@ -97,6 +97,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Greek yoghurt and berries'), findsNothing);
     expect(prefs.getStringList(dailyKey), isEmpty);
+
+    // Signing out must replace the whole app with the sign-in gate, not just
+    // clear the account while leaving the tab bar usable. Checked here,
+    // reusing this test's single A2App mount, rather than as its own
+    // testWidgets — flutter_test hangs pumpAndSettle on a *second* full
+    // A2App mount in the same file for reasons unrelated to this app (a
+    // pre-existing test-harness quirk, confirmed by a throwaway test that
+    // hung on a second mount doing nothing at all).
+    tester.widget<AppShell>(find.byType(AppShell)).onSignedOut();
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('Save your progress'), findsOneWidget);
   });
 
   test('daily entries persist and remain separated by date', () async {

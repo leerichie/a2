@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0+30 — 2026-09-13
+
+- Console: added a way to create a real app account (with email, the way
+  the mobile app actually signs in) directly from the console, instead of
+  only being able to add console-login (username/password) accounts.
+  Useful for setting someone up to link diary entries with before they've
+  self-registered in the app.
+- Corrected two already-logged entries on the live server that were caught
+  by the old estimator bug (a coleslaw and a McDonald's order) to their
+  accurate values.
+- Verified the sign-out fix from 1.0.0+27 with an automated test — it
+  works correctly in code; if it still doesn't take effect on a device, a
+  full rebuild/reinstall of the app is needed, since deploying only updates
+  the server.
+
 ## 1.0.0+29 — 2026-09-13
 
 - Added diary entry sync between linked accounts: turn it on in Settings,

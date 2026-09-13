@@ -446,6 +446,18 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/admin/api/app-users') {
       return json(res, 200, {users: (await loadAppUsers()).map(publicAppUser)});
     }
+    if (req.method === 'POST' && url.pathname === '/admin/api/app-users') {
+      const {email, password, name = ''} = await readBody(req);
+      const normalEmail = String(email || '').trim().toLowerCase();
+      if (!validEmail(normalEmail)) return json(res, 400, {error: 'Enter a valid email address'});
+      if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
+      const users = await loadAppUsers();
+      if (users.some(item => item.email === normalEmail)) return json(res, 409, {error: 'An app account already exists for this email'});
+      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), role: 'user', blocked: false, privateSync: false, aiEnabled: false, entrySyncEnabled: false, linkedUserIds: [], passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
+      users.push(user); await saveAppUsers(users);
+      await logActivity(session, `${session.username} added app user ${normalEmail} from the console`);
+      return json(res, 201, {user: publicAppUser(user)});
+    }
     const appUserMatch = url.pathname.match(/^\/admin\/api\/app-users\/([^/]+)$/);
     if (appUserMatch && req.method === 'PATCH') {
       const changes = await readBody(req);
