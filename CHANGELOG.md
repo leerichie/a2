@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0+25 — 2026-09-13
+
+- Fixed the dashboard greeting always saying "Good afternoon" and showing a
+  fixed date, regardless of the actual time or day.
+- Replaced the dead notification bell (it didn't do anything) with the a2
+  logo.
+- The "little nudge" card now actually responds to today's progress —
+  encouraging a first meal, flagging an empty afternoon, celebrating hitting
+  target, noting a day well over or well under, recognising a balanced day
+  of food and exercise, and prompting more protein when it's low.
+
 ## 1.0.0+24 — 2026-09-13
 
 - Fixed the iOS build failing to install pods after adding on-device label

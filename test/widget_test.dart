@@ -46,7 +46,10 @@ void main() {
 
   testWidgets('shows dashboard and adds a meal', (tester) async {
     await tester.pumpWidget(const A2App(startOnboarding: false));
-    expect(find.text('Good afternoon, Ashley'), findsOneWidget);
+    expect(
+      find.text('${greetingFor(DateTime.now())}, Ashley'),
+      findsOneWidget,
+    );
     expect(find.text('Nothing logged today'), findsOneWidget);
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
@@ -217,5 +220,75 @@ void main() {
   test('label reader finds nothing useful in unrelated text', () {
     final reading = LabelParser.parse('Best before end: see lid. Keep cool.');
     expect(reading.hasNutrition, isFalse);
+  });
+
+  test('daily nudge encourages breakfast when nothing is logged yet', () {
+    final nudge = DailyNudge.forToday(
+      entries: const [],
+      calories: 0,
+      targetCalories: 2100,
+      protein: 0,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 8),
+    );
+    expect(nudge.title, 'Good time for breakfast');
+  });
+
+  test('daily nudge nudges toward lunch later with nothing logged', () {
+    final nudge = DailyNudge.forToday(
+      entries: const [],
+      calories: 0,
+      targetCalories: 2100,
+      protein: 0,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 13),
+    );
+    expect(nudge.title, 'Nothing logged yet');
+  });
+
+  test('daily nudge celebrates hitting the calorie target', () {
+    final nudge = DailyNudge.forToday(
+      entries: [const FoodEntry('Lunch', '12:00', 1000, 50, Icons.restaurant)],
+      calories: 1995,
+      targetCalories: 2100,
+      protein: 120,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 14),
+    );
+    expect(nudge.title, 'Right on target');
+  });
+
+  test('daily nudge flags going well over the calorie target', () {
+    final nudge = DailyNudge.forToday(
+      entries: [const FoodEntry('Dinner', '20:00', 2500, 90, Icons.restaurant)],
+      calories: 2500,
+      targetCalories: 2100,
+      protein: 90,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 21),
+    );
+    expect(nudge.title, 'A little over today');
+  });
+
+  test('daily nudge recognises a balanced day of food and exercise', () {
+    final nudge = DailyNudge.forToday(
+      entries: const [
+        FoodEntry('Lunch', '12:00', 800, 40, Icons.restaurant),
+        FoodEntry(
+          'Run',
+          '18:00 · 30 min',
+          300,
+          0,
+          Icons.directions_run,
+          isExercise: true,
+        ),
+      ],
+      calories: 800,
+      targetCalories: 2100,
+      protein: 40,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 15),
+    );
+    expect(nudge.title, 'Nice balance today');
   });
 }

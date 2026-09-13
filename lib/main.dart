@@ -620,6 +620,91 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   }
 }
 
+class DailyNudge {
+  const DailyNudge(this.title, this.body, this.icon);
+  final String title;
+  final String body;
+  final IconData icon;
+
+  factory DailyNudge.forToday({
+    required List<FoodEntry> entries,
+    required int calories,
+    required int targetCalories,
+    required int protein,
+    required int targetProtein,
+    DateTime? now,
+  }) {
+    final hour = (now ?? DateTime.now()).hour;
+    final hasFood = entries.any((e) => !e.isExercise);
+    final hasExercise = entries.any((e) => e.isExercise);
+
+    if (!hasFood) {
+      if (hour < 11) {
+        return const DailyNudge(
+          'Good time for breakfast',
+          'Nothing logged yet—add your first meal whenever you’re ready.',
+          Icons.wb_sunny_outlined,
+        );
+      }
+      if (hour < 15) {
+        return const DailyNudge(
+          'Nothing logged yet',
+          'Add lunch to keep today on track.',
+          Icons.restaurant_outlined,
+        );
+      }
+      return const DailyNudge(
+        'Quiet day so far',
+        'No meals logged today—that’s okay, add one whenever suits you.',
+        Icons.nightlight_outlined,
+      );
+    }
+
+    final calorieRatio = targetCalories == 0 ? 0.0 : calories / targetCalories;
+    if (calorieRatio >= 1.15) {
+      return const DailyNudge(
+        'A little over today',
+        'You’ve gone over today’s calorie target—tomorrow’s a fresh start.',
+        Icons.info_outline,
+      );
+    }
+    if (calorieRatio >= 0.9) {
+      return const DailyNudge(
+        'Right on target',
+        'You’re within reach of today’s calorie goal. Nice work.',
+        Icons.check_circle_outline,
+      );
+    }
+    if (hour >= 18 && calorieRatio < 0.5) {
+      return const DailyNudge(
+        'Light day so far',
+        'You’re well under target this evening—make sure you’re eating enough.',
+        Icons.eco_outlined,
+      );
+    }
+    if (hasExercise) {
+      return const DailyNudge(
+        'Nice balance today',
+        'You’ve logged food and exercise—keep it up.',
+        Icons.directions_run,
+      );
+    }
+    final proteinRatio = targetProtein == 0 ? 1.0 : protein / targetProtein;
+    if (proteinRatio < 0.5 && calorieRatio > 0.3) {
+      return const DailyNudge(
+        'Protein could use a boost',
+        'Add a protein-rich snack to help hit your target.',
+        Icons.fitness_center,
+      );
+    }
+    return const DailyNudge(
+      'You’re on track',
+      'Keep logging meals to stay on top of today’s goals.',
+      Icons.trending_up,
+    );
+  }
+}
+
 class NutritionTargets {
   const NutritionTargets({
     required this.calories,
@@ -731,13 +816,24 @@ class TodayPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => CustomScrollView(
+  Widget build(BuildContext context) {
+    final nudge = DailyNudge.forToday(
+      entries: entries,
+      calories: calories,
+      targetCalories: targets.calories,
+      protein: protein,
+      targetProtein: targets.protein,
+    );
+    return CustomScrollView(
     slivers: [
       SliverPadding(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
         sliver: SliverList.list(
           children: [
-            const TopBar('Good afternoon, Ashley', 'Sunday, 13 September'),
+            TopBar(
+              '${greetingFor(DateTime.now())}, Ashley',
+              fullDate(DateTime.now()),
+            ),
             const SizedBox(height: 22),
             if (entries.isEmpty) ...[
               Card(
@@ -817,26 +913,26 @@ class TodayPage extends StatelessWidget {
                   color: mint,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     CircleAvatar(
                       backgroundColor: Colors.white,
                       foregroundColor: forest,
-                      child: Icon(Icons.eco_outlined),
+                      child: Icon(nudge.icon),
                     ),
-                    SizedBox(width: 13),
+                    const SizedBox(width: 13),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           LText(
-                            'Targets follow your active plan',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            nudge.title,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
-                          SizedBox(height: 3),
+                          const SizedBox(height: 3),
                           LText(
-                            'Calories, protein and carbohydrates update together when you change diet plan.',
-                            style: TextStyle(
+                            nudge.body,
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black54,
                               height: 1.35,
@@ -857,7 +953,8 @@ class TodayPage extends StatelessWidget {
         ),
       ),
     ],
-  );
+    );
+  }
 }
 
 class TopBar extends StatelessWidget {
@@ -891,12 +988,12 @@ class TopBar extends StatelessWidget {
           ],
         ),
       ),
-      Badge(
-        backgroundColor: coral,
-        smallSize: 9,
-        child: IconButton.filledTonal(
-          onPressed: () {},
-          icon: const Icon(Icons.notifications_none),
+      ClipOval(
+        child: Image.asset(
+          'assets/branding/app_icon.png',
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
         ),
       ),
     ],
@@ -2227,6 +2324,42 @@ class HistoryRecord {
 
 String shortDate(DateTime d) =>
     '${d.day} ${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]}';
+
+String greetingFor(DateTime now) {
+  final hour = now.hour;
+  if (hour < 5) return 'Good night';
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  if (hour < 21) return 'Good evening';
+  return 'Good night';
+}
+
+String fullDate(DateTime d) {
+  const weekdays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  return '${weekdays[d.weekday - 1]}, ${d.day} ${months[d.month - 1]}';
+}
 String recordDetail(HistoryRecord r) {
   final bits = <String>[];
   if (r.weight != null) bits.add('${r.weight!.toStringAsFixed(1)} kg');
@@ -3470,7 +3603,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+24';
+  String installedVersion = '1.0.0+25';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
