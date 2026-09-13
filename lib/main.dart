@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,6 +55,7 @@ class _A2AppState extends State<A2App> {
     setState(() => locale = value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language', value.languageCode);
+    await const AccountService().uploadLocalData(defaultServerUrl);
   }
 
   Future<void> _finishOnboarding() async {
@@ -417,15 +419,41 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    _loadTodayEntries();
-    _loadImports();
-    _loadHistory();
-    _loadPlan();
+    _restoreAndSync();
+  }
+
+  Future<void> _restoreAndSync() async {
+    await Future.wait([
+      _loadTodayEntries(),
+      _loadImports(),
+      _loadHistory(),
+      _loadPlan(),
+    ]);
+    try {
+      final enabled = await const AccountService().refreshAccount(
+        defaultServerUrl,
+      );
+      if (!enabled) return;
+      await const AccountService().synchronise(defaultServerUrl);
+      await Future.wait([
+        _loadTodayEntries(),
+        _loadHistory(),
+        _loadPlan(),
+      ]);
+    } catch (_) {
+      // The local app remains usable when the server is offline or signed out.
+    }
   }
 
   Future<void> _loadTodayEntries() async {
     final restored = await const DailyEntryRepository().load(DateTime.now());
-    if (mounted) setState(() => entries.addAll(restored));
+    if (mounted) {
+      setState(() {
+        entries
+          ..clear()
+          ..addAll(restored);
+      });
+    }
   }
 
   Future<void> _saveTodayEntries() async {
@@ -1385,7 +1413,7 @@ class AddItemSheet extends StatelessWidget {
       20,
       12,
       20,
-      MediaQuery.viewInsetsOf(context).bottom + 28,
+      sheetBottomInset(context, 28),
     ),
     decoration: const BoxDecoration(
       color: cream,
@@ -1468,11 +1496,64 @@ class AddExerciseSheet extends StatefulWidget {
 class _AddExerciseSheetState extends State<AddExerciseSheet> {
   final activity = TextEditingController();
   final minutes = TextEditingController(text: '30');
+  bool aiAvailable = false;
+  bool busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    const AiService().isAvailable().then((value) {
+      if (mounted) setState(() => aiAvailable = value);
+    });
+  }
+
   @override
   void dispose() {
     activity.dispose();
     minutes.dispose();
     super.dispose();
+  }
+
+  Future<void> _addExercise() async {
+    final name = activity.text.trim();
+    final mins = int.tryParse(minutes.text) ?? 0;
+    if (name.isEmpty || mins <= 0) return;
+    int? aiCalories;
+    if (aiAvailable) {
+      setState(() => busy = true);
+      try {
+        final result = await const AiService().describe(
+          serverUrl: defaultServerUrl,
+          kind: 'exercise',
+          text: '$name for $mins minutes',
+        );
+        aiCalories = result.calories;
+      } catch (_) {
+        // Falls through to the local heuristic below.
+      } finally {
+        if (mounted) setState(() => busy = false);
+      }
+      if (!mounted) return;
+    }
+    final lower = name.toLowerCase();
+    final perMinute = lower.contains('run')
+        ? 10
+        : lower.contains('cycl') || lower.contains('swim')
+        ? 8
+        : lower.contains('gym') || lower.contains('weight')
+        ? 6
+        : 4;
+    Navigator.pop(
+      context,
+      FoodEntry(
+        name,
+        '${_clockTime()} · $mins min',
+        aiCalories ?? mins * perMinute,
+        0,
+        Icons.directions_run,
+        isExercise: true,
+      ),
+    );
   }
 
   @override
@@ -1481,7 +1562,7 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
       20,
       18,
       20,
-      MediaQuery.viewInsetsOf(context).bottom + 24,
+      sheetBottomInset(context, 24),
     ),
     decoration: const BoxDecoration(
       color: cream,
@@ -1512,34 +1593,29 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
             suffixText: 'minutes',
           ),
         ),
+        if (busy)
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 10),
+                LText(
+                  'Estimating with AI…',
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: () {
-              final name = activity.text.trim();
-              final mins = int.tryParse(minutes.text) ?? 0;
-              if (name.isEmpty || mins <= 0) return;
-              final lower = name.toLowerCase();
-              final perMinute = lower.contains('run')
-                  ? 10
-                  : lower.contains('cycl') || lower.contains('swim')
-                  ? 8
-                  : lower.contains('gym') || lower.contains('weight')
-                  ? 6
-                  : 4;
-              Navigator.pop(
-                context,
-                FoodEntry(
-                  name,
-                  '${_clockTime()} · $mins min',
-                  mins * perMinute,
-                  0,
-                  Icons.directions_run,
-                  isExercise: true,
-                ),
-              );
-            },
+            onPressed: busy ? null : () => _addExercise(),
             icon: const Icon(Icons.add),
             label: const LText('Add exercise'),
           ),
@@ -1558,10 +1634,133 @@ class AddMealSheet extends StatefulWidget {
 class _AddMealSheetState extends State<AddMealSheet> {
   final description = TextEditingController();
   int mode = 0;
+  bool aiAvailable = false;
+  bool busy = false;
+  NutritionEstimate? aiEstimate;
+
+  @override
+  void initState() {
+    super.initState();
+    const AiService().isAvailable().then((value) {
+      if (mounted) setState(() => aiAvailable = value);
+    });
+  }
+
   @override
   void dispose() {
     description.dispose();
     super.dispose();
+  }
+
+  Future<void> _capture(int newMode) async {
+    setState(() => mode = newMode);
+    XFile? photo;
+    try {
+      photo = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        imageQuality: 70,
+      );
+    } catch (_) {
+      photo = null;
+    }
+    if (!mounted) return;
+    if (photo == null) {
+      setState(() => mode = 0);
+      return;
+    }
+    if (!aiAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: LText('Describe what you took a photo of.')),
+      );
+      return;
+    }
+    setState(() {
+      busy = true;
+      aiEstimate = null;
+    });
+    try {
+      final bytes = await photo.readAsBytes();
+      final estimate = await const AiService().analyzeImage(
+        serverUrl: defaultServerUrl,
+        kind: newMode == 2 ? 'label_photo' : 'meal_photo',
+        bytes: bytes,
+        mimeType: 'image/jpeg',
+      );
+      if (!mounted) return;
+      setState(() {
+        aiEstimate = estimate;
+        description.text = estimate.name;
+      });
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: LText(
+              'AI could not analyse the photo. Describe it below instead.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> _addToDay() async {
+    final text = description.text.trim();
+    if (aiEstimate != null && text == aiEstimate!.name.trim()) {
+      Navigator.pop(
+        context,
+        FoodEntry(
+          aiEstimate!.name,
+          _clockTime(),
+          aiEstimate!.calories,
+          aiEstimate!.protein,
+          Icons.restaurant,
+          carbs: aiEstimate!.carbs,
+        ),
+      );
+      return;
+    }
+    FoodEstimate? estimate;
+    if (aiAvailable && text.isNotEmpty) {
+      setState(() => busy = true);
+      try {
+        final result = await const AiService().describe(
+          serverUrl: defaultServerUrl,
+          kind: 'food',
+          text: text,
+        );
+        estimate = FoodEstimate(result.calories, result.protein, result.carbs);
+      } catch (_) {
+        // Falls through to the local estimator below.
+      } finally {
+        if (mounted) setState(() => busy = false);
+      }
+      if (!mounted) return;
+    }
+    estimate ??= FoodEstimator.estimate(text);
+    if (estimate.calories == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: LText(
+            'Not enough nutrition information. Add quantities or scan the product label.',
+          ),
+        ),
+      );
+      return;
+    }
+    Navigator.pop(
+      context,
+      FoodEntry(
+        text.isEmpty ? 'Meal from photo' : text,
+        _clockTime(),
+        estimate.calories,
+        estimate.protein,
+        Icons.restaurant,
+        carbs: estimate.carbs,
+      ),
+    );
   }
 
   @override
@@ -1570,7 +1769,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
       20,
       12,
       20,
-      MediaQuery.viewInsetsOf(context).bottom + 24,
+      sheetBottomInset(context, 24),
     ),
     decoration: const BoxDecoration(
       color: cream,
@@ -1607,9 +1806,9 @@ class _AddMealSheetState extends State<AddMealSheet> {
               Expanded(
                 child: CaptureChoice(
                   Icons.camera_alt_outlined,
-                  'Meal photo',
+                  'Take photo',
                   mode == 1,
-                  () => setState(() => mode = 1),
+                  busy ? null : () => _capture(1),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1618,11 +1817,29 @@ class _AddMealSheetState extends State<AddMealSheet> {
                   Icons.document_scanner_outlined,
                   'Scan label',
                   mode == 2,
-                  () => setState(() => mode = 2),
+                  busy ? null : () => _capture(2),
                 ),
               ),
             ],
           ),
+          if (busy)
+            const Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 10),
+                  LText(
+                    'Analysing your photo…',
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 15),
             child: Row(
@@ -1646,7 +1863,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
             decoration: InputDecoration(
               hintText: ui(
                 context,
-                'e.g. 2 spoons cottage cheese, 4 slices ham, handful of slaw…',
+                'e.g. 2 spoons cottage cheese, a can of cola, a bag of crisps, glass of wine…',
               ),
               filled: true,
               fillColor: Colors.white,
@@ -1677,31 +1894,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 backgroundColor: ink,
                 padding: const EdgeInsets.all(17),
               ),
-              onPressed: () {
-                final text = description.text.trim();
-                final estimate = FoodEstimator.estimate(text);
-                if (estimate.calories == 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: LText(
-                        'Not enough nutrition information. Add quantities or scan the product label.',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-                Navigator.pop(
-                  context,
-                  FoodEntry(
-                    text.isEmpty ? 'Meal from photo' : text,
-                    _clockTime(),
-                    estimate.calories,
-                    estimate.protein,
-                    Icons.restaurant,
-                    carbs: estimate.carbs,
-                  ),
-                );
-              },
+              onPressed: busy ? null : () => _addToDay(),
               icon: const Icon(Icons.auto_awesome),
               label: const LText(
                 'Add to day',
@@ -1720,6 +1913,11 @@ String _clockTime([DateTime? value]) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
 
+double sheetBottomInset(BuildContext context, double extra) =>
+    MediaQuery.viewInsetsOf(context).bottom +
+    MediaQuery.viewPaddingOf(context).bottom +
+    extra;
+
 class CaptureChoice extends StatelessWidget {
   const CaptureChoice(
     this.icon,
@@ -1731,7 +1929,7 @@ class CaptureChoice extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
@@ -2216,7 +2414,7 @@ class DayDetailSheet extends StatelessWidget {
       color: cream,
       child: ListView(
         controller: controller,
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, sheetBottomInset(context, 20)),
         children: [
           Center(child: Container(width: 42, height: 4, color: Colors.black12)),
           const SizedBox(height: 20),
@@ -2728,6 +2926,36 @@ class AccountService {
     return body['user'] as Map<String, dynamic>;
   }
 
+  Future<bool> refreshAccount(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) return false;
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .get(
+          Uri.parse('$base/api/v1/auth/me'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode == 401) {
+      await prefs.remove('account_token');
+      await prefs.remove('account_user');
+      return false;
+    }
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Account refresh failed');
+    }
+    final user = body['user'] as Map<String, dynamic>;
+    if (user['blocked'] == true) {
+      await prefs.remove('account_token');
+      await prefs.remove('account_user');
+      return false;
+    }
+    await prefs.setString('account_user', jsonEncode(user));
+    return user['privateSync'] == true;
+  }
+
   Future<Map<String, dynamic>> _localPayload() async {
     final prefs = await SharedPreferences.getInstance();
     final daily = <String, dynamic>{};
@@ -2748,6 +2976,13 @@ class AccountService {
         'bodyProfile': prefs.getString('body_profile'),
         'activeDietPlan': prefs.getString('active_diet_plan'),
         'dailyTarget': prefs.getInt('daily_target'),
+        'savedDietPlans': prefs.getStringList('saved_diet_plans'),
+        'importedRecordIds': prefs.getStringList('imported_record_ids'),
+        'importedRecords': prefs.getStringList('imported_records'),
+        'lastImportSource': prefs.getString('last_import_source'),
+        'lastImportedAt': prefs.getString('last_imported_at'),
+        'language': prefs.getString('language'),
+        'aiEnabled': prefs.getBool('ai_enabled'),
       },
     };
   }
@@ -2820,6 +3055,36 @@ class AccountService {
     if (settings['dailyTarget'] case final int value) {
       await prefs.setInt('daily_target', value);
     }
+    if (settings['savedDietPlans'] case final List value) {
+      await prefs.setStringList(
+        'saved_diet_plans',
+        value.map((item) => item as String).toList(),
+      );
+    }
+    if (settings['importedRecordIds'] case final List value) {
+      await prefs.setStringList(
+        'imported_record_ids',
+        value.map((item) => item as String).toList(),
+      );
+    }
+    if (settings['importedRecords'] case final List value) {
+      await prefs.setStringList(
+        'imported_records',
+        value.map((item) => item as String).toList(),
+      );
+    }
+    if (settings['lastImportSource'] case final String value) {
+      await prefs.setString('last_import_source', value);
+    }
+    if (settings['lastImportedAt'] case final String value) {
+      await prefs.setString('last_imported_at', value);
+    }
+    if (settings['language'] case final String value) {
+      await prefs.setString('language', value);
+    }
+    if (settings['aiEnabled'] case final bool value) {
+      await prefs.setBool('ai_enabled', value);
+    }
   }
 
   Future<void> logout(String serverUrl) async {
@@ -2837,6 +3102,94 @@ class AccountService {
     await prefs.remove('account_token');
     await prefs.remove('account_user');
   }
+}
+
+class NutritionEstimate {
+  const NutritionEstimate(this.name, this.calories, this.protein, this.carbs);
+  final String name;
+  final int calories, protein, carbs;
+}
+
+class AiService {
+  const AiService();
+
+  Future<bool> isAvailable() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('ai_enabled') != true) return false;
+    final userRaw = prefs.getString('account_user');
+    if (userRaw == null) return false;
+    final user = jsonDecode(userRaw) as Map<String, dynamic>;
+    return user['aiEnabled'] == true;
+  }
+
+  Future<NutritionEstimate> describe({
+    required String serverUrl,
+    required String kind,
+    required String text,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to use AI features');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/ai/describe'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'kind': kind, 'text': text}),
+        )
+        .timeout(const Duration(seconds: 20));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'AI request failed');
+    }
+    return _estimateFrom(body, fallbackName: text);
+  }
+
+  Future<NutritionEstimate> analyzeImage({
+    required String serverUrl,
+    required String kind,
+    required Uint8List bytes,
+    required String mimeType,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to use AI features');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/ai/vision'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'kind': kind,
+            'imageBase64': base64Encode(bytes),
+            'mimeType': mimeType,
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'AI request failed');
+    }
+    return _estimateFrom(body, fallbackName: 'Photo entry');
+  }
+
+  NutritionEstimate _estimateFrom(
+    Map<String, dynamic> body, {
+    required String fallbackName,
+  }) => NutritionEstimate(
+    (body['name'] as String?)?.trim().isNotEmpty == true
+        ? body['name'] as String
+        : fallbackName,
+    ((body['calories'] as num?) ?? 0).round(),
+    ((body['protein'] as num?) ?? 0).round(),
+    ((body['carbs'] as num?) ?? 0).round(),
+  );
 }
 
 class ProfilePage extends StatefulWidget {
@@ -2873,9 +3226,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+15';
+  String installedVersion = '1.0.0+17';
   String? accountEmail;
   bool accountPrivateSync = false;
+  bool accountAiEnabled = false;
 
   @override
   void initState() {
@@ -2944,6 +3298,11 @@ class _ProfilePageState extends State<ProfilePage> {
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['privateSync'] ==
               true;
+      accountAiEnabled =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['aiEnabled'] ==
+              true;
+      ai = prefs.getBool('ai_enabled') ?? true;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
       if (cached != null) {
@@ -3332,15 +3691,26 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             SwitchListTile(
-              value: ai,
-              onChanged: (v) => setState(() => ai = v),
+              value: ai && accountAiEnabled,
+              onChanged: !accountAiEnabled
+                  ? null
+                  : (v) async {
+                      setState(() => ai = v);
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('ai_enabled', v);
+                      await const AccountService().uploadLocalData(
+                        contentServerUrl,
+                      );
+                    },
               secondary: const Icon(Icons.auto_awesome, color: forest),
               title: const LText(
                 'AI meal estimates',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: const LText(
-                'Photos and descriptions are analysed only when you ask.',
+              subtitle: LText(
+                accountAiEnabled
+                    ? 'Photos and descriptions are analysed only when you ask.'
+                    : 'Ask your administrator to enable AI for your account.',
               ),
             ),
             const Divider(height: 1, indent: 55),
@@ -3531,7 +3901,7 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
       20,
       14,
       20,
-      MediaQuery.viewInsetsOf(context).bottom + 24,
+      sheetBottomInset(context, 24),
     ),
     child: Form(
       key: formKey,
@@ -3689,7 +4059,7 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
       20,
       14,
       20,
-      MediaQuery.viewInsetsOf(context).bottom + 24,
+      sheetBottomInset(context, 24),
     ),
     child: Form(
       key: formKey,
@@ -3898,6 +4268,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
       'last_imported_at',
       DateTime.now().toUtc().toIso8601String(),
     );
+    await const AccountService().uploadLocalData(defaultServerUrl);
     if (mounted) Navigator.pop(context, true);
   }
 

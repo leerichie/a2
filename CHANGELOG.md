@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.0+17 — 2026-09-13
+
+- Synced saved diet plans, imported plan records, app language and the AI
+  preference, not just body profile and the active plan.
+- Added an admin console screen to view and edit an app user's stored body
+  profile, active plan and daily target.
+- Added a console-configured OpenAI API key and a per-user AI access toggle,
+  gating new realtime AI endpoints for describing food, drink and exercise
+  and for analysing meal and nutrition-label photos.
+- Made the "Take photo" (renamed from "Meal photo") and "Scan label" buttons
+  actually work: they capture a photo and, when AI is enabled for the
+  account, prefill an estimate from it; otherwise they prompt for a manual
+  description. AI now also assists the free-text food, drink and exercise
+  estimates when available, falling back to the existing local estimator.
+- Broadened the free-text example to cover drinks and snacks, not just food.
+- Fixed modal sheets (Add menu, body/plan editors, day detail) sitting under
+  the phone's gesture/navigation bar.
+
+## 1.0.0+16 — 2026-09-13
+
+- Refreshed account status from the server on every app launch, so a remotely
+  toggled private sync, block, or account deletion takes effect immediately.
+- Re-synced today's entries, history and plan after a successful launch sync
+  so restarting the app shows the latest server-held data.
+
 ## 1.0.0+15 — 2026-09-13
 
 - Added a second calorie ring for exercise-adjusted net energy.

@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>A2 connects to your private AA Cloud server to update and synchronise your data.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>A2 uses the camera to photograph meals and nutrition labels so it can estimate what you ate.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
