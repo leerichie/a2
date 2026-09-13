@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+12 — 2026-09-13
+
+- Fixed successful console logins remaining visually stuck behind the login screen.
+- Normalized the signed-in administrator response for account management.
+- Preserved the password and displayed an error when dashboard loading fails.
+
 ## 1.0.0+11 — 2026-09-13
 
 - Clarified that food and drink entries both count towards the day.
