@@ -11,6 +11,7 @@ const dataFile = join(process.env.DATA_DIR || join(root, 'data'), 'content.json'
 const usersFile = join(process.env.DATA_DIR || join(root, 'data'), 'users.json');
 const appUsersFile = join(process.env.DATA_DIR || join(root, 'data'), 'app-users.json');
 const healthDataFile = join(process.env.DATA_DIR || join(root, 'data'), 'health-data.json');
+const settingsFile = join(process.env.DATA_DIR || join(root, 'data'), 'settings.json');
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
 const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
@@ -31,11 +32,11 @@ const sessionFor = req => {
   }
   return {...session, token};
 };
-const readBody = async req => {
+const readBody = async (req, maxBytes = 1_000_000) => {
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 1_000_000) throw new Error('Request too large');
+    if (raw.length > maxBytes) throw new Error('Request too large');
   }
   return raw ? JSON.parse(raw) : {};
 };
@@ -82,7 +83,36 @@ const saveAppUsers = async users => {
   await mkdir(dirname(appUsersFile), {recursive: true});
   await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
 };
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, createdAt: user.createdAt});
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, createdAt: user.createdAt});
+const loadServerSettings = async () => {
+  try { return JSON.parse(await readFile(settingsFile, 'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return {}; throw error; }
+};
+const saveServerSettings = async settings => {
+  await mkdir(dirname(settingsFile), {recursive: true});
+  await writeFile(settingsFile, JSON.stringify(settings, null, 2), {mode: 0o600});
+};
+const getOpenAiCredentials = async () => {
+  const settings = await loadServerSettings();
+  return {
+    apiKey: settings.openaiApiKey || process.env.OPENAI_API_KEY || '',
+    model: settings.openaiModel || process.env.OPENAI_MODEL || 'gpt-5',
+  };
+};
+const decodeHealthPayload = record => {
+  const settings = record?.payload?.settings || {};
+  const parse = value => {
+    if (typeof value !== 'string') return value ?? null;
+    try { return JSON.parse(value); } catch { return null; }
+  };
+  return {
+    updatedAt: record?.updatedAt || null,
+    bodyProfile: parse(settings.bodyProfile),
+    activeDietPlan: parse(settings.activeDietPlan),
+    dailyTarget: settings.dailyTarget ?? null,
+    savedDietPlans: (settings.savedDietPlans || []).map(parse).filter(Boolean),
+  };
+};
 const loadHealthData = async () => {
   try { return JSON.parse(await readFile(healthDataFile, 'utf8')); }
   catch (error) { if (error.code === 'ENOENT') return {users: {}}; throw error; }
@@ -104,12 +134,13 @@ const targetMatches = (target, userId, deviceId, groups) =>
   (target.type === 'group' && target.ids.some(id => groups.includes(id)));
 
 async function research(topic) {
-  if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not configured');
+  const {apiKey, model} = await getOpenAiCredentials();
+  if (!apiKey) throw new Error('AI is not configured on this server');
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: {'authorization': `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json'},
+    headers: {'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json'},
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || 'gpt-5',
+      model,
       store: false,
       tools: [{type: 'web_search'}],
       include: ['web_search_call.action.sources'],
@@ -131,6 +162,65 @@ async function research(topic) {
   return JSON.parse(result.output_text);
 }
 
+const NUTRITION_SCHEMA = {
+  type: 'object', additionalProperties: false,
+  properties: {
+    name: {type: 'string'},
+    calories: {type: 'number'},
+    protein: {type: 'number'},
+    carbs: {type: 'number'},
+  },
+  required: ['name', 'calories', 'protein', 'carbs'],
+};
+
+async function aiDescribe(kind, text) {
+  const {apiKey, model} = await getOpenAiCredentials();
+  if (!apiKey) throw new Error('AI is not configured on this server');
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json'},
+    body: JSON.stringify({
+      model,
+      store: false,
+      instructions: kind === 'exercise'
+        ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise.'
+        : 'Estimate nutrition for a described food or drink item, assuming typical portion sizes when quantities are vague. Never invent false precision.',
+      input: text,
+      text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
+    }),
+  });
+  if (!response.ok) throw new Error(`AI request failed (${response.status})`);
+  const result = await response.json();
+  return JSON.parse(result.output_text);
+}
+
+async function aiVision(kind, imageBase64, mimeType) {
+  const {apiKey, model} = await getOpenAiCredentials();
+  if (!apiKey) throw new Error('AI is not configured on this server');
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json'},
+    body: JSON.stringify({
+      model,
+      store: false,
+      instructions: kind === 'label_photo'
+        ? 'Read the nutrition facts label shown in the photo and extract calories, protein and carbohydrates for one serving. If a value is unreadable, estimate conservatively rather than inventing false precision.'
+        : 'Identify the food or drink shown in the photo and estimate its nutrition for the visible portion. Never invent false precision.',
+      input: [{
+        role: 'user',
+        content: [
+          {type: 'input_text', text: kind === 'label_photo' ? 'Read this nutrition label.' : 'What food or drink is this, and roughly how much does it contain?'},
+          {type: 'input_image', image_url: `data:${mimeType};base64,${imageBase64}`},
+        ],
+      }],
+      text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
+    }),
+  });
+  if (!response.ok) throw new Error(`AI vision request failed (${response.status})`);
+  const result = await response.json();
+  return JSON.parse(result.output_text);
+}
+
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -142,7 +232,7 @@ const server = createServer(async (req, res) => {
       if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
       const users = await loadAppUsers();
       if (users.some(item => item.email === normalEmail)) return json(res, 409, {error: 'An account already exists for this email'});
-      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), role: 'user', blocked: false, privateSync: false, passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
+      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), role: 'user', blocked: false, privateSync: false, aiEnabled: false, passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
       users.push(user); await saveAppUsers(users);
       const token = randomBytes(32).toString('hex');
       appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
@@ -189,6 +279,37 @@ const server = createServer(async (req, res) => {
           data.users[appSession.userId] = {payload: body.payload || {}, updatedAt: new Date().toISOString()};
           await saveHealthData(data);
           return json(res, 200, {ok: true, updatedAt: data.users[appSession.userId].updatedAt});
+        }
+      }
+    }
+    if (url.pathname.startsWith('/api/v1/ai/')) {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      const aiUser = (await loadAppUsers()).find(item => item.id === appSession.userId);
+      if (!aiUser || aiUser.blocked === true) return json(res, 403, {error: 'Account access is blocked'});
+      if (aiUser.aiEnabled !== true) return json(res, 403, {error: 'AI features are not enabled for this account'});
+      const {apiKey} = await getOpenAiCredentials();
+      if (!apiKey) return json(res, 503, {error: 'AI is not configured on this server'});
+      if (req.method === 'POST' && url.pathname === '/api/v1/ai/describe') {
+        const {kind, text} = await readBody(req);
+        if (!['food', 'drink', 'exercise'].includes(kind) || !text?.trim()) {
+          return json(res, 400, {error: 'A kind and description are required'});
+        }
+        try {
+          return json(res, 200, await aiDescribe(kind, text.trim()));
+        } catch (error) {
+          return json(res, 502, {error: error.message || 'AI request failed'});
+        }
+      }
+      if (req.method === 'POST' && url.pathname === '/api/v1/ai/vision') {
+        const {kind, imageBase64, mimeType} = await readBody(req, 6_000_000);
+        if (!['meal_photo', 'label_photo'].includes(kind) || !imageBase64) {
+          return json(res, 400, {error: 'A photo is required'});
+        }
+        try {
+          return json(res, 200, await aiVision(kind, imageBase64, mimeType || 'image/jpeg'));
+        } catch (error) {
+          return json(res, 502, {error: error.message || 'AI request failed'});
         }
       }
     }
@@ -239,6 +360,7 @@ const server = createServer(async (req, res) => {
       if (!user) return json(res, 404, {error: 'App user not found'});
       if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
       if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
+      if (typeof changes.aiEnabled === 'boolean') user.aiEnabled = changes.aiEnabled;
       await saveAppUsers(users);
       if (user.blocked) for (const [token, item] of appSessions) if (item.userId === user.id) appSessions.delete(token);
       return json(res, 200, {user: publicAppUser(user)});
@@ -252,6 +374,50 @@ const server = createServer(async (req, res) => {
       delete data.users[appUserMatch[1]];
       await saveHealthData(data);
       return json(res, 200, {ok: true});
+    }
+    const appUserHealthMatch = url.pathname.match(/^\/admin\/api\/app-users\/([^/]+)\/health$/);
+    if (appUserHealthMatch && req.method === 'GET') {
+      const data = await loadHealthData();
+      const record = data.users[appUserHealthMatch[1]] || null;
+      return json(res, 200, {data: record ? decodeHealthPayload(record) : null});
+    }
+    if (appUserHealthMatch && req.method === 'PATCH') {
+      const changes = await readBody(req);
+      const data = await loadHealthData();
+      const id = appUserHealthMatch[1];
+      const existing = data.users[id]?.payload || {};
+      const settings = {...(existing.settings || {})};
+      if (changes.bodyProfile) settings.bodyProfile = JSON.stringify(changes.bodyProfile);
+      if (changes.activeDietPlan) settings.activeDietPlan = JSON.stringify(changes.activeDietPlan);
+      if (typeof changes.dailyTarget === 'number') settings.dailyTarget = changes.dailyTarget;
+      if (Array.isArray(changes.savedDietPlans)) {
+        settings.savedDietPlans = changes.savedDietPlans.map(plan => JSON.stringify(plan));
+      }
+      data.users[id] = {payload: {...existing, settings}, updatedAt: new Date().toISOString()};
+      await saveHealthData(data);
+      return json(res, 200, {data: decodeHealthPayload(data.users[id])});
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/settings') {
+      const settings = await loadServerSettings();
+      return json(res, 200, {
+        hasApiKey: Boolean(settings.openaiApiKey || process.env.OPENAI_API_KEY),
+        openaiModel: settings.openaiModel || process.env.OPENAI_MODEL || 'gpt-5',
+      });
+    }
+    if (req.method === 'PATCH' && url.pathname === '/admin/api/settings') {
+      const changes = await readBody(req);
+      const settings = await loadServerSettings();
+      if (typeof changes.openaiApiKey === 'string' && changes.openaiApiKey.trim()) {
+        settings.openaiApiKey = changes.openaiApiKey.trim();
+      }
+      if (typeof changes.openaiModel === 'string' && changes.openaiModel.trim()) {
+        settings.openaiModel = changes.openaiModel.trim();
+      }
+      await saveServerSettings(settings);
+      return json(res, 200, {
+        hasApiKey: Boolean(settings.openaiApiKey || process.env.OPENAI_API_KEY),
+        openaiModel: settings.openaiModel || process.env.OPENAI_MODEL || 'gpt-5',
+      });
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/users') {
       const {username, password, role = 'admin'} = await readBody(req);
