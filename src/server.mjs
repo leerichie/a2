@@ -99,7 +99,8 @@ const getOpenAiCredentials = async () => {
   };
 };
 const decodeHealthPayload = record => {
-  const settings = record?.payload?.settings || {};
+  const payload = record?.payload || {};
+  const settings = payload.settings || {};
   const parse = value => {
     if (typeof value !== 'string') return value ?? null;
     try { return JSON.parse(value); } catch { return null; }
@@ -110,6 +111,8 @@ const decodeHealthPayload = record => {
     activeDietPlan: parse(settings.activeDietPlan),
     dailyTarget: settings.dailyTarget ?? null,
     savedDietPlans: (settings.savedDietPlans || []).map(parse).filter(Boolean),
+    dailyEntries: payload.dailyEntries || {},
+    history: payload.history || {records: []},
   };
 };
 const loadHealthData = async () => {
@@ -352,7 +355,7 @@ const server = createServer(async (req, res) => {
       return json(res, 200, {data: record ? decodeHealthPayload(record) : null});
     }
     if (appUserHealthMatch && req.method === 'PATCH') {
-      const changes = await readBody(req);
+      const changes = await readBody(req, 4_000_000);
       const data = await loadHealthData();
       const id = appUserHealthMatch[1];
       const existing = data.users[id]?.payload || {};
@@ -363,7 +366,14 @@ const server = createServer(async (req, res) => {
       if (Array.isArray(changes.savedDietPlans)) {
         settings.savedDietPlans = changes.savedDietPlans.map(plan => JSON.stringify(plan));
       }
-      data.users[id] = {payload: {...existing, settings}, updatedAt: new Date().toISOString()};
+      const updated = {...existing, settings};
+      if (changes.dailyEntries && typeof changes.dailyEntries === 'object') {
+        updated.dailyEntries = changes.dailyEntries;
+      }
+      if (changes.history && typeof changes.history === 'object') {
+        updated.history = changes.history;
+      }
+      data.users[id] = {payload: updated, updatedAt: new Date().toISOString()};
       await saveHealthData(data);
       return json(res, 200, {data: decodeHealthPayload(data.users[id])});
     }
