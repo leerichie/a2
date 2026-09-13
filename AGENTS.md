@@ -1,12 +1,11 @@
 # a2 repository instructions
 
-- After each major user-visible feature or substantial session change, bump the
-  minor semantic version and increment the build number in `pubspec.yaml`.
-- Use a patch bump for fixes and small refinements. Reserve major bumps for
-  incompatible releases.
-- Add the release summary to `CHANGELOG.md` in the same change.
-- Run `dart run tool/bump_version.dart minor "Summary"` when appropriate, then
-  run formatting, `flutter analyze`, and `flutter test`.
+- Keep the app version fixed at `1.0.0` and increment only the build number in
+  `pubspec.yaml` after each substantial session change (`1.0.0+5`,
+  `1.0.0+6`, and so on). Never bump the major, minor, or patch digits unless the
+  user explicitly changes this policy.
+- Add the release summary to `CHANGELOG.md` under the matching `1.0.0+build`
+  heading, then run formatting, `flutter analyze`, and `flutter test`.
 - Never put API keys, admin tokens, signing keys, or production secrets in Git.
 - Every user-visible UI change must ship simultaneously in English, Polish,
   German, French, Spanish and Italian. Add or update all six entries in
