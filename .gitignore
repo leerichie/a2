@@ -50,3 +50,4 @@ app.*.map.json
 # Server secrets
 server/.env
 firebase-debug.log*
+.site_staging/
