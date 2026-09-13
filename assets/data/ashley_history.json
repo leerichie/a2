@@ -1,5 +1,5 @@
 {
-  "source": "ChatGPT · Keto Meal Plan Poland",
+  "source": "Personal history import",
   "timezone": "Europe/Warsaw",
   "records": [
     {"id":"bbb-start","at":"2026-08-03T20:09:53+02:00","kind":"measurement","title":"Starting weight","weight":90.0,"evidence":"user_report"},
@@ -49,7 +49,7 @@
     {"id":"bbb21127","at":"2026-09-07T12:49:18+02:00","kind":"meal","slot":"lunch","title":"Chicken Tikka Masala with yellow rice","kcal":507,"protein":31.6,"carbs":71.8,"fat":9.8,"salt":4.3,"evidence":"label","images":["file_00000000d08882108b358bbb5e9f5c1a"]},
     {"id":"bbb21b5c","at":"2026-09-08T10:13:49+02:00","kind":"meal","slot":"lunch","title":"Hake with ratatouille and potatoes","kcal":550,"protein":24.6,"carbs":44.1,"fat":28.9,"fibre":7.0,"salt":3.9,"evidence":"label","images":["file_000000002a2481fd9c9cc922d27ab57a"]},
     {"id":"bbb21239-f","at":"2026-09-09T12:00:46+02:00","kind":"meal","slot":"lunch","title":"Chicken fajita bake","kcal":688,"protein":39.2,"carbs":64.0,"fat":27.6,"fibre":8.8,"salt":5.2,"evidence":"label","images":["file_00000000078481f483a2d39ce5410091"]},
-    {"id":"bbb21239-m","at":"2026-09-09T12:05:46+02:00","kind":"snack","title":"Blackcurrant mousse with coffee pudding","kcal":333,"detail":"Estimated from 222 kcal/100 g and approximately 150 g pot","evidence":"label_estimate","images":["file_000000008e9081f49963bada0261aadb","file_00000000cbb082468d3a70c9db7bddeb"]},
+    {"id":"bbb21239-m","at":"2026-09-09T12:05:46+02:00","kind":"snack","title":"Blackcurrant mousse with coffee pudding","kcal":333,"detail":"222 kcal/100 g; approximately 150 g pot","evidence":"label_estimate","images":["file_000000008e9081f49963bada0261aadb","file_00000000cbb082468d3a70c9db7bddeb"]},
     {"id":"bbb214a1","at":"2026-09-09T18:12:57+02:00","kind":"snack","title":"Walkers crisps and chocolate raisins","detail":"2 × 25 g prawn cocktail, 1 ready salted, 4 small handfuls chocolate raisins","kcal_min":630,"kcal_max":780,"evidence":"assistant_estimate"},
     {"id":"sep9-dinner","at":"2026-09-09T19:00:00+02:00","kind":"meal","slot":"dinner","title":"Chicken and mixed salad","detail":"Cabbage, carrot, tomato, pickle, olive, pepper and cucumber","evidence":"user_report"},
     {"id":"bbb2124c","at":"2026-09-10T07:47:14+02:00","kind":"meal","slot":"breakfast","title":"Usual breakfast","detail":"Photo logged; exact ingredients not stated in message","evidence":"image_only","images":["file_000000004be4820ab3a1801563c760ce"]},
@@ -57,12 +57,12 @@
     {"id":"sep11-breakfast","at":"2026-09-11T08:38:49+02:00","kind":"meal","slot":"breakfast","title":"Usual breakfast","kcal_min":400,"kcal_max":500,"evidence":"assistant_estimate","images":["file_000000006030821098e4940ea4d6ebfb"]},
     {"id":"sep11-lunch","at":"2026-09-11T10:13:00+02:00","kind":"meal","slot":"lunch","title":"Greek turkey lunch","kcal":500,"protein":26.0,"carbs":53.0,"fat":19.0,"salt":4.1,"evidence":"label","images":["file_00000000764882108aaabe1f5cd1117d"]},
     {"id":"sep11-yoghurt","at":"2026-09-11T16:36:46+02:00","kind":"snack","title":"Whole yoghurt with granola and honey","kcal":406,"detail":"350 g × 116 kcal/100 g","evidence":"label"},
-    {"id":"sep11-hiit","at":"2026-09-11T16:36:46+02:00","kind":"activity","title":"HIIT video","kcal":220,"detail":"Calorie burn estimated for reported 89.4 kg","evidence":"assistant_estimate"},
+    {"id":"sep11-hiit","at":"2026-09-11T16:36:46+02:00","kind":"activity","title":"HIIT video","kcal":220,"detail":"Based on 89.4 kg body weight","evidence":"assistant_estimate"},
     {"id":"sep11-weight","at":"2026-09-11T16:36:46+02:00","kind":"measurement","title":"Weight","weight":89.4,"evidence":"user_report"},
     {"id":"sep12-breakfast","at":"2026-09-12T08:30:00+02:00","kind":"meal","slot":"breakfast","title":"Bacon and fried egg breakfast","detail":"Tomato and fruit-yoghurt smoothie; no added oil","kcal_min":450,"kcal_max":550,"evidence":"assistant_estimate"},
     {"id":"sep12-tennis","at":"2026-09-12T11:00:00+02:00","kind":"activity","title":"High-intensity coached tennis","detail":"60 minutes of constant hitting","kcal_min":500,"kcal_max":700,"evidence":"assistant_estimate"},
     {"id":"sep12-burger","at":"2026-09-12T14:53:26+02:00","kind":"meal","slot":"lunch","title":"MAX Rywala Beef ’N’ Bacon","kcal":975,"protein":45.5,"carbs":65.7,"fat":58.8,"evidence":"published_product_value"},
-    {"id":"sep12-fries","at":"2026-09-12T14:53:26+02:00","kind":"meal","slot":"lunch","title":"MAX cheesy fries and Buffalo sauce","kcal_min":550,"kcal_max":620,"detail":"0.5 L Coke Zero also reported","evidence":"published_value_plus_estimate"},
+    {"id":"sep12-fries","at":"2026-09-12T14:53:26+02:00","kind":"meal","slot":"lunch","title":"MAX cheesy fries and Buffalo sauce","kcal_min":550,"kcal_max":620,"detail":"0.5 L Coke Zero","evidence":"published_value_plus_estimate"},
     {"id":"sep12-salad","at":"2026-09-12T21:06:12+02:00","kind":"meal","slot":"dinner","title":"MAX sesame salad","kcal_min":150,"kcal_max":250,"detail":"No extras","evidence":"assistant_estimate"},
     {"id":"sep12-drinks","at":"2026-09-12T21:06:12+02:00","kind":"drink","title":"Beer and usual whisky","kcal_min":250,"kcal_max":350,"evidence":"assistant_estimate"}
   ]

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0+14 — 2026-09-13
+
+- Simplified daily cards to show time only and grouped entries by meal category.
+- Removed one-time import branding and repeated estimate wording from history rows.
+- Added account-owned private history sync and mandatory account onboarding.
+- Added superadmin controls to enable private sync and block or delete app users.
+- Added Google backup setup guidance for standard users.
+
 ## 1.0.0+13 — 2026-09-13
 
 - Added a delete icon to each entry in today’s timeline.

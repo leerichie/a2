@@ -37,7 +37,7 @@ void main() {
     await tester.tap(find.text('Food or drink · counts towards your day'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Greek yoghurt and berries');
-    await tester.tap(find.text('Estimate & add to day'));
+    await tester.tap(find.text('Add to day'));
     await tester.pumpAndSettle();
     expect(find.text('80'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 50));
@@ -123,6 +123,14 @@ void main() {
     final whisky = FoodEstimator.estimate('a straight whisky about 50ml');
     expect(whisky.calories, 110);
     expect(whisky.protein, 0);
+  });
+
+  test('detects and orders common meal descriptions', () {
+    expect(MealCategory.detect('Bacon breakfast', false), 'Breakfast');
+    expect(MealCategory.detect('Quick afternoon snack', false), 'Snack');
+    expect(MealCategory.detect('Late supper', false), 'Supper');
+    expect(MealCategory.detect('50ml whisky', false), 'Drinks');
+    expect(MealCategory.detect('Tennis', true), 'Exercise');
   });
 
   test('dynamic translations insert their real values', () {

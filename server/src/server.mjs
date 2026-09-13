@@ -10,6 +10,7 @@ const publicDir = join(root, 'public');
 const dataFile = join(process.env.DATA_DIR || join(root, 'data'), 'content.json');
 const usersFile = join(process.env.DATA_DIR || join(root, 'data'), 'users.json');
 const appUsersFile = join(process.env.DATA_DIR || join(root, 'data'), 'app-users.json');
+const healthDataFile = join(process.env.DATA_DIR || join(root, 'data'), 'health-data.json');
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
 const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
@@ -81,7 +82,15 @@ const saveAppUsers = async users => {
   await mkdir(dirname(appUsersFile), {recursive: true});
   await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
 };
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, createdAt: user.createdAt});
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, createdAt: user.createdAt});
+const loadHealthData = async () => {
+  try { return JSON.parse(await readFile(healthDataFile, 'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return {users: {}}; throw error; }
+};
+const saveHealthData = async data => {
+  await mkdir(dirname(healthDataFile), {recursive: true});
+  await writeFile(healthDataFile, JSON.stringify(data, null, 2), {mode: 0o600});
+};
 const appSessionFor = req => {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   const session = appSessions.get(token);
@@ -133,7 +142,7 @@ const server = createServer(async (req, res) => {
       if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
       const users = await loadAppUsers();
       if (users.some(item => item.email === normalEmail)) return json(res, 409, {error: 'An account already exists for this email'});
-      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
+      const user = {id: randomUUID(), email: normalEmail, name: String(name).trim().slice(0, 60), role: 'user', blocked: false, privateSync: false, passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
       users.push(user); await saveAppUsers(users);
       const token = randomBytes(32).toString('hex');
       appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
@@ -144,6 +153,7 @@ const server = createServer(async (req, res) => {
       const users = await loadAppUsers();
       const user = users.find(item => item.email === String(email || '').trim().toLowerCase());
       if (!user || !(await verifyPassword(password, user.passwordHash))) return json(res, 401, {error: 'Incorrect email or password'});
+      if (user.blocked === true) return json(res, 403, {error: 'This account has been blocked'});
       const token = randomBytes(32).toString('hex');
       appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
       return json(res, 200, {token, user: publicAppUser(user)});
@@ -163,6 +173,23 @@ const server = createServer(async (req, res) => {
         await saveAppUsers(users.filter(item => item.id !== appSession.userId));
         for (const [token, item] of appSessions) if (item.userId === appSession.userId) appSessions.delete(token);
         return json(res, 200, {ok: true});
+      }
+      if (url.pathname === '/api/v1/auth/sync') {
+        const users = await loadAppUsers();
+        const user = users.find(item => item.id === appSession.userId);
+        if (!user || user.blocked === true) return json(res, 403, {error: 'Account access is blocked'});
+        if (user.privateSync !== true) return json(res, 403, {error: 'Private sync is not enabled for this account'});
+        if (req.method === 'GET') {
+          const data = await loadHealthData();
+          return json(res, 200, {data: data.users[appSession.userId] || null});
+        }
+        if (req.method === 'PUT') {
+          const body = await readBody(req);
+          const data = await loadHealthData();
+          data.users[appSession.userId] = {payload: body.payload || {}, updatedAt: new Date().toISOString()};
+          await saveHealthData(data);
+          return json(res, 200, {ok: true, updatedAt: data.users[appSession.userId].updatedAt});
+        }
       }
     }
     if (req.method === 'GET' && url.pathname === '/api/v1/content') {
@@ -203,6 +230,28 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'GET' && url.pathname === '/admin/api/app-users') {
       return json(res, 200, {users: (await loadAppUsers()).map(publicAppUser)});
+    }
+    const appUserMatch = url.pathname.match(/^\/admin\/api\/app-users\/([^/]+)$/);
+    if (appUserMatch && req.method === 'PATCH') {
+      const changes = await readBody(req);
+      const users = await loadAppUsers();
+      const user = users.find(item => item.id === appUserMatch[1]);
+      if (!user) return json(res, 404, {error: 'App user not found'});
+      if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
+      if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
+      await saveAppUsers(users);
+      if (user.blocked) for (const [token, item] of appSessions) if (item.userId === user.id) appSessions.delete(token);
+      return json(res, 200, {user: publicAppUser(user)});
+    }
+    if (appUserMatch && req.method === 'DELETE') {
+      const users = await loadAppUsers();
+      if (!users.some(item => item.id === appUserMatch[1])) return json(res, 404, {error: 'App user not found'});
+      await saveAppUsers(users.filter(item => item.id !== appUserMatch[1]));
+      for (const [token, item] of appSessions) if (item.userId === appUserMatch[1]) appSessions.delete(token);
+      const data = await loadHealthData();
+      delete data.users[appUserMatch[1]];
+      await saveHealthData(data);
+      return json(res, 200, {ok: true});
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/users') {
       const {username, password, role = 'admin'} = await readBody(req);

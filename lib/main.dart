@@ -357,14 +357,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   backgroundColor: ink,
                   padding: const EdgeInsets.all(18),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (page < 2) {
                     controller.nextPage(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOut,
                     );
                   } else {
-                    widget.onDone();
+                    final created = await showModalBottomSheet<bool>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => const AccountSheet(
+                        serverUrl: defaultServerUrl,
+                        accountEmail: null,
+                        initialRegister: true,
+                        accountRequired: true,
+                      ),
+                    );
+                    if (created == true) widget.onDone();
                   }
                 },
                 child: LText(
@@ -414,6 +424,7 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _saveTodayEntries() async {
     await const DailyEntryRepository().save(DateTime.now(), entries);
+    await const AccountService().uploadLocalData(defaultServerUrl);
   }
 
   Future<void> _loadPlan() async {
@@ -424,8 +435,10 @@ class _AppShellState extends State<AppShell> {
   }
 
   Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString('personal_history_cache');
     final raw = jsonDecode(
-      await rootBundle.loadString('assets/data/ashley_history.json'),
+      stored ?? await rootBundle.loadString('assets/data/ashley_history.json'),
     ) as Map<String, dynamic>;
     final loaded =
         (raw['records'] as List)
@@ -544,6 +557,34 @@ class TodayPage extends StatelessWidget {
   final int calories, protein;
   final int dailyTarget;
   final ValueChanged<FoodEntry> onDelete;
+
+  List<Widget> _timeline(BuildContext context) {
+    final grouped = <String, List<FoodEntry>>{};
+    for (final entry in entries) {
+      (grouped[entry.dayCategory] ??= []).add(entry);
+    }
+    return [
+      for (final category in MealCategory.order)
+        if (grouped[category]?.isNotEmpty ?? false) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 10, 4, 7),
+            child: LText(
+              category,
+              style: const TextStyle(
+                color: forest,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: .8,
+              ),
+            ),
+          ),
+          ...grouped[category]!.map(
+            (entry) =>
+                FoodTile(entry, onDelete: () => _confirmDelete(context, entry)),
+          ),
+        ],
+    ];
+  }
 
   Future<void> _confirmDelete(BuildContext context, FoodEntry entry) async {
     final confirmed = await showDialog<bool>(
@@ -692,12 +733,7 @@ class TodayPage extends StatelessWidget {
               const SizedBox(height: 24),
               SectionHeader('Today’s timeline', '${entries.length} ITEMS'),
               const SizedBox(height: 8),
-              ...entries.map(
-                (entry) => FoodTile(
-                  entry,
-                  onDelete: () => _confirmDelete(context, entry),
-                ),
-              ),
+              ..._timeline(context),
             ],
           ],
         ),
@@ -940,11 +976,15 @@ class FoodEntry {
     this.protein,
     this.icon, {
     this.isExercise = false,
+    this.category,
   });
   final String name, time;
   final int calories, protein;
   final IconData icon;
   final bool isExercise;
+  final String? category;
+
+  String get dayCategory => category ?? MealCategory.detect(name, isExercise);
 
   Map<String, Object> toJson() => {
     'name': name,
@@ -952,6 +992,7 @@ class FoodEntry {
     'calories': calories,
     'protein': protein,
     'isExercise': isExercise,
+    'category': dayCategory,
   };
 
   factory FoodEntry.fromJson(Map<String, dynamic> json) {
@@ -963,7 +1004,79 @@ class FoodEntry {
       json['protein'] as int,
       isExercise ? Icons.directions_run : Icons.restaurant,
       isExercise: isExercise,
+      category: json['category'] as String?,
     );
+  }
+}
+
+class MealCategory {
+  static const order = [
+    'Breakfast',
+    'Brunch',
+    'Lunch',
+    'Snack',
+    'Dinner',
+    'Supper',
+    'Drinks',
+    'Other',
+    'Exercise',
+  ];
+
+  static String detect(String description, bool isExercise) {
+    if (isExercise) return 'Exercise';
+    final text = description.toLowerCase();
+    const terms = <String, List<String>>{
+      'Breakfast': [
+        'breakfast',
+        'śniadanie',
+        'frühstück',
+        'petit-déjeuner',
+        'desayuno',
+        'colazione',
+        'porridge',
+        'oats',
+      ],
+      'Brunch': ['brunch', 'drugie śniadanie', 'zweites frühstück'],
+      'Lunch': [
+        'lunch',
+        'obiad',
+        'mittagessen',
+        'déjeuner',
+        'almuerzo',
+        'pranzo',
+      ],
+      'Snack': [
+        'snack',
+        'przekąska',
+        'imbiss',
+        'goûter',
+        'tentempié',
+        'spuntino',
+        'crisps',
+        'chocolate',
+      ],
+      'Dinner': ['dinner', 'kolacja', 'abendessen', 'dîner', 'cena'],
+      'Supper': ['supper', 'wieczerza', 'abendbrot', 'souper'],
+      'Drinks': [
+        'drink',
+        'napój',
+        'getränk',
+        'boisson',
+        'bebida',
+        'bevanda',
+        'whisky',
+        'whiskey',
+        'beer',
+        'wine',
+        'vodka',
+        'gin',
+        'rum',
+      ],
+    };
+    for (final entry in terms.entries) {
+      if (entry.value.any(text.contains)) return entry.key;
+    }
+    return 'Other';
   }
 }
 
@@ -1023,12 +1136,7 @@ class FoodTile extends StatelessWidget {
           entry.name,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        subtitle: LText(
-          entry.isExercise
-              ? entry.time
-              : '${entry.time}  ·  ${entry.protein} g protein',
-          style: const TextStyle(fontSize: 12),
-        ),
+        subtitle: LText(entry.time, style: const TextStyle(fontSize: 12)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1305,7 +1413,7 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
                 context,
                 FoodEntry(
                   name,
-                  'Now · $mins min',
+                  '${_clockTime()} · $mins min',
                   mins * perMinute,
                   0,
                   Icons.directions_run,
@@ -1466,8 +1574,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 Navigator.pop(
                   context,
                   FoodEntry(
-                    text.isEmpty ? 'Photo meal estimate' : text,
-                    'Now',
+                    text.isEmpty ? 'Meal from photo' : text,
+                    _clockTime(),
                     estimate.calories,
                     estimate.protein,
                     Icons.restaurant,
@@ -1476,7 +1584,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
               },
               icon: const Icon(Icons.auto_awesome),
               label: const LText(
-                'Estimate & add to day',
+                'Add to day',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -1485,6 +1593,11 @@ class _AddMealSheetState extends State<AddMealSheet> {
       ),
     ),
   );
+}
+
+String _clockTime([DateTime? value]) {
+  final time = value ?? DateTime.now();
+  return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
 
 class CaptureChoice extends StatelessWidget {
@@ -1539,6 +1652,11 @@ class HistoryRecord {
   final DateTime at;
   final double? kcal, kcalMin, kcalMax, weight;
   final List<String> images;
+  String get dayCategory => kind == 'activity'
+      ? 'Exercise'
+      : kind == 'measurement'
+      ? 'Other'
+      : MealCategory.detect('$title $detail', false);
   IconData get icon => kind == 'activity'
       ? Icons.directions_run
       : kind == 'measurement'
@@ -1558,9 +1676,13 @@ String recordDetail(HistoryRecord r) {
   if (r.kcal != null) {
     bits.add('${r.kcal!.round()} kcal');
   } else if (r.kcalMin != null) {
-    bits.add('${r.kcalMin!.round()}–${r.kcalMax!.round()} kcal estimate');
+    bits.add('${r.kcalMin!.round()}–${r.kcalMax!.round()} kcal');
   }
-  if (r.detail.isNotEmpty) bits.add(r.detail);
+  final detail = r.detail
+      .replaceAll(RegExp(r'\s*also reported\b', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\bestimated?\b\s*', caseSensitive: false), '')
+      .trim();
+  if (detail.isNotEmpty) bits.add(detail);
   return bits.join(' · ');
 }
 
@@ -1957,6 +2079,13 @@ class DayDetailSheet extends StatelessWidget {
   const DayDetailSheet({super.key, required this.date, required this.records});
   final DateTime date;
   final List<HistoryRecord> records;
+  List<HistoryRecord> get orderedRecords => [...records]
+    ..sort((a, b) {
+      final byCategory = MealCategory.order
+          .indexOf(a.dayCategory)
+          .compareTo(MealCategory.order.indexOf(b.dayCategory));
+      return byCategory == 0 ? a.at.compareTo(b.at) : byCategory;
+    });
   @override
   Widget build(BuildContext context) => DraggableScrollableSheet(
     expand: false,
@@ -1977,11 +2106,11 @@ class DayDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const LText(
-            'Only information recorded in ChatGPT',
+            'Estimated values',
             style: TextStyle(color: Colors.black54),
           ),
           const SizedBox(height: 18),
-          ...records.map(
+          ...orderedRecords.map(
             (r) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Card(
@@ -1996,9 +2125,7 @@ class DayDetailSheet extends StatelessWidget {
                     r.title,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  subtitle: LText(
-                    '${recordDetail(r)}${r.images.isNotEmpty ? '\n${r.images.length} original image reference${r.images.length == 1 ? '' : 's'}' : ''}',
-                  ),
+                  subtitle: LText(recordDetail(r)),
                   trailing: r.images.isNotEmpty
                       ? const Icon(Icons.photo_outlined, color: forest)
                       : null,
@@ -2475,7 +2602,86 @@ class AccountService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('account_token', body['token'] as String);
     await prefs.setString('account_user', jsonEncode(body['user']));
+    if ((body['user'] as Map<String, dynamic>)['privateSync'] == true) {
+      await synchronise(serverUrl);
+    }
     return body['user'] as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> _localPayload() async {
+    final prefs = await SharedPreferences.getInstance();
+    final daily = <String, dynamic>{};
+    for (final key in prefs.getKeys().where(
+      (key) => key.startsWith('daily_entries_'),
+    )) {
+      daily[key] = (prefs.getStringList(key) ?? const [])
+          .map((raw) => jsonDecode(raw))
+          .toList();
+    }
+    final historyRaw =
+        prefs.getString('personal_history_cache') ??
+        await rootBundle.loadString('assets/data/ashley_history.json');
+    return {'history': jsonDecode(historyRaw), 'dailyEntries': daily};
+  }
+
+  Future<void> uploadLocalData(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    final userRaw = prefs.getString('account_user');
+    if (token == null || userRaw == null) return;
+    final user = jsonDecode(userRaw) as Map<String, dynamic>;
+    if (user['privateSync'] != true) return;
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    try {
+      await http
+          .put(
+            Uri.parse('$base/api/v1/auth/sync'),
+            headers: {
+              'content-type': 'application/json',
+              'authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'payload': await _localPayload()}),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (_) {
+      // Local saving remains reliable when the private server is unavailable.
+    }
+  }
+
+  Future<void> synchronise(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) return;
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .get(
+          Uri.parse('$base/api/v1/auth/sync'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Sync failed');
+    }
+    final saved = body['data'] as Map<String, dynamic>?;
+    if (saved == null) {
+      await uploadLocalData(serverUrl);
+      return;
+    }
+    final payload = saved['payload'] as Map<String, dynamic>? ?? const {};
+    if (payload['history'] != null) {
+      await prefs.setString(
+        'personal_history_cache',
+        jsonEncode(payload['history']),
+      );
+    }
+    final daily = payload['dailyEntries'] as Map<String, dynamic>? ?? const {};
+    for (final entry in daily.entries) {
+      await prefs.setStringList(
+        entry.key,
+        (entry.value as List).map((item) => jsonEncode(item)).toList(),
+      );
+    }
   }
 
   Future<void> logout(String serverUrl) async {
@@ -2527,8 +2733,9 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+13';
+  String installedVersion = '1.0.0+14';
   String? accountEmail;
+  bool accountPrivateSync = false;
 
   @override
   void initState() {
@@ -2593,6 +2800,10 @@ class _ProfilePageState extends State<ProfilePage> {
           ? null
           : (jsonDecode(accountRaw) as Map<String, dynamic>)['email']
                 as String?;
+      accountPrivateSync =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['privateSync'] ==
+              true;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
       if (cached != null) {
@@ -2963,12 +3174,10 @@ class _ProfilePageState extends State<ProfilePage> {
           onTap: null,
           leading: const Icon(Icons.chat_bubble_outline, color: forest),
           title: const LText(
-            'ChatGPT history imported',
+            'Personal history',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
-          subtitle: const LText(
-            '3 Aug – 12 Sep · meals, activity, weights and image references',
-          ),
+          subtitle: const LText('3 Aug – 12 Sep · meals, activity and weights'),
           trailing: const Icon(Icons.chevron_right),
         ),
       ),
@@ -3013,17 +3222,48 @@ class _ProfilePageState extends State<ProfilePage> {
       Card(
         child: Column(
           children: [
-            SwitchListTile(
-              value: sync,
-              onChanged: (v) => setState(() => sync = v),
-              secondary: const Icon(Icons.cloud_outlined, color: forest),
-              title: const LText(
-                'Private server sync',
-                style: TextStyle(fontWeight: FontWeight.w700),
+            if (accountPrivateSync)
+              SwitchListTile(
+                value: sync,
+                onChanged: (v) async {
+                  setState(() => sync = v);
+                  if (v) {
+                    await const AccountService().synchronise(contentServerUrl);
+                  }
+                },
+                secondary: const Icon(Icons.cloud_outlined, color: forest),
+                title: const LText(
+                  'Private server sync',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: const LText('Off · your data stays on this device'),
               ),
-              subtitle: const LText('Off · your data stays on this device'),
-            ),
-            const Divider(height: 1, indent: 55),
+            if (accountPrivateSync) const Divider(height: 1, indent: 55),
+            if (!accountPrivateSync)
+              ListTile(
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const LText('Google Drive backup'),
+                    content: const LText(
+                      'Google backup will use your own Google account. Add the Google client ID in the app build, then return here to connect and choose a backup folder.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const LText('Close'),
+                      ),
+                    ],
+                  ),
+                ),
+                leading: const Icon(Icons.add_to_drive_outlined, color: forest),
+                title: const LText('Google Drive backup'),
+                subtitle: const LText(
+                  'Connect your own Google account · optional',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+              ),
+            if (!accountPrivateSync) const Divider(height: 1, indent: 55),
             ListTile(
               onTap: () => showModalBottomSheet(
                 context: context,
@@ -3037,21 +3277,22 @@ class _ProfilePageState extends State<ProfilePage> {
               subtitle: const LText('Device · compressed copies · 184 MB'),
               trailing: const Icon(Icons.chevron_right),
             ),
-            const Divider(height: 1, indent: 55),
-            ListTile(
-              onTap: _configureContentServer,
-              leading: const Icon(Icons.dns_outlined, color: forest),
-              title: const LText(
-                'Server',
-                style: TextStyle(fontWeight: FontWeight.w700),
+            if (accountPrivateSync) const Divider(height: 1, indent: 55),
+            if (accountPrivateSync)
+              ListTile(
+                onTap: _configureContentServer,
+                leading: const Icon(Icons.dns_outlined, color: forest),
+                title: const LText(
+                  'Server',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: LText(
+                  contentServerUrl.isEmpty
+                      ? 'aa-cloud-wp30 · tap to configure'
+                      : contentServerUrl,
+                ),
+                trailing: const Icon(Icons.chevron_right),
               ),
-              subtitle: LText(
-                contentServerUrl.isEmpty
-                    ? 'aa-cloud-wp30 · tap to configure'
-                    : contentServerUrl,
-              ),
-              trailing: const Icon(Icons.chevron_right),
-            ),
             const Divider(height: 1, indent: 55),
             ListTile(
               onTap: checkingContent ? null : _checkContent,
@@ -3475,7 +3716,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
   ];
   late final selected = List<bool>.filled(candidates.length, true);
   final imported = <String>{};
-  String idFor(int index) => 'chatgpt:6aa678f0:$index';
+  String idFor(int index) => 'personal-import:$index';
   @override
   void initState() {
     super.initState();
@@ -3549,7 +3790,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
                         ),
                         SizedBox(height: 7),
                         LText(
-                          'a2 found candidate records in “Keto Meal Plan Poland”. Check them first—ChatGPT estimates remain marked as estimates.',
+                          'a2 found personal history records. Review them before importing.',
                           style: TextStyle(color: Colors.black54, height: 1.4),
                         ),
                       ],
@@ -3651,9 +3892,13 @@ class AccountSheet extends StatefulWidget {
     super.key,
     required this.serverUrl,
     required this.accountEmail,
+    this.initialRegister = false,
+    this.accountRequired = false,
   });
   final String serverUrl;
   final String? accountEmail;
+  final bool initialRegister;
+  final bool accountRequired;
   @override
   State<AccountSheet> createState() => _AccountSheetState();
 }
@@ -3662,7 +3907,8 @@ class _AccountSheetState extends State<AccountSheet> {
   final email = TextEditingController();
   final password = TextEditingController();
   final name = TextEditingController();
-  bool register = false, busy = false;
+  late bool register = widget.initialRegister;
+  bool busy = false;
   String? error;
 
   @override
@@ -3741,8 +3987,10 @@ class _AccountSheetState extends State<AccountSheet> {
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                const LText(
-                  'An account is optional. Sign in to prepare for secure backup and access on another device.',
+                LText(
+                  widget.accountRequired
+                      ? 'Create an account to protect your records and use them on another device.'
+                      : 'Sign in for secure backup and access on another device.',
                   style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
                 const SizedBox(height: 22),
@@ -3814,7 +4062,7 @@ class _AccountSheetState extends State<AccountSheet> {
                     ),
                   ),
                 ),
-                const Divider(height: 28),
+                if (!widget.accountRequired) const Divider(height: 28),
                 const Row(
                   children: [
                     Icon(Icons.g_mobiledata, size: 28, color: Colors.black38),
@@ -3827,13 +4075,14 @@ class _AccountSheetState extends State<AccountSheet> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const LText('Keep using a2 locally'),
+                if (!widget.accountRequired)
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const LText('Keep using a2 locally'),
+                    ),
                   ),
-                ),
                 const Center(
                   child: LText(
                     'Never upload health data without clear consent.',
