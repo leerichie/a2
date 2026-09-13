@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0+18 — 2026-09-13
+
+- Removed the AI content-research/drafts/publish screen from the console —
+  it wasn't used and left a button stuck "Researching…"; the console now
+  opens straight to Users & security, with AI settings alongside it. The
+  app's own content-update check is unaffected.
+- Made per-user AI access reflect in the app as soon as it's used: opening
+  Settings or the Add-food/exercise sheets now re-checks the account's AI
+  access from the server first, instead of only at app launch.
+- Taking a meal/drink photo now requires a description before it can be
+  added, so an AI-estimated (or manually corrected) description is never
+  skipped. Scanning a label can be added without a description, but a
+  photo without one now assumes the whole label's contents were consumed.
+
 ## 1.0.0+17 — 2026-09-13
 
 - Synced saved diet plans, imported plan records, app language and the AI

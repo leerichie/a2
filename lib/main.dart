@@ -1708,6 +1708,37 @@ class _AddMealSheetState extends State<AddMealSheet> {
 
   Future<void> _addToDay() async {
     final text = description.text.trim();
+    if (mode == 1 && text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: LText(
+            'Add a description of what’s in the photo before saving.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (mode == 2 && text.isEmpty && aiEstimate != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: LText(
+            'Without a description, we’ll assume the whole label was consumed.',
+          ),
+        ),
+      );
+      Navigator.pop(
+        context,
+        FoodEntry(
+          aiEstimate!.name,
+          _clockTime(),
+          aiEstimate!.calories,
+          aiEstimate!.protein,
+          Icons.restaurant,
+          carbs: aiEstimate!.carbs,
+        ),
+      );
+      return;
+    }
     if (aiEstimate != null && text == aiEstimate!.name.trim()) {
       Navigator.pop(
         context,
@@ -1753,7 +1784,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
     Navigator.pop(
       context,
       FoodEntry(
-        text.isEmpty ? 'Meal from photo' : text,
+        text,
         _clockTime(),
         estimate.calories,
         estimate.protein,
@@ -3114,6 +3145,11 @@ class AiService {
   const AiService();
 
   Future<bool> isAvailable() async {
+    try {
+      await const AccountService().refreshAccount(defaultServerUrl);
+    } catch (_) {
+      // Falls back to the last-known cached account status when offline.
+    }
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool('ai_enabled') != true) return false;
     final userRaw = prefs.getString('account_user');
@@ -3226,7 +3262,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+17';
+  String installedVersion = '1.0.0+18';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
@@ -3252,6 +3288,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _restoreHealthSettings() async {
+    try {
+      await const AccountService().refreshAccount(defaultServerUrl);
+    } catch (_) {
+      // Falls back to the last-known cached account status when offline.
+    }
     final prefs = await SharedPreferences.getInstance();
     final bodyRaw = prefs.getString('body_profile');
     final planRaw = prefs.getString('active_diet_plan');

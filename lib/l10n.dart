@@ -785,6 +785,22 @@ const _rows = <List<String>>[
     'Descrivi cosa hai fotografato.',
   ],
   [
+    'Add a description of what’s in the photo before saving.',
+    'Opisz, co jest na zdjęciu, zanim zapiszesz.',
+    'Beschreibe, was auf dem Foto zu sehen ist, bevor du speicherst.',
+    'Décrivez ce que montre la photo avant d’enregistrer.',
+    'Describe lo que aparece en la foto antes de guardar.',
+    'Descrivi cosa mostra la foto prima di salvare.',
+  ],
+  [
+    'Without a description, we’ll assume the whole label was consumed.',
+    'Bez opisu założymy, że spożyto całą zawartość opakowania.',
+    'Ohne Beschreibung nehmen wir an, dass die gesamte Packung verzehrt wurde.',
+    'Sans description, nous supposerons que tout l’emballage a été consommé.',
+    'Sin descripción, supondremos que se consumió todo el envase.',
+    'Senza descrizione, presumeremo che sia stata consumata l’intera confezione.',
+  ],
+  [
     'AI could not analyse the photo. Describe it below instead.',
     'AI nie mogła przeanalizować zdjęcia. Opisz je poniżej.',
     'Die KI konnte das Foto nicht analysieren. Beschreibe es stattdessen unten.',
