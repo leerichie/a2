@@ -131,7 +131,7 @@ const saveAppUsers = async users => {
   await mkdir(dirname(appUsersFile), {recursive: true});
   await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
 };
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, createdAt: user.createdAt});
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], createdAt: user.createdAt});
 const loadServerSettings = async () => {
   try { return JSON.parse(await readFile(settingsFile, 'utf8')); }
   catch (error) { if (error.code === 'ENOENT') return {}; throw error; }
@@ -208,7 +208,7 @@ async function aiDescribe(kind, text) {
       store: false,
       instructions: kind === 'exercise'
         ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise.'
-        : 'Estimate nutrition for a described food or drink item, assuming typical portion sizes when quantities are vague. Never invent false precision.',
+        : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal.',
       input: text,
       text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
     }),
@@ -282,6 +282,27 @@ const server = createServer(async (req, res) => {
       if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
         appSessions.delete(appSession.token); return json(res, 200, {ok: true});
       }
+      if (req.method === 'GET' && url.pathname === '/api/v1/auth/users') {
+        const users = await loadAppUsers();
+        return json(res, 200, {
+          users: users
+            .filter(item => item.id !== appSession.userId && item.blocked !== true)
+            .map(item => ({id: item.id, name: item.name, email: item.email})),
+        });
+      }
+      if (req.method === 'PATCH' && url.pathname === '/api/v1/auth/link') {
+        const {linkedUserIds, entrySyncEnabled} = await readBody(req);
+        const users = await loadAppUsers();
+        const user = users.find(item => item.id === appSession.userId);
+        if (!user) return json(res, 401, {error: 'Account no longer exists'});
+        if (Array.isArray(linkedUserIds)) {
+          const validIds = new Set(users.map(item => item.id));
+          user.linkedUserIds = linkedUserIds.filter(id => typeof id === 'string' && validIds.has(id) && id !== user.id);
+        }
+        if (typeof entrySyncEnabled === 'boolean') user.entrySyncEnabled = entrySyncEnabled;
+        await saveAppUsers(users);
+        return json(res, 200, {user: publicAppUser(user)});
+      }
       if (req.method === 'DELETE' && url.pathname === '/api/v1/auth/account') {
         const users = await loadAppUsers();
         await saveAppUsers(users.filter(item => item.id !== appSession.userId));
@@ -300,11 +321,52 @@ const server = createServer(async (req, res) => {
         if (req.method === 'PUT') {
           const body = await readBody(req);
           const data = await loadHealthData();
-          data.users[appSession.userId] = {payload: body.payload || {}, updatedAt: new Date().toISOString()};
+          // A device's upload always sends its whole local payload, which can't
+          // yet know about an entry another user just shared into this account
+          // server-side (see /api/v1/entries/share) — keep any such entry this
+          // upload doesn't already have, per day, instead of dropping it.
+          const existingDaily = data.users[appSession.userId]?.payload?.dailyEntries || {};
+          const incomingDaily = body.payload?.dailyEntries || {};
+          const mergedDaily = {...incomingDaily};
+          for (const [key, existingList] of Object.entries(existingDaily)) {
+            const incomingList = incomingDaily[key] || [];
+            const incomingSerialized = new Set(incomingList.map(item => JSON.stringify(item)));
+            const missingShared = (existingList || []).filter(item => item?.sharedFrom && !incomingSerialized.has(JSON.stringify(item)));
+            if (missingShared.length) mergedDaily[key] = [...incomingList, ...missingShared];
+          }
+          const mergedPayload = {...(body.payload || {}), dailyEntries: mergedDaily};
+          data.users[appSession.userId] = {payload: mergedPayload, updatedAt: new Date().toISOString()};
           await saveHealthData(data);
           return json(res, 200, {ok: true, updatedAt: data.users[appSession.userId].updatedAt});
         }
       }
+    }
+    if (req.method === 'POST' && url.pathname === '/api/v1/entries/share') {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      const users = await loadAppUsers();
+      const user = users.find(item => item.id === appSession.userId);
+      if (!user || user.blocked === true) return json(res, 403, {error: 'Account access is blocked'});
+      if (user.entrySyncEnabled !== true) return json(res, 400, {error: 'Entry sync is turned off in Settings'});
+      const targetIds = (user.linkedUserIds || []).filter(id => users.some(item => item.id === id && item.blocked !== true));
+      if (!targetIds.length) return json(res, 400, {error: 'No one is linked to sync entries with yet'});
+      const {date, entry} = await readBody(req);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '') || !entry || typeof entry !== 'object') {
+        return json(res, 400, {error: 'A date and entry are required'});
+      }
+      const data = await loadHealthData();
+      const key = `daily_entries_${date}`;
+      const sharedEntry = {...entry, sharedFrom: user.name || user.email};
+      for (const targetId of targetIds) {
+        const existing = data.users[targetId]?.payload || {};
+        const dailyEntries = {...(existing.dailyEntries || {})};
+        dailyEntries[key] = [...(dailyEntries[key] || []), sharedEntry];
+        data.users[targetId] = {payload: {...existing, dailyEntries}, updatedAt: new Date().toISOString()};
+      }
+      await saveHealthData(data);
+      const targetNames = targetIds.map(id => { const t = users.find(item => item.id === id); return t?.name || t?.email || id; });
+      await logActivity({username: user.name || user.email}, `${user.name || user.email} shared "${entry.name || 'an entry'}" with ${targetNames.join(', ')}`);
+      return json(res, 200, {shared: targetIds});
     }
     if (url.pathname.startsWith('/api/v1/ai/')) {
       const appSession = appSessionFor(req);
@@ -507,11 +569,15 @@ const server = createServer(async (req, res) => {
     }
     const userMatch = url.pathname.match(/^\/admin\/api\/users\/([^/]+)$/);
     if (userMatch && req.method === 'PATCH') {
-      const {username, password, currentPassword} = await readBody(req);
+      const {username, password, currentPassword, role} = await readBody(req);
       const users = await loadUsers();
       const user = users.find(item => item.id === userMatch[1]);
       if (!user) return json(res, 404, {error: 'User not found'});
-      if (user.id === session.userId && !(await verifyPassword(currentPassword, user.passwordHash))) return json(res, 403, {error: 'Current password is incorrect'});
+      const editingSelf = user.id === session.userId;
+      const oldUsername = user.username;
+      if (editingSelf && (username !== undefined || password)) {
+        if (!(await verifyPassword(currentPassword, user.passwordHash))) return json(res, 403, {error: 'Current password is incorrect'});
+      }
       if (username !== undefined) {
         if (!validUsername(username)) return json(res, 400, {error: 'Username must be 3–32 valid characters'});
         if (users.some(item => item.id !== user.id && item.username.toLowerCase() === username.toLowerCase())) return json(res, 409, {error: 'Username already exists'});
@@ -521,11 +587,22 @@ const server = createServer(async (req, res) => {
         if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
         user.passwordHash = await hashPassword(password);
       }
+      if (typeof role === 'string') {
+        if (!['admin', 'viewer'].includes(role)) return json(res, 400, {error: 'Role must be "admin" or "viewer"'});
+        if (editingSelf && role !== 'admin') return json(res, 400, {error: 'You cannot remove your own admin access'});
+        if (role !== 'admin' && users.filter(item => item.role === 'admin' && item.id !== user.id).length === 0) {
+          return json(res, 400, {error: 'At least one console account must stay an administrator'});
+        }
+        user.role = role;
+      }
       await saveUsers(users);
       for (const [token, item] of sessions) if (item.userId === user.id && token !== session.token) sessions.delete(token);
-      const oldUsername = session.username;
-      session.username = user.username;
-      await logActivity(session, password ? `${oldUsername} changed their password` : `${oldUsername} renamed their account to ${user.username}`);
+      const changeNotes = [];
+      if (username !== undefined) changeNotes.push(editingSelf ? 'renamed their account' : `renamed console user ${oldUsername} to ${user.username}`);
+      if (password) changeNotes.push(editingSelf ? 'changed their password' : `reset the password for console user ${user.username}`);
+      if (typeof role === 'string') changeNotes.push(`set ${user.username}'s console role to ${role === 'admin' ? 'administrator' : 'view-only'}`);
+      if (editingSelf) session.username = user.username;
+      if (changeNotes.length) await logActivity(session, `${session.username} ${changeNotes.join(', ')}`);
       return json(res, 200, {user: publicUser(user)});
     }
     if (userMatch && req.method === 'DELETE') {
