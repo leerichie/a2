@@ -1,0 +1,11 @@
+{
+  "name": "a2-content-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "check": "node --check src/server.mjs",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}

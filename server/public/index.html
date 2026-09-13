@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>a2 content console</title><link rel="stylesheet" href="style.css"></head>
+<body><main>
+  <header><div><small>AA-CLOUD-WP30</small><h1>a2 content console</h1><p>Research, review and selectively publish app knowledge.</p></div><span id="status">Not connected</span></header>
+  <section class="auth card"><label>Admin token<input id="token" type="password" autocomplete="current-password" placeholder="Stored only in this browser tab"></label><button id="connect">Connect</button></section>
+  <section class="grid">
+    <article class="card"><small>1 · ASK AI</small><h2>Research a change</h2><textarea id="topic" rows="6" placeholder="Example: Find current NHS guidance on Mediterranean-style diets. Use primary sources and state what changed."></textarea><button id="research">Create review draft</button><p class="hint">AI creates a draft only. It cannot publish.</p></article>
+    <article class="card"><small>2 · REVIEW</small><h2>Drafts</h2><div id="drafts" class="stack empty">Connect to load drafts.</div></article>
+    <article class="card"><small>3 · CONTROL DELIVERY</small><h2>Published releases</h2><div id="releases" class="stack empty">Connect to load releases.</div></article>
+  </section>
+</main><script src="app.js"></script></body></html>
