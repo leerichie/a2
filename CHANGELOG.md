@@ -3,6 +3,14 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.0.0+7 — 2026-09-13
+
+- Fixed an apparently unresponsive web-console login caused by stale browser
+  assets, with cache-busted files and explicit no-store response headers.
+- Added visible login progress and browser error feedback.
+- Redirected the server root and slashless `/admin` address to `/admin/` so
+  browser-relative styles and scripts always load correctly.
+
 ## 1.0.0+6 — 2026-09-13
 
 - Completed a global six-language UI audit and added an automated translation
