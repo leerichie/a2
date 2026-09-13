@@ -460,6 +460,10 @@ class _AppShellState extends State<AppShell> {
         calories: calories,
         protein: protein,
         dailyTarget: dailyTarget,
+        onDelete: (entry) async {
+          setState(() => entries.remove(entry));
+          await _saveTodayEntries();
+        },
       ),
       ProgressPage(importedCount: importedCount, history: history),
       JourneyPage(history: history),
@@ -534,10 +538,49 @@ class TodayPage extends StatelessWidget {
     required this.calories,
     required this.protein,
     required this.dailyTarget,
+    required this.onDelete,
   });
   final List<FoodEntry> entries;
   final int calories, protein;
   final int dailyTarget;
+  final ValueChanged<FoodEntry> onDelete;
+
+  Future<void> _confirmDelete(BuildContext context, FoodEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText('Delete entry?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const LText(
+              'This will remove it from today’s totals and timeline.',
+            ),
+            const SizedBox(height: 10),
+            Text(
+              entry.name,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const LText('Cancel'),
+          ),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: coral),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.delete_outline),
+            label: const LText('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) onDelete(entry);
+  }
+
   @override
   Widget build(BuildContext context) => CustomScrollView(
     slivers: [
@@ -649,7 +692,12 @@ class TodayPage extends StatelessWidget {
               const SizedBox(height: 24),
               SectionHeader('Today’s timeline', '${entries.length} ITEMS'),
               const SizedBox(height: 8),
-              ...entries.map((e) => FoodTile(e)),
+              ...entries.map(
+                (entry) => FoodTile(
+                  entry,
+                  onDelete: () => _confirmDelete(context, entry),
+                ),
+              ),
             ],
           ],
         ),
@@ -953,8 +1001,9 @@ class DailyEntryRepository {
 }
 
 class FoodTile extends StatelessWidget {
-  const FoodTile(this.entry, {super.key});
+  const FoodTile(this.entry, {super.key, required this.onDelete});
   final FoodEntry entry;
+  final VoidCallback onDelete;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -980,17 +1029,32 @@ class FoodTile extends StatelessWidget {
               : '${entry.time}  ·  ${entry.protein} g protein',
           style: const TextStyle(fontSize: 12),
         ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            LText(
-              '${entry.isExercise ? '−' : ''}${entry.calories}',
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                LText(
+                  '${entry.isExercise ? '−' : ''}${entry.calories}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                const LText(
+                  'kcal',
+                  style: TextStyle(fontSize: 10, color: Colors.black45),
+                ),
+              ],
             ),
-            const LText(
-              'kcal',
-              style: TextStyle(fontSize: 10, color: Colors.black45),
+            const SizedBox(width: 3),
+            IconButton(
+              onPressed: onDelete,
+              tooltip: ui(context, 'Delete entry'),
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.delete_outline, color: coral, size: 20),
             ),
           ],
         ),
@@ -2463,7 +2527,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+12';
+  String installedVersion = '1.0.0+13';
   String? accountEmail;
 
   @override

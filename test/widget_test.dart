@@ -50,6 +50,25 @@ void main() {
       (key) => key.startsWith('daily_entries_'),
     );
     expect(prefs.getStringList(dailyKey)!.single, contains('Greek yoghurt'));
+
+    await tester.scrollUntilVisible(
+      find.byIcon(Icons.delete_outline),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete entry?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Greek yoghurt and berries'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+    expect(find.text('Greek yoghurt and berries'), findsNothing);
+    expect(prefs.getStringList(dailyKey), isEmpty);
   });
 
   test('daily entries persist and remain separated by date', () async {

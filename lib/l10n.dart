@@ -6,6 +6,32 @@ const supportedLanguageCodes = ['en', 'pl', 'de', 'fr', 'es', 'it'];
 // imported ChatGPT records are not translated or rewritten.
 const _rows = <List<String>>[
   [
+    'Delete entry?',
+    'Usunąć wpis?',
+    'Eintrag löschen?',
+    'Supprimer l’entrée ?',
+    '¿Eliminar registro?',
+    'Eliminare la voce?',
+  ],
+  [
+    'This will remove it from today’s totals and timeline.',
+    'Wpis zostanie usunięty z dzisiejszych sum i osi czasu.',
+    'Der Eintrag wird aus den heutigen Summen und dem Verlauf entfernt.',
+    'L’entrée sera retirée des totaux et de la chronologie du jour.',
+    'Se eliminará de los totales y la cronología de hoy.',
+    'La voce verrà rimossa dai totali e dalla cronologia di oggi.',
+  ],
+  ['Cancel', 'Anuluj', 'Abbrechen', 'Annuler', 'Cancelar', 'Annulla'],
+  ['Delete', 'Usuń', 'Löschen', 'Supprimer', 'Eliminar', 'Elimina'],
+  [
+    'Delete entry',
+    'Usuń wpis',
+    'Eintrag löschen',
+    'Supprimer l’entrée',
+    'Eliminar registro',
+    'Elimina voce',
+  ],
+  [
     'Good afternoon, Ashley',
     'Dzień dobry, Ashley',
     'Guten Tag, Ashley',

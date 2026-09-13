@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+13 — 2026-09-13
+
+- Added a delete icon to each entry in today’s timeline.
+- Added confirmation before deletion and immediately updates persisted daily totals.
+- Added deletion text in all six supported languages.
+
 ## 1.0.0+12 — 2026-09-13
 
 - Fixed successful console logins remaining visually stuck behind the login screen.
