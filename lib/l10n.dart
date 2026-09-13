@@ -1406,6 +1406,54 @@ const _rows = <List<String>>[
     'Aplicación creada por Ashley Richards — visita ashleyrichards.tech',
     'App realizzata da Ashley Richards — visita ashleyrichards.tech',
   ],
+  [
+    'Water',
+    'Woda',
+    'Wasser',
+    'Eau',
+    'Agua',
+    'Acqua',
+  ],
+  [
+    'Add water',
+    'Dodaj wodę',
+    'Wasser hinzufügen',
+    'Ajouter de l’eau',
+    'Añadir agua',
+    'Aggiungi acqua',
+  ],
+  [
+    'Custom amount (ml)',
+    'Własna ilość (ml)',
+    'Eigene Menge (ml)',
+    'Quantité personnalisée (ml)',
+    'Cantidad personalizada (ml)',
+    'Quantità personalizzata (ml)',
+  ],
+  [
+    'Water target',
+    'Cel nawodnienia',
+    'Wasserziel',
+    'Objectif d’hydratation',
+    'Objetivo de agua',
+    'Obiettivo idrico',
+  ],
+  [
+    'Daily target (ml)',
+    'Dzienny cel (ml)',
+    'Tagesziel (ml)',
+    'Objectif quotidien (ml)',
+    'Objetivo diario (ml)',
+    'Obiettivo giornaliero (ml)',
+  ],
+  [
+    'Water has no calories to log here—use the Water card on your dashboard instead.',
+    'Woda nie ma kalorii do zapisania tutaj — użyj karty Woda na pulpicie.',
+    'Wasser hat hier keine Kalorien zum Erfassen – nutze stattdessen die Wasser-Karte auf deinem Dashboard.',
+    'L’eau n’a pas de calories à enregistrer ici — utilisez la carte Eau de votre tableau de bord.',
+    'El agua no tiene calorías que registrar aquí — usa la tarjeta de Agua de tu panel.',
+    'L’acqua non ha calorie da registrare qui: usa la scheda Acqua nella tua dashboard.',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
@@ -1489,6 +1537,27 @@ String translateUi(String languageCode, String input) {
       r'Échec de la vérification : $1',
       r'Error al buscar actualizaciones: $1',
       r'Controllo aggiornamenti non riuscito: $1',
+    ],
+    RegExp(r'^of (\d+) ml$'): [
+      r'z $1 ml',
+      r'von $1 ml',
+      r'sur $1 ml',
+      r'de $1 ml',
+      r'di $1 ml',
+    ],
+    RegExp(r'^(\d+) ml/day · tap to change$'): [
+      r'$1 ml/dzień · dotknij, aby zmienić',
+      r'$1 ml/Tag · zum Ändern tippen',
+      r'$1 ml/jour · touchez pour modifier',
+      r'$1 ml/día · toca para cambiar',
+      r'$1 ml/giorno · tocca per modificare',
+    ],
+    RegExp(r'^Use recommended \((\d+) ml\)$'): [
+      r'Użyj zalecanej ($1 ml)',
+      r'Empfohlenen Wert verwenden ($1 ml)',
+      r'Utiliser la valeur recommandée ($1 ml)',
+      r'Usar la cantidad recomendada ($1 ml)',
+      r'Usa il valore consigliato ($1 ml)',
     ],
   };
   for (final entry in replacements.entries) {

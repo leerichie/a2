@@ -135,6 +135,8 @@ const decodeHealthPayload = record => {
     dailyTarget: settings.dailyTarget ?? null,
     savedDietPlans: (settings.savedDietPlans || []).map(parse).filter(Boolean),
     dailyEntries: payload.dailyEntries || {},
+    dailyWater: payload.dailyWater || {},
+    waterTargetMl: settings.waterTargetMl ?? null,
     history: payload.history || {records: []},
   };
 };
@@ -397,12 +399,16 @@ const server = createServer(async (req, res) => {
       if (changes.bodyProfile) settings.bodyProfile = JSON.stringify(changes.bodyProfile);
       if (changes.activeDietPlan) settings.activeDietPlan = JSON.stringify(changes.activeDietPlan);
       if (typeof changes.dailyTarget === 'number') settings.dailyTarget = changes.dailyTarget;
+      if (typeof changes.waterTargetMl === 'number') settings.waterTargetMl = changes.waterTargetMl;
       if (Array.isArray(changes.savedDietPlans)) {
         settings.savedDietPlans = changes.savedDietPlans.map(plan => JSON.stringify(plan));
       }
       const updated = {...existing, settings};
       if (changes.dailyEntries && typeof changes.dailyEntries === 'object') {
         updated.dailyEntries = changes.dailyEntries;
+      }
+      if (changes.dailyWater && typeof changes.dailyWater === 'object') {
+        updated.dailyWater = changes.dailyWater;
       }
       if (changes.history && typeof changes.history === 'object') {
         updated.history = changes.history;

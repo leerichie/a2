@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0+26 — 2026-09-13
+
+- Added water intake tracking: a dedicated Water card on Today with a quick
+  "+ Add" action (common amounts or a custom ml), a Water target in Settings
+  (defaults to a recommendation based on your weight, editable), and full
+  sync of both to the server and the console's per-user data editor.
+- Fixed the free-text meal box always showing "not enough nutrition
+  information" for water with no explanation — it now points at the new
+  Water card instead.
+- Disabled the "little nudge" card and its Settings toggle for now (the
+  toggle never actually worked); the same dynamic message now lives in the
+  calorie ring's headline instead.
+- Fixed iOS Simulator builds failing on Apple Silicon Macs — Google ML
+  Kit's pods ship no arm64 simulator slice, so simulator builds now use
+  x86_64 for those pods (via Rosetta) instead of erroring out.
+
 ## 1.0.0+25 — 2026-09-13
 
 - Fixed the dashboard greeting always saying "Good afternoon" and showing a

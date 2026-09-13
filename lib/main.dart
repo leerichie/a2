@@ -15,12 +15,17 @@ import 'l10n.dart';
 
 void main() => runApp(const A2App());
 
+/// Disabled for now — the standalone "little nudge" card was replaced by
+/// HeroCard's dynamic headline. Flip back to true to restore it.
+const showNudgeCard = false;
+
 const ink = Color(0xFF17231E),
     forest = Color(0xFF1F684B),
     mint = Color(0xFFDDF3E7),
     cream = Color(0xFFF6F4EE),
     coral = Color(0xFFFF826D),
-    gold = Color(0xFFF3C66E);
+    gold = Color(0xFFF3C66E),
+    aqua = Color(0xFF4FA8D8);
 
 class A2App extends StatefulWidget {
   const A2App({super.key, this.startOnboarding = true});
@@ -409,6 +414,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int dailyTarget = 2100;
   String dietStyle = 'Balanced';
   double? bodyWeightKg;
+  int waterMl = 0;
+  int waterTargetMl = 2000;
   final entries = <FoodEntry>[];
   List<HistoryRecord> history = [];
   int get calories => entries
@@ -443,6 +450,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       _loadImports(),
       _loadHistory(),
       _loadPlan(),
+      _loadWater(),
     ]);
     try {
       final enabled = await const AccountService().refreshAccount(
@@ -454,6 +462,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         _loadTodayEntries(),
         _loadHistory(),
         _loadPlan(),
+        _loadWater(),
       ]);
     } catch (_) {
       // The local app remains usable when the server is offline or signed out.
@@ -473,6 +482,25 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
   Future<void> _saveTodayEntries() async {
     await const DailyEntryRepository().save(DateTime.now(), entries);
+    await const AccountService().uploadLocalData(defaultServerUrl);
+  }
+
+  Future<void> _loadWater() async {
+    final prefs = await SharedPreferences.getInstance();
+    final loaded = await const WaterRepository().load(DateTime.now());
+    if (mounted) {
+      setState(() {
+        waterMl = loaded;
+        waterTargetMl =
+            prefs.getInt('water_target_ml') ?? recommendedWaterMl(bodyWeightKg);
+      });
+    }
+  }
+
+  Future<void> _addWater(int ml) async {
+    final updated = math.max(0, waterMl + ml);
+    setState(() => waterMl = updated);
+    await const WaterRepository().save(DateTime.now(), updated);
     await const AccountService().uploadLocalData(defaultServerUrl);
   }
 
@@ -543,6 +571,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         carbs: carbs,
         exerciseCalories: exerciseCalories,
         targets: targets,
+        waterMl: waterMl,
+        waterTargetMl: waterTargetMl,
+        onAddWater: _addWater,
         onDelete: (entry) async {
           setState(() => entries.remove(entry));
           await _saveTodayEntries();
@@ -745,11 +776,16 @@ class TodayPage extends StatelessWidget {
     required this.exerciseCalories,
     required this.targets,
     required this.onDelete,
+    required this.waterMl,
+    required this.waterTargetMl,
+    required this.onAddWater,
   });
   final List<FoodEntry> entries;
   final int calories, protein, carbs, exerciseCalories;
   final NutritionTargets targets;
   final ValueChanged<FoodEntry> onDelete;
+  final int waterMl, waterTargetMl;
+  final ValueChanged<int> onAddWater;
 
   List<Widget> _timeline(BuildContext context) {
     final grouped = <String, List<FoodEntry>>{};
@@ -825,134 +861,152 @@ class TodayPage extends StatelessWidget {
       targetProtein: targets.protein,
     );
     return CustomScrollView(
-    slivers: [
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
-        sliver: SliverList.list(
-          children: [
-            TopBar(
-              '${greetingFor(DateTime.now())}, Ashley',
-              fullDate(DateTime.now()),
-            ),
-            const SizedBox(height: 22),
-            if (entries.isEmpty) ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(28),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: const BoxDecoration(
-                          color: mint,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.add_a_photo_outlined,
-                          color: forest,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const LText(
-                        'Nothing logged today',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-                      const LText(
-                        'Your imported history is under Journey. Start today when you have your next meal.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black54, height: 1.4),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              const SectionHeader('Today’s timeline', '0 ITEMS'),
-            ] else ...[
-              HeroCard(
-                foodCalories: calories,
-                exerciseCalories: exerciseCalories,
-                target: targets.calories,
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: MetricCard(
-                      'Protein',
-                      '$protein g',
-                      'of ${targets.protein} g',
-                      protein / targets.protein,
-                      coral,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: MetricCard(
-                      'Carbohydrates',
-                      '$carbs g',
-                      'of ${targets.carbs} g',
-                      carbs / targets.carbs,
-                      gold,
-                    ),
-                  ),
-                ],
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
+          sliver: SliverList.list(
+            children: [
+              TopBar(
+                '${greetingFor(DateTime.now())}, Ashley',
+                fullDate(DateTime.now()),
               ),
               const SizedBox(height: 22),
-              const SectionHeader('A little nudge', 'WHY?'),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: mint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      foregroundColor: forest,
-                      child: Icon(nudge.icon),
+              if (entries.isEmpty) ...[
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: const BoxDecoration(
+                            color: mint,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.add_a_photo_outlined,
+                            color: forest,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const LText(
+                          'Nothing logged today',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        const LText(
+                          'Your imported history is under Journey. Start today when you have your next meal.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.black54, height: 1.4),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 13),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const SectionHeader('Today’s timeline', '0 ITEMS'),
+              ] else ...[
+                HeroCard(
+                  foodCalories: calories,
+                  exerciseCalories: exerciseCalories,
+                  target: targets.calories,
+                  headline: nudge.title,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LText(
-                            nudge.title,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 3),
-                          LText(
-                            nudge.body,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
+                      child: MetricCard(
+                        'Protein',
+                        '$protein g',
+                        'of ${targets.protein} g',
+                        protein / targets.protein,
+                        coral,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: MetricCard(
+                        'Carbohydrates',
+                        '$carbs g',
+                        'of ${targets.carbs} g',
+                        carbs / targets.carbs,
+                        gold,
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              SectionHeader('Today’s timeline', '${entries.length} ITEMS'),
-              const SizedBox(height: 8),
-              ..._timeline(context),
+                const SizedBox(height: 12),
+                WaterCard(
+                  waterMl: waterMl,
+                  waterTargetMl: waterTargetMl,
+                  onAdd: () => showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => WaterQuickAddSheet(onAdd: onAddWater),
+                  ),
+                ),
+                // The standalone nudge card is folded into HeroCard's headline
+                // instead (see `nudge` above) — disabled here for now rather
+                // than removed, in case it comes back as a separate section.
+                if (showNudgeCard) ...[
+                  const SizedBox(height: 22),
+                  const SectionHeader('A little nudge', 'WHY?'),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: mint,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          foregroundColor: forest,
+                          child: Icon(nudge.icon),
+                        ),
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LText(
+                                nudge.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              LText(
+                                nudge.body,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                  height: 1.35,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                SectionHeader('Today’s timeline', '${entries.length} ITEMS'),
+                const SizedBox(height: 8),
+                ..._timeline(context),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
-    ],
+      ],
     );
   }
 }
@@ -1006,8 +1060,10 @@ class HeroCard extends StatelessWidget {
     required this.foodCalories,
     required this.exerciseCalories,
     required this.target,
+    required this.headline,
   });
   final int foodCalories, exerciseCalories, target;
+  final String headline;
   @override
   Widget build(BuildContext context) {
     final netCalories = math.max(0, foodCalories - exerciseCalories);
@@ -1080,9 +1136,11 @@ class HeroCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const LText(
-                  'Looking steady',
-                  style: TextStyle(
+                LText(
+                  headline,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -1130,18 +1188,16 @@ class HeroCard extends StatelessWidget {
   }
 }
 
-class MetricCard extends StatelessWidget {
-  const MetricCard(
-    this.label,
-    this.value,
-    this.detail,
-    this.progress,
-    this.color, {
+class WaterCard extends StatelessWidget {
+  const WaterCard({
     super.key,
+    required this.waterMl,
+    required this.waterTargetMl,
+    required this.onAdd,
   });
-  final String label, value, detail;
-  final double progress;
-  final Color color;
+  final int waterMl, waterTargetMl;
+  final VoidCallback onAdd;
+
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
@@ -1149,20 +1205,43 @@ class MetricCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LText(
-            label,
-            style: const TextStyle(
-              color: Colors.black54,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              const Icon(Icons.water_drop_outlined, color: aqua, size: 18),
+              const SizedBox(width: 8),
+              const LText(
+                'Water',
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: onAdd,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(Icons.add, size: 16),
+                label: const LText(
+                  'Add',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 5),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               LText(
-                value,
+                '$waterMl ml',
                 style: const TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.w800,
@@ -1172,7 +1251,7 @@ class MetricCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 3),
                 child: LText(
-                  detail,
+                  'of $waterTargetMl ml',
                   style: const TextStyle(fontSize: 11, color: Colors.black45),
                 ),
               ),
@@ -1180,13 +1259,97 @@ class MetricCard extends StatelessWidget {
           ),
           const SizedBox(height: 13),
           LinearProgressIndicator(
-            value: progress.clamp(0, 1),
-            color: color,
-            backgroundColor: color.withValues(alpha: .16),
+            value: (waterTargetMl == 0 ? 0.0 : waterMl / waterTargetMl).clamp(
+              0,
+              1,
+            ),
+            color: aqua,
+            backgroundColor: aqua.withValues(alpha: .16),
             borderRadius: BorderRadius.circular(8),
             minHeight: 7,
           ),
         ],
+      ),
+    ),
+  );
+}
+
+class MetricCard extends StatelessWidget {
+  const MetricCard(
+    this.label,
+    this.value,
+    this.detail,
+    this.progress,
+    this.color, {
+    super.key,
+    this.onTap,
+  });
+  final String label, value, detail;
+  final double progress;
+  final Color color;
+  final VoidCallback? onTap;
+  @override
+  Widget build(BuildContext context) => Card(
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(17),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LText(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black54,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: LText(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: LText(
+                      detail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.black45,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 13),
+            LinearProgressIndicator(
+              value: progress.clamp(0, 1),
+              color: color,
+              backgroundColor: color.withValues(alpha: .16),
+              borderRadius: BorderRadius.circular(8),
+              minHeight: 7,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -1221,8 +1384,7 @@ class DevBadge extends StatelessWidget {
   const DevBadge({super.key, this.padding = const EdgeInsets.only(top: 24)});
   final EdgeInsetsGeometry padding;
 
-  Future<void> _open() =>
-      launchUrl(Uri.parse('https://ashleyrichards.tech'));
+  Future<void> _open() => launchUrl(Uri.parse('https://ashleyrichards.tech'));
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -1408,6 +1570,29 @@ class DailyEntryRepository {
       }
     }
     return restored;
+  }
+}
+
+int recommendedWaterMl(double? weightKg) =>
+    weightKg == null ? 2000 : (weightKg * 35).round();
+
+class WaterRepository {
+  const WaterRepository();
+
+  String keyFor(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return 'daily_water_${date.year}-$month-$day';
+  }
+
+  Future<void> save(DateTime date, int ml) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(keyFor(date), ml);
+  }
+
+  Future<int> load(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(keyFor(date)) ?? 0;
   }
 }
 
@@ -1633,12 +1818,7 @@ class AddItemSheet extends StatelessWidget {
   const AddItemSheet({super.key});
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.fromLTRB(
-      20,
-      12,
-      20,
-      sheetBottomInset(context, 28),
-    ),
+    padding: EdgeInsets.fromLTRB(20, 12, 20, sheetBottomInset(context, 28)),
     decoration: const BoxDecoration(
       color: cream,
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -1707,6 +1887,95 @@ class AddItemSheet extends StatelessWidget {
           ),
         ],
       ),
+    ),
+  );
+}
+
+class WaterQuickAddSheet extends StatefulWidget {
+  const WaterQuickAddSheet({super.key, required this.onAdd});
+  final ValueChanged<int> onAdd;
+  @override
+  State<WaterQuickAddSheet> createState() => _WaterQuickAddSheetState();
+}
+
+class _WaterQuickAddSheetState extends State<WaterQuickAddSheet> {
+  final custom = TextEditingController();
+
+  @override
+  void dispose() {
+    custom.dispose();
+    super.dispose();
+  }
+
+  void _add(int ml) {
+    widget.onAdd(ml);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.fromLTRB(20, 20, 20, sheetBottomInset(context, 24)),
+    decoration: const BoxDecoration(
+      color: cream,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Container(
+            width: 42,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.black12,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        const LText(
+          'Add water',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [100, 200, 250, 330, 500, 750]
+              .map(
+                (ml) => OutlinedButton(
+                  onPressed: () => _add(ml),
+                  child: LText('+$ml ml'),
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: custom,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: ui(context, 'Custom amount (ml)'),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: ink),
+              onPressed: () {
+                final ml = int.tryParse(custom.text);
+                if (ml != null && ml > 0) _add(ml);
+              },
+              child: const LText('Add'),
+            ),
+          ],
+        ),
+      ],
     ),
   );
 }
@@ -1782,12 +2051,7 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.fromLTRB(
-      20,
-      18,
-      20,
-      sheetBottomInset(context, 24),
-    ),
+    padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
     decoration: const BoxDecoration(
       color: cream,
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -1986,9 +2250,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
     } catch (_) {
       if (mounted) {
         setState(
-          () =>
-              notice =
-                  'AI could not analyse the photo. Describe it below instead.',
+          () => notice =
+              'AI could not analyse the photo. Describe it below instead.',
         );
       }
     } finally {
@@ -2000,7 +2263,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
     final text = description.text.trim();
     if (mode == 1 && text.isEmpty) {
       setState(
-        () => notice = 'Add a description of what’s in the photo before saving.',
+        () =>
+            notice = 'Add a description of what’s in the photo before saving.',
       );
       return;
     }
@@ -2059,8 +2323,9 @@ class _AddMealSheetState extends State<AddMealSheet> {
     estimate ??= FoodEstimator.estimate(text);
     if (estimate.calories == 0) {
       setState(
-        () => notice =
-            'Not enough nutrition information. Add quantities or scan the product label.',
+        () => notice = RegExp(r'\bwater\b').hasMatch(text.toLowerCase())
+            ? 'Water has no calories to log here—use the Water card on your dashboard instead.'
+            : 'Not enough nutrition information. Add quantities or scan the product label.',
       );
       return;
     }
@@ -2079,12 +2344,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.fromLTRB(
-      20,
-      12,
-      20,
-      sheetBottomInset(context, 24),
-    ),
+    padding: EdgeInsets.fromLTRB(20, 12, 20, sheetBottomInset(context, 24)),
     decoration: const BoxDecoration(
       color: cream,
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -2360,6 +2620,7 @@ String fullDate(DateTime d) {
   ];
   return '${weekdays[d.weekday - 1]}, ${d.day} ${months[d.month - 1]}';
 }
+
 String recordDetail(HistoryRecord r) {
   final bits = <String>[];
   if (r.weight != null) bits.add('${r.weight!.toStringAsFixed(1)} kg');
@@ -3338,12 +3599,19 @@ class AccountService {
           .map((raw) => jsonDecode(raw))
           .toList();
     }
+    final dailyWater = <String, dynamic>{};
+    for (final key in prefs.getKeys().where(
+      (key) => key.startsWith('daily_water_'),
+    )) {
+      dailyWater[key] = prefs.getInt(key);
+    }
     final historyRaw =
         prefs.getString('personal_history_cache') ??
         await rootBundle.loadString('assets/data/ashley_history.json');
     return {
       'history': jsonDecode(historyRaw),
       'dailyEntries': daily,
+      'dailyWater': dailyWater,
       'settings': {
         'bodyProfile': prefs.getString('body_profile'),
         'activeDietPlan': prefs.getString('active_diet_plan'),
@@ -3355,6 +3623,7 @@ class AccountService {
         'lastImportedAt': prefs.getString('last_imported_at'),
         'language': prefs.getString('language'),
         'aiEnabled': prefs.getBool('ai_enabled'),
+        'waterTargetMl': prefs.getInt('water_target_ml'),
       },
     };
   }
@@ -3417,6 +3686,13 @@ class AccountService {
         (entry.value as List).map((item) => jsonEncode(item)).toList(),
       );
     }
+    final dailyWater =
+        payload['dailyWater'] as Map<String, dynamic>? ?? const {};
+    for (final entry in dailyWater.entries) {
+      if (entry.value case final int ml) {
+        await prefs.setInt(entry.key, ml);
+      }
+    }
     final settings = payload['settings'] as Map<String, dynamic>? ?? const {};
     if (settings['bodyProfile'] case final String value) {
       await prefs.setString('body_profile', value);
@@ -3456,6 +3732,9 @@ class AccountService {
     }
     if (settings['aiEnabled'] case final bool value) {
       await prefs.setBool('ai_enabled', value);
+    }
+    if (settings['waterTargetMl'] case final int value) {
+      await prefs.setInt('water_target_ml', value);
     }
   }
 
@@ -3598,12 +3877,13 @@ class _ProfilePageState extends State<ProfilePage> {
     target: widget.dailyTarget,
   );
   List<DietPlan> savedPlans = [];
+  int waterTarget = 2000;
   String contentServerUrl = '';
   String deviceId = '';
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+25';
+  String installedVersion = '1.0.0+26';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
@@ -3662,6 +3942,8 @@ class _ProfilePageState extends State<ProfilePage> {
           )
           .toList();
       if (savedPlans.isEmpty) savedPlans = [plan];
+      waterTarget =
+          prefs.getInt('water_target_ml') ?? recommendedWaterMl(body.weightKg);
       final storedServer = prefs.getString('content_server_url') ?? '';
       contentServerUrl =
           {
@@ -3683,8 +3965,7 @@ class _ProfilePageState extends State<ProfilePage> {
               true;
       accountAiEnabled =
           accountRaw != null &&
-          (jsonDecode(accountRaw) as Map<String, dynamic>)['aiEnabled'] ==
-              true;
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['aiEnabled'] == true;
       accountIsAdmin =
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['role'] == 'admin';
@@ -3807,6 +4088,51 @@ class _ProfilePageState extends State<ProfilePage> {
     widget.onBodyChanged(value);
     await const AccountService().uploadLocalData(contentServerUrl);
     if (mounted) setState(() => body = value);
+  }
+
+  Future<void> _editWaterTarget() async {
+    final recommended = recommendedWaterMl(body.weightKg);
+    final controller = TextEditingController(text: waterTarget.toString());
+    final value = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText('Water target'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: ui(dialogContext, 'Daily target (ml)'),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => controller.text = recommended.toString(),
+              child: LText('Use recommended ($recommended ml)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const LText('Cancel'),
+          ),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, int.tryParse(controller.text)),
+            child: const LText('Save'),
+          ),
+        ],
+      ),
+    );
+    if (value == null || value <= 0) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('water_target_ml', value);
+    await const AccountService().uploadLocalData(contentServerUrl);
+    if (mounted) setState(() => waterTarget = value);
   }
 
   Future<void> _editPlan() async {
@@ -4008,6 +4334,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ],
+            const Divider(height: 1, indent: 55),
+            ListTile(
+              onTap: _editWaterTarget,
+              leading: const Icon(Icons.water_drop_outlined, color: forest),
+              title: const LText(
+                'Water target',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: LText('$waterTarget ml/day · tap to change'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
           ],
         ),
       ),
@@ -4130,20 +4467,24 @@ class _ProfilePageState extends State<ProfilePage> {
                     : 'Ask your administrator to enable AI for your account.',
               ),
             ),
-            const Divider(height: 1, indent: 55),
-            SwitchListTile(
-              value: nudges,
-              onChanged: (v) => setState(() => nudges = v),
-              secondary: const Icon(
-                Icons.notifications_active_outlined,
-                color: forest,
+            // Disabled alongside the nudge card (see showNudgeCard) — this
+            // toggle didn't actually gate anything yet.
+            if (showNudgeCard) ...[
+              const Divider(height: 1, indent: 55),
+              SwitchListTile(
+                value: nudges,
+                onChanged: (v) => setState(() => nudges = v),
+                secondary: const Icon(
+                  Icons.notifications_active_outlined,
+                  color: forest,
+                ),
+                title: const LText(
+                  'Helpful nudges',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: const LText('Gentle, useful reminders—not guilt.'),
               ),
-              title: const LText(
-                'Helpful nudges',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-              subtitle: const LText('Gentle, useful reminders—not guilt.'),
-            ),
+            ],
           ],
         ),
       ),
@@ -4320,12 +4661,7 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
       color: cream,
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    padding: EdgeInsets.fromLTRB(
-      20,
-      14,
-      20,
-      sheetBottomInset(context, 24),
-    ),
+    padding: EdgeInsets.fromLTRB(20, 14, 20, sheetBottomInset(context, 24)),
     child: Form(
       key: formKey,
       child: SingleChildScrollView(
@@ -4478,12 +4814,7 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
       color: cream,
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
     ),
-    padding: EdgeInsets.fromLTRB(
-      20,
-      14,
-      20,
-      sheetBottomInset(context, 24),
-    ),
+    padding: EdgeInsets.fromLTRB(20, 14, 20, sheetBottomInset(context, 24)),
     child: Form(
       key: formKey,
       child: SingleChildScrollView(

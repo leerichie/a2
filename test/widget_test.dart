@@ -22,7 +22,12 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: HeroCard(foodCalories: 600, exerciseCalories: 0, target: 1800),
+          body: HeroCard(
+            foodCalories: 600,
+            exerciseCalories: 0,
+            target: 1800,
+            headline: 'Looking steady',
+          ),
         ),
       ),
     );
@@ -36,7 +41,12 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: HeroCard(foodCalories: 646, exerciseCalories: 80, target: 2100),
+          body: HeroCard(
+            foodCalories: 646,
+            exerciseCalories: 80,
+            target: 2100,
+            headline: 'Looking steady',
+          ),
         ),
       ),
     );
@@ -46,10 +56,7 @@ void main() {
 
   testWidgets('shows dashboard and adds a meal', (tester) async {
     await tester.pumpWidget(const A2App(startOnboarding: false));
-    expect(
-      find.text('${greetingFor(DateTime.now())}, Ashley'),
-      findsOneWidget,
-    );
+    expect(find.text('${greetingFor(DateTime.now())}, Ashley'), findsOneWidget);
     expect(find.text('Nothing logged today'), findsOneWidget);
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
@@ -195,18 +202,15 @@ void main() {
     expect((reading.carbsPer100! * factor).round(), 138);
   });
 
-  test(
-    'label reader multiplies serving size by servings per container '
-    'when no net weight is printed',
-    () {
-      final reading = LabelParser.parse(
-        'Nutrition Facts Serving Size 30g Servings Per Container 8 '
-        'Calories 120kcal Protein 3g Carbohydrate 22g',
-      );
-      expect(reading.totalGrams, 240);
-      expect(reading.caloriesPer100, 120);
-    },
-  );
+  test('label reader multiplies serving size by servings per container '
+      'when no net weight is printed', () {
+    final reading = LabelParser.parse(
+      'Nutrition Facts Serving Size 30g Servings Per Container 8 '
+      'Calories 120kcal Protein 3g Carbohydrate 22g',
+    );
+    expect(reading.totalGrams, 240);
+    expect(reading.caloriesPer100, 120);
+  });
 
   test('label reader reports low confidence without a pack weight', () {
     final reading = LabelParser.parse(
@@ -290,5 +294,10 @@ void main() {
       now: DateTime(2026, 1, 1, 15),
     );
     expect(nudge.title, 'Nice balance today');
+  });
+
+  test('recommended water intake scales with body weight', () {
+    expect(recommendedWaterMl(80), 2800);
+    expect(recommendedWaterMl(null), 2000);
   });
 }
