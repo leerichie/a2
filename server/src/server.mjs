@@ -273,7 +273,14 @@ const server = createServer(async (req, res) => {
       return res.end();
     }
     if (req.method === 'GET' && url.pathname === '/admin/') {
-      const body = await readFile(join(publicDir, 'index.html'));
+      const [page, styles, script] = await Promise.all([
+        readFile(join(publicDir, 'index.html'), 'utf8'),
+        readFile(join(publicDir, 'style.css'), 'utf8'),
+        readFile(join(publicDir, 'app.js'), 'utf8'),
+      ]);
+      const body = page
+        .replace(/<link rel="stylesheet"[^>]*>/, `<style>${styles}</style>`)
+        .replace(/<script src="[^"]+"><\/script>/, `<script>${script}</script>`);
       res.writeHead(200, {'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store'}); return res.end(body);
     }
     const file = url.pathname.startsWith('/admin/') ? join(publicDir, url.pathname.slice(7)) : null;

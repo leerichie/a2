@@ -3,6 +3,12 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.0.0+10 — 2026-09-13
+
+- Made the web console self-contained by embedding its tested CSS and JavaScript
+  into the login response, avoiding browser asset-loading failures.
+- Added absolute fallback asset paths and prevented native form reloads.
+
 ## 1.0.0+9 — 2026-09-13
 
 - Switched the default backend address to the memorable home-network URL
