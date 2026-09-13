@@ -2060,7 +2060,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.1.0+2';
+  String installedVersion = '1.2.0+3';
 
   @override
   void initState() {

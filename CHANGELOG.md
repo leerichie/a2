@@ -3,6 +3,12 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.2.0+3 — 2026-09-13
+
+- Added production Docker packaging for the controlled content service.
+- Added persistent, restricted container storage and service health checks.
+- Prepared private HTTPS delivery through the server's existing Tailscale setup.
+
 ## 1.1.0+2 — 2026-09-13
 
 - Added personal body details and maintenance-calorie estimates.
