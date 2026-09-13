@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+11 — 2026-09-13
+
+- Clarified that food and drink entries both count towards the day.
+- Added quantity-aware calorie estimates for common alcoholic drinks, including whisky.
+- Kept all changed interface text translated across the six supported languages.
+
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 

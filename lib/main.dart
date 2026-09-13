@@ -1054,6 +1054,33 @@ class FoodEstimator {
       protein += item.value.$2 * grams / 100;
       usedRanges.add(item.key);
     }
+    final drinks = <String, (double, double)>{
+      'whisky': (220, 0),
+      'whiskey': (220, 0),
+      'vodka': (220, 0),
+      'gin': (220, 0),
+      'rum': (220, 0),
+      'wine': (83, 0.1),
+      'beer': (43, 0.5),
+    };
+    final usedDrinks = <String>{};
+    for (final item in drinks.entries) {
+      if (!text.contains(item.key) || usedDrinks.contains(item.key)) continue;
+      final match = item.key.allMatches(text).first;
+      final around = text.substring(
+        math.max(0, match.start - 40),
+        math.min(text.length, match.end + 40),
+      );
+      final mlMatch = RegExp(r'(\d+(?:\.\d+)?)\s*ml').firstMatch(around);
+      final millilitres = mlMatch == null
+          ? 25.0
+          : double.parse(mlMatch.group(1)!);
+      kcal += item.value.$1 * millilitres / 100;
+      protein += item.value.$2 * millilitres / 100;
+      usedDrinks.add(item.key);
+      if (item.key == 'whisky') usedDrinks.add('whiskey');
+      if (item.key == 'whiskey') usedDrinks.add('whisky');
+    }
     if (kcal == 0) return const FoodEstimate(0, 0);
     return FoodEstimate(kcal.round(), protein.round());
   }
@@ -1094,7 +1121,7 @@ class AddItemSheet extends StatelessWidget {
               child: Icon(Icons.restaurant, color: forest),
             ),
             title: const LText(
-              'Food or drink',
+              'Food or drink · counts towards your day',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             subtitle: const LText('Describe it, photograph it or scan a label'),
@@ -1275,7 +1302,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
           ),
           const SizedBox(height: 20),
           const LText(
-            'What did you have?',
+            'What did you eat or drink?',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 5),
@@ -1385,7 +1412,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
               },
               icon: const Icon(Icons.auto_awesome),
               label: const LText(
-                'Estimate & add',
+                'Estimate & add to day',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -2436,7 +2463,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+10';
+  String installedVersion = '1.0.0+11';
   String? accountEmail;
 
   @override

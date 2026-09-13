@@ -34,10 +34,10 @@ void main() {
     expect(find.text('Nothing logged today'), findsOneWidget);
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Food or drink'));
+    await tester.tap(find.text('Food or drink · counts towards your day'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Greek yoghurt and berries');
-    await tester.tap(find.text('Estimate & add'));
+    await tester.tap(find.text('Estimate & add to day'));
     await tester.pumpAndSettle();
     expect(find.text('80'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 50));
@@ -98,6 +98,12 @@ void main() {
 
   test('unknown foods do not receive a fake default estimate', () {
     expect(FoodEstimator.estimate('mystery item').calories, 0);
+  });
+
+  test('estimates a measured straight whisky', () {
+    final whisky = FoodEstimator.estimate('a straight whisky about 50ml');
+    expect(whisky.calories, 110);
+    expect(whisky.protein, 0);
   });
 
   test('dynamic translations insert their real values', () {
