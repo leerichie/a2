@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0+20 — 2026-09-13
+
+- Fixed every server restart silently signing everyone out — sessions were
+  only ever kept in memory, so a routine console deploy invalidated every
+  signed-in device. Sessions now survive a graceful restart.
+- Added the ability for a superadmin to reset any app user's password from
+  the console. Resetting signs that device out (so it must sign back in
+  with the new password) without touching any of their synced data.
+
 ## 1.0.0+19 — 2026-09-13
 
 - Console user "Details" now shows and lets a superadmin edit everything
