@@ -65,7 +65,9 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Greek yoghurt and berries');
     await tester.tap(find.text('Add to day'));
     await tester.pumpAndSettle();
-    expect(find.text('80'), findsOneWidget);
+    // The hero ring's total and the single entry's own tile can coincide
+    // (both read "80" when it's the only entry logged), so accept either.
+    expect(find.text('80'), findsWidgets);
     await tester.pump(const Duration(milliseconds: 50));
     final prefs = await SharedPreferences.getInstance();
     expect(

@@ -38,6 +38,7 @@ class _A2AppState extends State<A2App> {
   Locale locale = const Locale('en');
   late bool onboarding = widget.startOnboarding;
   bool ready = false;
+  bool signedOut = false;
   @override
   void initState() {
     super.initState();
@@ -70,6 +71,10 @@ class _A2AppState extends State<A2App> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
   }
+
+  void _handleSignedOut() => setState(() => signedOut = true);
+
+  void _handleGateDismissed() => setState(() => signedOut = false);
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -107,7 +112,21 @@ class _A2AppState extends State<A2App> {
             onLocale: _setLocale,
             onDone: _finishOnboarding,
           )
-        : AppShell(locale: locale, onLocale: _setLocale),
+        : signedOut
+        ? Scaffold(
+            body: SafeArea(
+              child: AccountSheet(
+                serverUrl: defaultServerUrl,
+                accountEmail: null,
+                onDismiss: _handleGateDismissed,
+              ),
+            ),
+          )
+        : AppShell(
+            locale: locale,
+            onLocale: _setLocale,
+            onSignedOut: _handleSignedOut,
+          ),
   );
 }
 
@@ -401,9 +420,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
 }
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.locale, required this.onLocale});
+  const AppShell({
+    super.key,
+    required this.locale,
+    required this.onLocale,
+    required this.onSignedOut,
+  });
   final Locale locale;
   final ValueChanged<Locale> onLocale;
+  final VoidCallback onSignedOut;
   @override
   State<AppShell> createState() => _AppShellState();
 }
@@ -593,6 +618,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         onBodyChanged: (value) => setState(() {
           bodyWeightKg = value.weightKg;
         }),
+        onSignedOut: widget.onSignedOut,
       ),
     ];
     return Scaffold(
@@ -638,7 +664,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (_) => const AddItemSheet(),
+                  builder: (_) => AddItemSheet(onAddWater: _addWater),
                 );
                 if (e != null) {
                   setState(() => entries.add(e));
@@ -924,32 +950,29 @@ class TodayPage extends StatelessWidget {
                       child: MetricCard(
                         'Protein',
                         '$protein g',
-                        'of ${targets.protein} g',
+                        '',
                         protein / targets.protein,
                         coral,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: MetricCard(
-                        'Carbohydrates',
+                        'Carbs',
                         '$carbs g',
-                        'of ${targets.carbs} g',
+                        '',
                         carbs / targets.carbs,
                         gold,
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: WaterCard(
+                        waterMl: waterMl,
+                        waterTargetMl: waterTargetMl,
+                      ),
+                    ),
                   ],
-                ),
-                const SizedBox(height: 12),
-                WaterCard(
-                  waterMl: waterMl,
-                  waterTargetMl: waterTargetMl,
-                  onAdd: () => showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => WaterQuickAddSheet(onAdd: onAddWater),
-                  ),
                 ),
                 // The standalone nudge card is folded into HeroCard's headline
                 // instead (see `nudge` above) — disabled here for now rather
@@ -1193,85 +1216,103 @@ class WaterCard extends StatelessWidget {
     super.key,
     required this.waterMl,
     required this.waterTargetMl,
-    required this.onAdd,
   });
   final int waterMl, waterTargetMl;
-  final VoidCallback onAdd;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(17),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.water_drop_outlined, color: aqua, size: 18),
-              const SizedBox(width: 8),
-              const LText(
-                'Water',
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: onAdd,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+  Widget build(BuildContext context) {
+    final progress = (waterTargetMl == 0 ? 0.0 : waterMl / waterTargetMl).clamp(
+      0.0,
+      1.0,
+    );
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const LText(
+                    'Water',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                icon: const Icon(Icons.add, size: 16),
-                label: const LText(
-                  'Add',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
+                  const SizedBox(height: 5),
+                  LText(
+                    '$waterMl ml',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              LText(
-                '$waterMl ml',
-                style: const TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(width: 5),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: LText(
-                  'of $waterTargetMl ml',
-                  style: const TextStyle(fontSize: 11, color: Colors.black45),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 13),
-          LinearProgressIndicator(
-            value: (waterTargetMl == 0 ? 0.0 : waterMl / waterTargetMl).clamp(
-              0,
-              1,
             ),
-            color: aqua,
-            backgroundColor: aqua.withValues(alpha: .16),
-            borderRadius: BorderRadius.circular(8),
-            minHeight: 7,
+            const SizedBox(width: 6),
+            WaterGlass(progress: progress),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WaterGlass extends StatelessWidget {
+  const WaterGlass({super.key, required this.progress});
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 22,
+    height: 30,
+    child: ClipPath(
+      clipper: _GlassClipper(),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(color: aqua.withValues(alpha: .14)),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: progress,
+              child: Container(color: aqua),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: aqua, width: 1.4),
+            ),
           ),
         ],
       ),
     ),
   );
+}
+
+class _GlassClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final inset = size.width * 0.14;
+    return Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width - inset, size.height)
+      ..lineTo(inset, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
 class MetricCard extends StatelessWidget {
@@ -1294,7 +1335,7 @@ class MetricCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.all(17),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1318,26 +1359,28 @@ class MetricCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 21,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                const SizedBox(width: 5),
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: LText(
-                      detail,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.black45,
+                if (detail.isNotEmpty) ...[
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: LText(
+                        detail,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.black45,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 13),
@@ -1815,7 +1858,8 @@ class LabelParser {
 }
 
 class AddItemSheet extends StatelessWidget {
-  const AddItemSheet({super.key});
+  const AddItemSheet({super.key, required this.onAddWater});
+  final ValueChanged<int> onAddWater;
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.fromLTRB(20, 12, 20, sheetBottomInset(context, 28)),
@@ -1883,6 +1927,27 @@ class AddItemSheet extends StatelessWidget {
               if (context.mounted && result != null) {
                 Navigator.pop(context, result);
               }
+            },
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Color(0xFFDDF0F9),
+              child: Icon(Icons.water_drop_outlined, color: aqua),
+            ),
+            title: const LText(
+              'Water',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            subtitle: const LText('Log a glass, bottle or custom amount'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              await showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => WaterQuickAddSheet(onAdd: onAddWater),
+              );
+              if (context.mounted) Navigator.pop(context);
             },
           ),
         ],
@@ -3857,6 +3922,7 @@ class ProfilePage extends StatefulWidget {
     required this.dailyTarget,
     required this.onPlanChanged,
     required this.onBodyChanged,
+    required this.onSignedOut,
   });
   final Locale locale;
   final ValueChanged<Locale> onLocale;
@@ -3864,6 +3930,7 @@ class ProfilePage extends StatefulWidget {
   final int dailyTarget;
   final ValueChanged<DietPlan> onPlanChanged;
   final ValueChanged<BodyProfile> onBodyChanged;
+  final VoidCallback onSignedOut;
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -3883,7 +3950,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+26';
+  String installedVersion = '1.0.0+27';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
@@ -4206,6 +4273,7 @@ class _ProfilePageState extends State<ProfilePage> {
               builder: (_) => AccountSheet(
                 serverUrl: contentServerUrl,
                 accountEmail: accountEmail,
+                onSignedOut: widget.onSignedOut,
               ),
             );
             if (changed == true) await _restoreHealthSettings();
@@ -4260,7 +4328,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                     if (confirmed == true) {
                       await const AccountService().logout(contentServerUrl);
-                      await _restoreHealthSettings();
+                      widget.onSignedOut();
                     }
                   },
                 ),
@@ -5163,11 +5231,22 @@ class AccountSheet extends StatefulWidget {
     required this.accountEmail,
     this.initialRegister = false,
     this.accountRequired = false,
+    this.onDismiss,
+    this.onSignedOut,
   });
   final String serverUrl;
   final String? accountEmail;
   final bool initialRegister;
   final bool accountRequired;
+
+  /// Called when the sheet is "done" for reasons other than signing out —
+  /// signed in, created an account, or chose to keep using a2 locally.
+  /// Falls back to `Navigator.pop` when shown as a modal (the default).
+  final VoidCallback? onDismiss;
+
+  /// Called after a successful sign-out. Falls back to `Navigator.pop` when
+  /// shown as a modal (the default).
+  final VoidCallback? onSignedOut;
   @override
   State<AccountSheet> createState() => _AccountSheetState();
 }
@@ -5201,7 +5280,13 @@ class _AccountSheetState extends State<AccountSheet> {
         register: register,
         name: name.text.trim(),
       );
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        if (widget.onDismiss != null) {
+          widget.onDismiss!();
+        } else {
+          Navigator.pop(context, true);
+        }
+      }
     } catch (exception) {
       if (mounted) {
         setState(
@@ -5240,7 +5325,13 @@ class _AccountSheetState extends State<AccountSheet> {
                   child: OutlinedButton(
                     onPressed: () async {
                       await const AccountService().logout(widget.serverUrl);
-                      if (context.mounted) Navigator.pop(context, true);
+                      if (!context.mounted) return;
+                      if (widget.onSignedOut != null) {
+                        Navigator.pop(context);
+                        widget.onSignedOut!();
+                      } else {
+                        Navigator.pop(context, true);
+                      }
                     },
                     child: const LText('Sign out'),
                   ),
@@ -5348,7 +5439,9 @@ class _AccountSheetState extends State<AccountSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => widget.onDismiss != null
+                          ? widget.onDismiss!()
+                          : Navigator.pop(context),
                       child: const LText('Keep using a2 locally'),
                     ),
                   ),

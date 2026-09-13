@@ -1415,6 +1415,14 @@ const _rows = <List<String>>[
     'Acqua',
   ],
   [
+    'Log a glass, bottle or custom amount',
+    'Zapisz szklankę, butelkę lub własną ilość',
+    'Erfasse ein Glas, eine Flasche oder eine eigene Menge',
+    'Enregistrez un verre, une bouteille ou une quantité personnalisée',
+    'Registra un vaso, una botella o una cantidad personalizada',
+    'Registra un bicchiere, una bottiglia o una quantità personalizzata',
+  ],
+  [
     'Add water',
     'Dodaj wodę',
     'Wasser hinzufügen',

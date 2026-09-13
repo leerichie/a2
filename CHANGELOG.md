@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0+27 — 2026-09-13
+
+- Fixed sign-out only clearing the account locally while leaving the app
+  usable as if nothing happened — it now returns to a sign-in/onboarding
+  screen for every sign-out path, with "keep using a2 locally" still
+  available for anyone who prefers no account.
+- Redesigned the Water card to sit on the same row as Protein and Carbs, as
+  a compact glass that visually fills toward today's target. Dropped the
+  "of target" text on all three cards to make room. Removed the separate
+  "+ Add" button on the card — water is now logged from the same "Add"
+  sheet as food, drink and exercise, and stays in sync the same way.
+
 ## 1.0.0+26 — 2026-09-13
 
 - Added water intake tracking: a dedicated Water card on Today with a quick
