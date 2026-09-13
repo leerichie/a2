@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -1460,6 +1461,77 @@ class FoodEstimator {
   }
 }
 
+class LabelReading {
+  const LabelReading({
+    this.caloriesPer100,
+    this.proteinPer100,
+    this.carbsPer100,
+    this.totalGrams,
+  });
+  final double? caloriesPer100;
+  final double? proteinPer100;
+  final double? carbsPer100;
+  final double? totalGrams;
+  bool get hasNutrition => caloriesPer100 != null;
+  bool get isConfident => caloriesPer100 != null && totalGrams != null;
+}
+
+class LabelParser {
+  static double? _parseNumber(String raw) =>
+      double.tryParse(raw.replaceAll(',', '.'));
+
+  static double? _firstNumberNear(
+    String text,
+    String keywordPattern,
+    String unitPattern,
+  ) {
+    final match = RegExp(
+      '$keywordPattern.{0,40}?(\\d+(?:[.,]\\d+)?)\\s*$unitPattern',
+      caseSensitive: false,
+    ).firstMatch(text);
+    return match == null ? null : _parseNumber(match.group(1)!);
+  }
+
+  static LabelReading parse(String rawText) {
+    final text = rawText.replaceAll(RegExp(r'\s+'), ' ');
+    final calories = _firstNumberNear(text, '(?:energy|calories)', 'kcal');
+    final protein = _firstNumberNear(text, 'protein', 'g');
+    final carbs = _firstNumberNear(text, 'carbohydrate', 'g');
+
+    double? totalGrams;
+    final netWeight = RegExp(
+      r'(?:℮|net\s*(?:weight|wt)\.?:?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (netWeight != null) {
+      final value = _parseNumber(netWeight.group(1)!);
+      final unit = netWeight.group(2)!.toLowerCase();
+      if (value != null) {
+        totalGrams = (unit == 'kg' || unit == 'l') ? value * 1000 : value;
+      }
+    } else {
+      final servingSize = _firstNumberNear(text, 'serving\\s*size', 'g');
+      final servingsMatch = RegExp(
+        r'servings?\s*per\s*container[^0-9]{0,10}(\d+(?:[.,]\d+)?)',
+        caseSensitive: false,
+      ).firstMatch(text);
+      final servings = servingsMatch == null
+          ? null
+          : _parseNumber(servingsMatch.group(1)!);
+      if (servingSize != null && servings != null) {
+        totalGrams = servingSize * servings;
+      }
+    }
+
+    return LabelReading(
+      caloriesPer100: calories,
+      proteinPer100: protein,
+      carbsPer100: carbs,
+      totalGrams: totalGrams,
+    );
+  }
+}
+
 class AddItemSheet extends StatelessWidget {
   const AddItemSheet({super.key});
   @override
@@ -1731,6 +1803,20 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
   }
 
+  Future<LabelReading?> _readLabel(XFile photo) async {
+    final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    try {
+      final result = await recognizer.processImage(
+        InputImage.fromFilePath(photo.path),
+      );
+      return LabelParser.parse(result.text);
+    } catch (_) {
+      return null;
+    } finally {
+      recognizer.close();
+    }
+  }
+
   Future<void> _capture(int newMode) async {
     setState(() {
       mode = newMode;
@@ -1741,6 +1827,43 @@ class _AddMealSheetState extends State<AddMealSheet> {
     if (photo == null) {
       setState(() => mode = 0);
       return;
+    }
+    if (newMode == 2) {
+      setState(() => busy = true);
+      final reading = await _readLabel(photo);
+      if (!mounted) return;
+      setState(() => busy = false);
+      if (reading != null && reading.hasNutrition) {
+        if (reading.isConfident) {
+          final factor = reading.totalGrams! / 100;
+          final estimate = NutritionEstimate(
+            'Scanned label (${reading.totalGrams!.round()}g pack)',
+            (reading.caloriesPer100! * factor).round(),
+            ((reading.proteinPer100 ?? 0) * factor).round(),
+            ((reading.carbsPer100 ?? 0) * factor).round(),
+          );
+          setState(() {
+            aiEstimate = estimate;
+            description.text = estimate.name;
+          });
+          return;
+        }
+        if (!aiAvailable) {
+          final estimate = NutritionEstimate(
+            'Scanned label (per 100g — edit if you had more or less)',
+            reading.caloriesPer100!.round(),
+            (reading.proteinPer100 ?? 0).round(),
+            (reading.carbsPer100 ?? 0).round(),
+          );
+          setState(() {
+            aiEstimate = estimate;
+            description.text = estimate.name;
+          });
+          return;
+        }
+        // Nutrition found but not the pack size — AI can reason about the
+        // photo layout better than the regex reader, so fall through to it.
+      }
     }
     if (!aiAvailable) {
       setState(() => notice = 'Describe what you took a photo of.');
@@ -3347,7 +3470,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+22';
+  String installedVersion = '1.0.0+23';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;

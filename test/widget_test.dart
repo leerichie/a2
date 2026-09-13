@@ -172,4 +172,50 @@ void main() {
     expect(translateUi('pl', 'This device: a2-test'), 'To urządzenie: a2-test');
     expect(translateUi('pl', 'Update check failed: test'), contains('test'));
   });
+
+  test('label reader scales per-100g values by the printed pack weight', () {
+    final reading = LabelParser.parse(
+      'Nutrition Information Typical Values Per 100g Per Serving (30g) '
+      'Energy 1046kJ / 250kcal 314kJ / 75kcal '
+      'Protein 8.0g 2.4g '
+      'Carbohydrate 55.0g 16.5g '
+      'Net Weight: 250g',
+    );
+    expect(reading.isConfident, isTrue);
+    expect(reading.caloriesPer100, 250);
+    expect(reading.proteinPer100, 8.0);
+    expect(reading.carbsPer100, 55.0);
+    expect(reading.totalGrams, 250);
+    final factor = reading.totalGrams! / 100;
+    expect((reading.caloriesPer100! * factor).round(), 625);
+    expect((reading.proteinPer100! * factor).round(), 20);
+    expect((reading.carbsPer100! * factor).round(), 138);
+  });
+
+  test(
+    'label reader multiplies serving size by servings per container '
+    'when no net weight is printed',
+    () {
+      final reading = LabelParser.parse(
+        'Nutrition Facts Serving Size 30g Servings Per Container 8 '
+        'Calories 120kcal Protein 3g Carbohydrate 22g',
+      );
+      expect(reading.totalGrams, 240);
+      expect(reading.caloriesPer100, 120);
+    },
+  );
+
+  test('label reader reports low confidence without a pack weight', () {
+    final reading = LabelParser.parse(
+      'Typical Values Per 100g Energy 250kcal Protein 8g Carbohydrate 55g',
+    );
+    expect(reading.hasNutrition, isTrue);
+    expect(reading.isConfident, isFalse);
+    expect(reading.totalGrams, isNull);
+  });
+
+  test('label reader finds nothing useful in unrelated text', () {
+    final reading = LabelParser.parse('Best before end: see lid. Keep cool.');
+    expect(reading.hasNutrition, isFalse);
+  });
 }

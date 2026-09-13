@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0+23 — 2026-09-13
+
+- "Scan label" now reads nutrition labels on-device with no AI call and no
+  cost: it recognises the printed text, finds the per-100g values and the
+  pack weight (or serving size × servings per container), and calculates
+  the total for the whole pack. Falls back to the AI photo reader (only
+  when enabled) if the label can't be read confidently, then to manual
+  entry.
+- Fixed the console's Sync/AI buttons always showing green regardless of
+  state, which read as "on" even when off — they now show the current
+  state and turn red when off.
+
 ## 1.0.0+22 — 2026-09-13
 
 - Fixed a layout crash opening Photo storage in Settings.
