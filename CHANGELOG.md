@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.0+22 — 2026-09-13
+
+- Fixed a layout crash opening Photo storage in Settings.
+- Added an admin role for app users, set from the console (Users &
+  security → "Make admin"). Regular accounts no longer see the Server,
+  Content updates, or manual Private server sync controls in Settings —
+  only an account promoted to admin does.
+
+## 1.0.0+21 — 2026-09-13
+
+- Replaced the default Flutter app icon and launch screen with the a2 mark
+  on both Android and iOS.
+- Added a small "built by Ashley Richards" badge, linking to
+  ashleyrichards.tech, to onboarding, sign-in and Settings.
+- Fixed the Add-meal sheet's error and notice messages appearing hidden
+  behind the sheet until it closed — they now show inline, immediately.
+- Fixed "Take photo"/"Scan label" doing nothing on a device or emulator
+  with no usable camera — they now fall back to picking an existing photo.
+- Added a direct sign-out button in Settings.
+- The app now re-checks account status (private sync, AI access) with the
+  server whenever it's resumed from the background, not only when opening
+  a specific screen, so console changes reach the app sooner.
+
 ## 1.0.0+20 — 2026-09-13
 
 - Fixed every server restart silently signing everyone out — sessions were

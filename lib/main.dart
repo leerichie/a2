@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'l10n.dart';
 
@@ -385,6 +386,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
             ),
+            const DevBadge(),
           ],
         ),
       ),
@@ -400,7 +402,7 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int index = 0;
   int importedCount = 0;
   int dailyTarget = 2100;
@@ -419,7 +421,19 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _restoreAndSync();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _restoreAndSync();
   }
 
   Future<void> _restoreAndSync() async {
@@ -1105,6 +1119,47 @@ class SectionHeader extends StatelessWidget {
   );
 }
 
+class DevBadge extends StatelessWidget {
+  const DevBadge({super.key, this.padding = const EdgeInsets.only(top: 24)});
+  final EdgeInsetsGeometry padding;
+
+  Future<void> _open() =>
+      launchUrl(Uri.parse('https://ashleyrichards.tech'));
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: padding,
+    child: Center(
+      child: Semantics(
+        button: true,
+        label: ui(
+          context,
+          'App built by Ashley Richards — visit ashleyrichards.tech',
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: _open,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Image.asset('assets/branding/dev_logo.png', height: 26),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class FoodEntry {
   const FoodEntry(
     this.name,
@@ -1637,12 +1692,16 @@ class _AddMealSheetState extends State<AddMealSheet> {
   bool aiAvailable = false;
   bool busy = false;
   NutritionEstimate? aiEstimate;
+  String? notice;
 
   @override
   void initState() {
     super.initState();
     const AiService().isAvailable().then((value) {
       if (mounted) setState(() => aiAvailable = value);
+    });
+    description.addListener(() {
+      if (notice != null) setState(() => notice = null);
     });
   }
 
@@ -1652,26 +1711,39 @@ class _AddMealSheetState extends State<AddMealSheet> {
     super.dispose();
   }
 
-  Future<void> _capture(int newMode) async {
-    setState(() => mode = newMode);
-    XFile? photo;
+  Future<XFile?> _pickPhoto() async {
     try {
-      photo = await ImagePicker().pickImage(
+      final fromCamera = await ImagePicker().pickImage(
         source: ImageSource.camera,
         imageQuality: 70,
       );
+      if (fromCamera != null) return fromCamera;
     } catch (_) {
-      photo = null;
+      // No usable camera (common on emulators/desktops) — fall back below.
     }
+    try {
+      return await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _capture(int newMode) async {
+    setState(() {
+      mode = newMode;
+      notice = null;
+    });
+    final photo = await _pickPhoto();
     if (!mounted) return;
     if (photo == null) {
       setState(() => mode = 0);
       return;
     }
     if (!aiAvailable) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: LText('Describe what you took a photo of.')),
-      );
+      setState(() => notice = 'Describe what you took a photo of.');
       return;
     }
     setState(() {
@@ -1693,12 +1765,10 @@ class _AddMealSheetState extends State<AddMealSheet> {
       });
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: LText(
-              'AI could not analyse the photo. Describe it below instead.',
-            ),
-          ),
+        setState(
+          () =>
+              notice =
+                  'AI could not analyse the photo. Describe it below instead.',
         );
       }
     } finally {
@@ -1709,12 +1779,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
   Future<void> _addToDay() async {
     final text = description.text.trim();
     if (mode == 1 && text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: LText(
-            'Add a description of what’s in the photo before saving.',
-          ),
-        ),
+      setState(
+        () => notice = 'Add a description of what’s in the photo before saving.',
       );
       return;
     }
@@ -1772,12 +1838,9 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
     estimate ??= FoodEstimator.estimate(text);
     if (estimate.calories == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: LText(
+      setState(
+        () => notice =
             'Not enough nutrition information. Add quantities or scan the product label.',
-          ),
-        ),
       );
       return;
     }
@@ -1917,6 +1980,28 @@ class _AddMealSheetState extends State<AddMealSheet> {
               ),
             ],
           ),
+          if (notice != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFE5DD),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline, color: coral, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: LText(
+                      notice!,
+                      style: const TextStyle(fontSize: 12, color: ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -3262,10 +3347,11 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+20';
+  String installedVersion = '1.0.0+22';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
+  bool accountIsAdmin = false;
 
   @override
   void initState() {
@@ -3343,6 +3429,9 @@ class _ProfilePageState extends State<ProfilePage> {
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['aiEnabled'] ==
               true;
+      accountIsAdmin =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['role'] == 'admin';
       ai = prefs.getBool('ai_enabled') ?? true;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
@@ -3561,7 +3650,38 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? 'No account required · tap to sign in'
                 : 'Signed in · tap to manage account',
           ),
-          trailing: const Icon(Icons.chevron_right),
+          trailing: accountEmail == null
+              ? const Icon(Icons.chevron_right)
+              : IconButton(
+                  icon: const Icon(Icons.logout, color: coral),
+                  tooltip: ui(context, 'Sign out'),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: const LText('Sign out?'),
+                        content: const LText(
+                          'You can sign back in any time. Your data stays safe on the server.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(dialogContext, false),
+                            child: const LText('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext, true),
+                            child: const LText('Sign out'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await const AccountService().logout(contentServerUrl);
+                      await _restoreHealthSettings();
+                    }
+                  },
+                ),
         ),
       ),
       const SizedBox(height: 12),
@@ -3777,7 +3897,7 @@ class _ProfilePageState extends State<ProfilePage> {
       Card(
         child: Column(
           children: [
-            if (accountPrivateSync)
+            if (accountIsAdmin && accountPrivateSync) ...[
               SwitchListTile(
                 value: sync,
                 onChanged: (v) async {
@@ -3793,7 +3913,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 subtitle: const LText('Off · your data stays on this device'),
               ),
-            if (accountPrivateSync) const Divider(height: 1, indent: 55),
+              const Divider(height: 1, indent: 55),
+            ],
             if (!accountPrivateSync)
               ListTile(
                 onTap: () => showDialog(
@@ -3822,6 +3943,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               onTap: () => showModalBottomSheet(
                 context: context,
+                isScrollControlled: true,
                 builder: (_) => const StorageSheet(),
               ),
               leading: const Icon(Icons.photo_library_outlined, color: forest),
@@ -3832,8 +3954,8 @@ class _ProfilePageState extends State<ProfilePage> {
               subtitle: const LText('Device · compressed copies · 184 MB'),
               trailing: const Icon(Icons.chevron_right),
             ),
-            if (accountPrivateSync) const Divider(height: 1, indent: 55),
-            if (accountPrivateSync)
+            if (accountIsAdmin && accountPrivateSync) ...[
+              const Divider(height: 1, indent: 55),
               ListTile(
                 onTap: _configureContentServer,
                 leading: const Icon(Icons.dns_outlined, color: forest),
@@ -3848,30 +3970,33 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 trailing: const Icon(Icons.chevron_right),
               ),
-            const Divider(height: 1, indent: 55),
-            ListTile(
-              onTap: checkingContent ? null : _checkContent,
-              leading: checkingContent
-                  ? const Padding(
-                      padding: EdgeInsets.all(3),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  : const Icon(Icons.system_update_alt, color: forest),
-              title: const LText(
-                'Content updates',
-                style: TextStyle(fontWeight: FontWeight.w700),
+            ],
+            if (accountIsAdmin) ...[
+              const Divider(height: 1, indent: 55),
+              ListTile(
+                onTap: checkingContent ? null : _checkContent,
+                leading: checkingContent
+                    ? const Padding(
+                        padding: EdgeInsets.all(3),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : const Icon(Icons.system_update_alt, color: forest),
+                title: const LText(
+                  'Content updates',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: LText(
+                  contentCheckedAt == null
+                      ? 'Tap to check · controlled by your admin console'
+                      : '$publishedUpdates published · last checked ${contentCheckedAt!.substring(0, 16).replaceFirst('T', ' ')}',
+                ),
+                trailing: const Icon(Icons.refresh),
               ),
-              subtitle: LText(
-                contentCheckedAt == null
-                    ? 'Tap to check · controlled by your admin console'
-                    : '$publishedUpdates published · last checked ${contentCheckedAt!.substring(0, 16).replaceFirst('T', ' ')}',
-              ),
-              trailing: const Icon(Icons.refresh),
-            ),
+            ],
             const Divider(height: 1, indent: 55),
             const ListTile(
               leading: Icon(Icons.file_download_outlined, color: forest),
@@ -3900,6 +4025,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(fontSize: 11, color: Colors.black45),
         ),
       ),
+      const DevBadge(),
     ],
   );
 }
@@ -4645,6 +4771,7 @@ class _AccountSheetState extends State<AccountSheet> {
                     style: TextStyle(fontSize: 11, color: Colors.black45),
                   ),
                 ),
+                const DevBadge(padding: EdgeInsets.only(top: 18)),
               ],
             ),
     ),
@@ -4655,7 +4782,7 @@ class StorageSheet extends StatelessWidget {
   const StorageSheet({super.key});
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Padding(
+    child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -1214,6 +1214,30 @@ const _rows = <List<String>>[
     '3 ago – 12 sep · comidas, actividad, peso e imágenes',
     '3 ago – 12 set · pasti, attività, peso e immagini',
   ],
+  [
+    'Sign out?',
+    'Wylogować się?',
+    'Abmelden?',
+    'Se déconnecter ?',
+    '¿Cerrar sesión?',
+    'Uscire?',
+  ],
+  [
+    'You can sign back in any time. Your data stays safe on the server.',
+    'Możesz zalogować się ponownie w każdej chwili. Twoje dane są bezpieczne na serwerze.',
+    'Du kannst dich jederzeit wieder anmelden. Deine Daten bleiben sicher auf dem Server.',
+    'Vous pouvez vous reconnecter à tout moment. Vos données restent en sécurité sur le serveur.',
+    'Puedes volver a iniciar sesión cuando quieras. Tus datos permanecen seguros en el servidor.',
+    'Puoi accedere di nuovo in qualsiasi momento. I tuoi dati restano al sicuro sul server.',
+  ],
+  [
+    'App built by Ashley Richards — visit ashleyrichards.tech',
+    'Aplikację zbudował Ashley Richards — odwiedź ashleyrichards.tech',
+    'App entwickelt von Ashley Richards — besuche ashleyrichards.tech',
+    'Application conçue par Ashley Richards — visitez ashleyrichards.tech',
+    'Aplicación creada por Ashley Richards — visita ashleyrichards.tech',
+    'App realizzata da Ashley Richards — visita ashleyrichards.tech',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
