@@ -394,7 +394,9 @@ class _AppShellState extends State<AppShell> {
   int dailyTarget = 2100;
   final entries = <FoodEntry>[];
   List<HistoryRecord> history = [];
-  int get calories => entries.fold(0, (s, e) => s + e.calories);
+  int get calories => entries
+      .where((entry) => !entry.isExercise)
+      .fold(0, (sum, entry) => sum + entry.calories);
   int get protein => entries.fold(0, (s, e) => s + e.protein);
   @override
   void initState() {
@@ -495,14 +497,14 @@ class _AppShellState extends State<AppShell> {
           ? FloatingActionButton.extended(
               backgroundColor: ink,
               foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_a_photo_outlined),
-              label: const LText('Log food'),
+              icon: const Icon(Icons.add),
+              label: const LText('Add'),
               onPressed: () async {
                 final e = await showModalBottomSheet<FoodEntry>(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (_) => const AddMealSheet(),
+                  builder: (_) => const AddItemSheet(),
                 );
                 if (e != null) setState(() => entries.add(e));
               },
@@ -870,10 +872,18 @@ class SectionHeader extends StatelessWidget {
 }
 
 class FoodEntry {
-  const FoodEntry(this.name, this.time, this.calories, this.protein, this.icon);
+  const FoodEntry(
+    this.name,
+    this.time,
+    this.calories,
+    this.protein,
+    this.icon, {
+    this.isExercise = false,
+  });
   final String name, time;
   final int calories, protein;
   final IconData icon;
+  final bool isExercise;
 }
 
 class FoodTile extends StatelessWidget {
@@ -899,7 +909,9 @@ class FoodTile extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: LText(
-          '${entry.time}  ·  ${entry.protein} g protein',
+          entry.isExercise
+              ? entry.time
+              : '${entry.time}  ·  ${entry.protein} g protein',
           style: const TextStyle(fontSize: 12),
         ),
         trailing: Column(
@@ -907,7 +919,7 @@ class FoodTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             LText(
-              '${entry.calories}',
+              '${entry.isExercise ? '−' : ''}${entry.calories}',
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
             const LText(
@@ -917,6 +929,238 @@ class FoodTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
+  );
+}
+
+class FoodEstimate {
+  const FoodEstimate(this.calories, this.protein);
+  final int calories, protein;
+}
+
+class FoodEstimator {
+  static FoodEstimate estimate(String description) {
+    final text = description.toLowerCase();
+    var kcal = 0.0, protein = 0.0;
+    final foods = <String, (double, double, double)>{
+      'oat': (389, 16.9, 40),
+      'porridge': (389, 16.9, 40),
+      'yoghurt': (80, 5, 100),
+      'yogurt': (80, 5, 100),
+      'milk': (50, 3.5, 150),
+      'peach': (39, .9, 100),
+      'plum': (46, .7, 80),
+      'crisp': (520, 6, 25),
+      'chips': (520, 6, 25),
+      'chocolate raisin': (400, 5, 30),
+      'raisin': (300, 3.1, 30),
+      'cottage cheese': (98, 11, 60),
+      'ham': (145, 21, 60),
+      'egg': (143, 13, 60),
+      'bread': (265, 9, 40),
+      'banana': (89, 1.1, 120),
+      'apple': (52, .3, 150),
+      'chicken': (165, 31, 150),
+      'rice': (130, 2.7, 180),
+      'pasta': (158, 5.8, 180),
+      'potato': (87, 1.9, 180),
+      'cheese': (350, 25, 30),
+    };
+    final usedRanges = <String>[];
+    for (final item in foods.entries) {
+      final matches = item.key.allMatches(text).toList();
+      if (matches.isEmpty || usedRanges.any((key) => key.contains(item.key))) {
+        continue;
+      }
+      final match = matches.first;
+      final before = text.substring(math.max(0, match.start - 32), match.start);
+      final gramMatch = RegExp(r'(\d+(?:\.\d+)?)\s*g(?:\s+\w+){0,2}\s*$')
+          .firstMatch(before);
+      final multiplied = RegExp(
+        r'(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*g(?:\s+\w+){0,2}\s*$',
+      ).firstMatch(before);
+      final grams = multiplied != null
+          ? int.parse(multiplied.group(1)!) * double.parse(multiplied.group(2)!)
+          : gramMatch != null
+          ? double.parse(gramMatch.group(1)!)
+          : item.value.$3;
+      kcal += item.value.$1 * grams / 100;
+      protein += item.value.$2 * grams / 100;
+      usedRanges.add(item.key);
+    }
+    if (kcal == 0) return const FoodEstimate(0, 0);
+    return FoodEstimate(kcal.round(), protein.round());
+  }
+}
+
+class AddItemSheet extends StatelessWidget {
+  const AddItemSheet({super.key});
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.fromLTRB(
+      20,
+      12,
+      20,
+      MediaQuery.viewInsetsOf(context).bottom + 28,
+    ),
+    decoration: const BoxDecoration(
+      color: cream,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(
+            child: SizedBox(width: 42, child: Divider(thickness: 4)),
+          ),
+          const SizedBox(height: 18),
+          const LText(
+            'What would you like to add?',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: mint,
+              child: Icon(Icons.restaurant, color: forest),
+            ),
+            title: const LText(
+              'Food or drink',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            subtitle: const LText('Describe it, photograph it or scan a label'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              final result = await showModalBottomSheet<FoodEntry>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const AddMealSheet(),
+              );
+              if (context.mounted && result != null) {
+                Navigator.pop(context, result);
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Color(0xFFFFE9DF),
+              child: Icon(Icons.directions_run, color: coral),
+            ),
+            title: const LText(
+              'Exercise',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            subtitle: const LText('Record an activity and duration'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              final result = await showModalBottomSheet<FoodEntry>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const AddExerciseSheet(),
+              );
+              if (context.mounted && result != null) {
+                Navigator.pop(context, result);
+              }
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class AddExerciseSheet extends StatefulWidget {
+  const AddExerciseSheet({super.key});
+  @override
+  State<AddExerciseSheet> createState() => _AddExerciseSheetState();
+}
+
+class _AddExerciseSheetState extends State<AddExerciseSheet> {
+  final activity = TextEditingController();
+  final minutes = TextEditingController(text: '30');
+  @override
+  void dispose() {
+    activity.dispose();
+    minutes.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.fromLTRB(
+      20,
+      18,
+      20,
+      MediaQuery.viewInsetsOf(context).bottom + 24,
+    ),
+    decoration: const BoxDecoration(
+      color: cream,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const LText(
+          'Add exercise',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: activity,
+          decoration: const InputDecoration(
+            labelText: 'Activity',
+            hintText: 'Walking, running, cycling…',
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: minutes,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Duration',
+            suffixText: 'minutes',
+          ),
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () {
+              final name = activity.text.trim();
+              final mins = int.tryParse(minutes.text) ?? 0;
+              if (name.isEmpty || mins <= 0) return;
+              final lower = name.toLowerCase();
+              final perMinute = lower.contains('run')
+                  ? 10
+                  : lower.contains('cycl') || lower.contains('swim')
+                  ? 8
+                  : lower.contains('gym') || lower.contains('weight')
+                  ? 6
+                  : 4;
+              Navigator.pop(
+                context,
+                FoodEntry(
+                  name,
+                  'Now · $mins min',
+                  mins * perMinute,
+                  0,
+                  Icons.directions_run,
+                  isExercise: true,
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const LText('Add exercise'),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -1051,13 +1295,24 @@ class _AddMealSheetState extends State<AddMealSheet> {
               ),
               onPressed: () {
                 final text = description.text.trim();
+                final estimate = FoodEstimator.estimate(text);
+                if (estimate.calories == 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: LText(
+                        'Not enough nutrition information. Add quantities or scan the product label.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
                 Navigator.pop(
                   context,
                   FoodEntry(
                     text.isEmpty ? 'Photo meal estimate' : text,
                     'Now',
-                    420,
-                    31,
+                    estimate.calories,
+                    estimate.protein,
                     Icons.restaurant,
                   ),
                 );
@@ -2065,7 +2320,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.3.0+4';
+  String installedVersion = '1.4.0+5';
 
   @override
   void initState() {

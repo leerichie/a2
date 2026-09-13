@@ -3,6 +3,14 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.4.0+5 — 2026-09-13
+
+- Replaced the fixed demo meal result with quantity-aware nutrition estimates.
+- Added a combined Add menu for food, drink and exercise entries.
+- Fixed dynamic translated calorie and item counts displaying `$1`.
+- Added console accounts, secure password hashing, session login, user management
+  and a redesigned responsive administration interface.
+
 ## 1.3.0+4 — 2026-09-13
 
 - Completed app-wide UI translation support for English, Polish, German,

@@ -631,6 +631,42 @@ const _rows = <List<String>>[
     'p. ej. 2 cucharadas de requesón, 4 lonchas de jamón, un puñado de ensalada…',
     'es. 2 cucchiai di fiocchi di latte, 4 fette di prosciutto, una manciata di insalata…',
   ],
+  ['Add', 'Dodaj', 'Hinzufügen', 'Ajouter', 'Añadir', 'Aggiungi'],
+  [
+    'What would you like to add?',
+    'Co chcesz dodać?',
+    'Was möchtest du hinzufügen?',
+    'Que souhaitez-vous ajouter ?',
+    '¿Qué quieres añadir?',
+    'Cosa vuoi aggiungere?',
+  ],
+  [
+    'Food or drink',
+    'Jedzenie lub napój',
+    'Essen oder Getränk',
+    'Aliment ou boisson',
+    'Comida o bebida',
+    'Cibo o bevanda',
+  ],
+  ['Exercise', 'Ćwiczenia', 'Training', 'Exercice', 'Ejercicio', 'Esercizio'],
+  [
+    'Record an activity and duration',
+    'Zapisz aktywność i czas trwania',
+    'Aktivität und Dauer erfassen',
+    'Enregistrer une activité et sa durée',
+    'Registra una actividad y su duración',
+    'Registra attività e durata',
+  ],
+  [
+    'Add exercise',
+    'Dodaj ćwiczenie',
+    'Training hinzufügen',
+    'Ajouter un exercice',
+    'Añadir ejercicio',
+    'Aggiungi esercizio',
+  ],
+  ['Activity', 'Aktywność', 'Aktivität', 'Activité', 'Actividad', 'Attività'],
+  ['Duration', 'Czas trwania', 'Dauer', 'Durée', 'Duración', 'Durata'],
 ];
 
 final Map<String, List<String>> _translations = {
@@ -666,8 +702,9 @@ String translateUi(String languageCode, String input) {
     ],
   };
   for (final entry in replacements.entries) {
-    if (entry.key.hasMatch(input)) {
-      return input.replaceFirst(entry.key, entry.value[index - 1]);
+    final match = entry.key.firstMatch(input);
+    if (match != null) {
+      return entry.value[index - 1].replaceAll(r'$1', match.group(1)!);
     }
   }
   return input;
