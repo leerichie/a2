@@ -34,6 +34,28 @@ server `.env`, and never put it in Flutter, source control, or the browser.
 5. Put the nginx configuration behind a real hostname and TLS certificate.
 6. In a2, open **You → Data → Server** and enter the HTTPS origin only.
 
+The current private deployment uses Docker at `/srv/apps/a2`, listens only on
+`127.0.0.1:8787`, and is exposed to the owner's tailnet with:
+
+```bash
+sudo tailscale serve --bg --yes 8787
+```
+
+Its private console is `https://aa-cloud-wp30.tail52a6fb.ts.net/admin/`. To add
+or rotate the OpenAI key without putting it in shell history, connect by SSH,
+run `nano /srv/apps/a2/.env`, fill `OPENAI_API_KEY`, save, then run:
+
+```bash
+cd /srv/apps/a2
+docker compose up -d --force-recreate
+```
+
+Retrieve the generated admin token directly in your own SSH terminal with:
+
+```bash
+sed -n 's/^ADMIN_TOKEN=//p' /srv/apps/a2/.env
+```
+
 The JSON file is suitable for initial private testing. Before broad public use,
 move releases, users and device enrolments to PostgreSQL, add backups, rate
 limits, audit-log retention and real user/device authentication. Target IDs in
