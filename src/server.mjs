@@ -12,12 +12,35 @@ const usersFile = join(process.env.DATA_DIR || join(root, 'data'), 'users.json')
 const appUsersFile = join(process.env.DATA_DIR || join(root, 'data'), 'app-users.json');
 const healthDataFile = join(process.env.DATA_DIR || join(root, 'data'), 'health-data.json');
 const settingsFile = join(process.env.DATA_DIR || join(root, 'data'), 'settings.json');
+const sessionsFile = join(process.env.DATA_DIR || join(root, 'data'), 'sessions.json');
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
 const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
 const scrypt = promisify(scryptCallback);
 const sessions = new Map();
 const appSessions = new Map();
+const loadPersistedSessions = async () => {
+  try {
+    const raw = JSON.parse(await readFile(sessionsFile, 'utf8'));
+    const now = Date.now();
+    for (const [token, session] of raw.sessions || []) if (session.expiresAt > now) sessions.set(token, session);
+    for (const [token, session] of raw.appSessions || []) if (session.expiresAt > now) appSessions.set(token, session);
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.error('Failed to load sessions', error);
+  }
+};
+const persistSessions = async () => {
+  try {
+    await mkdir(dirname(sessionsFile), {recursive: true});
+    await writeFile(sessionsFile, JSON.stringify({sessions: [...sessions.entries()], appSessions: [...appSessions.entries()]}), {mode: 0o600});
+  } catch (error) {
+    console.error('Failed to persist sessions', error);
+  }
+};
+await loadPersistedSessions();
+for (const signal of ['SIGTERM', 'SIGINT']) {
+  process.on(signal, async () => { await persistSessions(); process.exit(0); });
+}
 
 const json = (res, status, body) => {
   res.writeHead(status, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'});
@@ -334,8 +357,15 @@ const server = createServer(async (req, res) => {
       if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
       if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
       if (typeof changes.aiEnabled === 'boolean') user.aiEnabled = changes.aiEnabled;
+      if (typeof changes.password === 'string') {
+        if (!validPassword(changes.password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
+        user.passwordHash = await hashPassword(changes.password);
+      }
       await saveAppUsers(users);
-      if (user.blocked) for (const [token, item] of appSessions) if (item.userId === user.id) appSessions.delete(token);
+      if (user.blocked || typeof changes.password === 'string') {
+        for (const [token, item] of appSessions) if (item.userId === user.id) appSessions.delete(token);
+        await persistSessions();
+      }
       return json(res, 200, {user: publicAppUser(user)});
     }
     if (appUserMatch && req.method === 'DELETE') {
