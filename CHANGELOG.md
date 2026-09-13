@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0+28 — 2026-09-13
+
+- Added a restricted, view-only console access level: can see every user,
+  their data and settings, but can't change, block, delete or reset
+  anything — enforced server-side, not just hidden in the UI. Choose it
+  when adding a console user under Users & security.
+- Added an Activity view to the console showing a human-readable, most
+  recent-first log of console actions (who blocked/unblocked, reset a
+  password, changed sync/AI/role, edited data, updated AI settings, added
+  or removed a console user, or signed in).
+
 ## 1.0.0+27 — 2026-09-13
 
 - Fixed sign-out only clearing the account locally while leaving the app

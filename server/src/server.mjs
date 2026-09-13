@@ -13,6 +13,8 @@ const appUsersFile = join(process.env.DATA_DIR || join(root, 'data'), 'app-users
 const healthDataFile = join(process.env.DATA_DIR || join(root, 'data'), 'health-data.json');
 const settingsFile = join(process.env.DATA_DIR || join(root, 'data'), 'settings.json');
 const sessionsFile = join(process.env.DATA_DIR || join(root, 'data'), 'sessions.json');
+const activityLogFile = join(process.env.DATA_DIR || join(root, 'data'), 'activity-log.json');
+const MAX_ACTIVITY_ENTRIES = 500;
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
 const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
@@ -41,6 +43,30 @@ await loadPersistedSessions();
 for (const signal of ['SIGTERM', 'SIGINT']) {
   process.on(signal, async () => { await persistSessions(); process.exit(0); });
 }
+
+const loadActivityLog = async () => {
+  try { return JSON.parse(await readFile(activityLogFile, 'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+};
+const logActivity = async (session, message) => {
+  try {
+    const entries = await loadActivityLog();
+    entries.unshift({
+      id: randomUUID(),
+      at: new Date().toISOString(),
+      by: session ? session.username : 'system',
+      message,
+    });
+    await mkdir(dirname(activityLogFile), {recursive: true});
+    await writeFile(
+      activityLogFile,
+      JSON.stringify(entries.slice(0, MAX_ACTIVITY_ENTRIES), null, 2),
+      {mode: 0o600},
+    );
+  } catch (error) {
+    console.error('Failed to record activity', error);
+  }
+};
 
 const json = (res, status, body) => {
   res.writeHead(status, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'});
@@ -325,11 +351,16 @@ const server = createServer(async (req, res) => {
       const user = users.find(item => item.username.toLowerCase() === String(username || '').toLowerCase());
       if (!user || !(await verifyPassword(password, user.passwordHash))) return json(res, 401, {error: 'Incorrect username or password'});
       const token = randomBytes(32).toString('hex');
-      sessions.set(token, {userId: user.id, username: user.username, role: user.role, expiresAt: Date.now() + 12 * 60 * 60 * 1000});
+      const newSession = {userId: user.id, username: user.username, role: user.role, expiresAt: Date.now() + 12 * 60 * 60 * 1000};
+      sessions.set(token, newSession);
+      await logActivity(newSession, `${user.username} signed in to the console`);
       return json(res, 200, {token, user: publicUser(user)});
     }
     const session = url.pathname.startsWith('/admin/api/') ? sessionFor(req) : null;
     if (url.pathname.startsWith('/admin/api/') && !session) return json(res, 401, {error: 'Unauthorized'});
+    if (session && session.role !== 'admin' && req.method !== 'GET' && url.pathname !== '/admin/api/logout') {
+      return json(res, 403, {error: 'Your account has view-only access'});
+    }
     if (req.method === 'POST' && url.pathname === '/admin/api/logout') {
       sessions.delete(session.token);
       return json(res, 200, {ok: true});
@@ -342,6 +373,9 @@ const server = createServer(async (req, res) => {
           role: session.role,
         },
       });
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/activity') {
+      return json(res, 200, {entries: await loadActivityLog()});
     }
     if (req.method === 'GET' && url.pathname === '/admin/api/users') {
       const users = await loadUsers();
@@ -372,16 +406,25 @@ const server = createServer(async (req, res) => {
         for (const [token, item] of appSessions) if (item.userId === user.id) appSessions.delete(token);
         await persistSessions();
       }
+      const changeNotes = [];
+      if (typeof changes.blocked === 'boolean') changeNotes.push(changes.blocked ? 'blocked' : 'unblocked');
+      if (typeof changes.privateSync === 'boolean') changeNotes.push(`turned private sync ${changes.privateSync ? 'on' : 'off'} for`);
+      if (typeof changes.aiEnabled === 'boolean') changeNotes.push(`turned AI ${changes.aiEnabled ? 'on' : 'off'} for`);
+      if (typeof changes.role === 'string') changeNotes.push(changes.role === 'admin' ? 'granted the app-admin role to' : 'removed the app-admin role from');
+      if (typeof changes.password === 'string') changeNotes.push('reset the password for');
+      if (changeNotes.length) await logActivity(session, `${session.username} ${changeNotes.join(', ')} ${user.email}`);
       return json(res, 200, {user: publicAppUser(user)});
     }
     if (appUserMatch && req.method === 'DELETE') {
       const users = await loadAppUsers();
-      if (!users.some(item => item.id === appUserMatch[1])) return json(res, 404, {error: 'App user not found'});
+      const deletedUser = users.find(item => item.id === appUserMatch[1]);
+      if (!deletedUser) return json(res, 404, {error: 'App user not found'});
       await saveAppUsers(users.filter(item => item.id !== appUserMatch[1]));
       for (const [token, item] of appSessions) if (item.userId === appUserMatch[1]) appSessions.delete(token);
       const data = await loadHealthData();
       delete data.users[appUserMatch[1]];
       await saveHealthData(data);
+      await logActivity(session, `${session.username} deleted app user ${deletedUser.email} and all their synced data`);
       return json(res, 200, {ok: true});
     }
     const appUserHealthMatch = url.pathname.match(/^\/admin\/api\/app-users\/([^/]+)\/health$/);
@@ -415,6 +458,13 @@ const server = createServer(async (req, res) => {
       }
       data.users[id] = {payload: updated, updatedAt: new Date().toISOString()};
       await saveHealthData(data);
+      const editedParts = [];
+      if (changes.bodyProfile || changes.activeDietPlan || typeof changes.dailyTarget === 'number' || typeof changes.waterTargetMl === 'number' || changes.savedDietPlans) editedParts.push('settings');
+      if (changes.dailyEntries) editedParts.push('daily entries');
+      if (changes.dailyWater) editedParts.push('daily water');
+      if (changes.history) editedParts.push('history');
+      const targetUser = (await loadAppUsers()).find(item => item.id === id);
+      await logActivity(session, `${session.username} edited ${editedParts.join(', ') || 'data'} for ${targetUser?.email || id}`);
       return json(res, 200, {data: decodeHealthPayload(data.users[id])});
     }
     if (req.method === 'GET' && url.pathname === '/admin/api/settings') {
@@ -434,6 +484,10 @@ const server = createServer(async (req, res) => {
         settings.openaiModel = changes.openaiModel.trim();
       }
       await saveServerSettings(settings);
+      const settingsNotes = [];
+      if (typeof changes.openaiApiKey === 'string' && changes.openaiApiKey.trim()) settingsNotes.push('the OpenAI API key');
+      if (typeof changes.openaiModel === 'string' && changes.openaiModel.trim()) settingsNotes.push('the AI model');
+      if (settingsNotes.length) await logActivity(session, `${session.username} updated ${settingsNotes.join(' and ')}`);
       return json(res, 200, {
         hasApiKey: Boolean(settings.openaiApiKey || process.env.OPENAI_API_KEY),
         openaiModel: settings.openaiModel || process.env.OPENAI_MODEL || 'gpt-5',
@@ -443,11 +497,12 @@ const server = createServer(async (req, res) => {
       const {username, password, role = 'admin'} = await readBody(req);
       if (!validUsername(username)) return json(res, 400, {error: 'Username must be 3–32 letters, numbers, dots, dashes or underscores'});
       if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
-      if (role !== 'admin') return json(res, 400, {error: 'Only admin accounts are currently supported'});
+      if (!['admin', 'viewer'].includes(role)) return json(res, 400, {error: 'Role must be "admin" or "viewer"'});
       const users = await loadUsers();
       if (users.some(item => item.username.toLowerCase() === username.toLowerCase())) return json(res, 409, {error: 'Username already exists'});
       const user = {id: randomUUID(), username, role, passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
       users.push(user); await saveUsers(users);
+      await logActivity(session, `${session.username} added console user ${username} (${role === 'admin' ? 'administrator' : 'view-only'})`);
       return json(res, 201, {user: publicUser(user)});
     }
     const userMatch = url.pathname.match(/^\/admin\/api\/users\/([^/]+)$/);
@@ -468,15 +523,19 @@ const server = createServer(async (req, res) => {
       }
       await saveUsers(users);
       for (const [token, item] of sessions) if (item.userId === user.id && token !== session.token) sessions.delete(token);
+      const oldUsername = session.username;
       session.username = user.username;
+      await logActivity(session, password ? `${oldUsername} changed their password` : `${oldUsername} renamed their account to ${user.username}`);
       return json(res, 200, {user: publicUser(user)});
     }
     if (userMatch && req.method === 'DELETE') {
       if (userMatch[1] === session.userId) return json(res, 400, {error: 'You cannot delete your own account'});
       const users = await loadUsers();
-      if (!users.some(item => item.id === userMatch[1])) return json(res, 404, {error: 'User not found'});
+      const removedUser = users.find(item => item.id === userMatch[1]);
+      if (!removedUser) return json(res, 404, {error: 'User not found'});
       await saveUsers(users.filter(item => item.id !== userMatch[1]));
       for (const [token, item] of sessions) if (item.userId === userMatch[1]) sessions.delete(token);
+      await logActivity(session, `${session.username} removed console user ${removedUser.username}`);
       return json(res, 200, {ok: true});
     }
     if (['GET', 'HEAD'].includes(req.method) && (url.pathname === '/' || url.pathname === '/admin')) {
