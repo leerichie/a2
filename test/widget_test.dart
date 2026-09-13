@@ -21,11 +21,27 @@ void main() {
   testWidgets('calorie card uses the active plan target', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(body: HeroCard(calories: 600, target: 1800)),
+        home: Scaffold(
+          body: HeroCard(foodCalories: 600, exerciseCalories: 0, target: 1800),
+        ),
       ),
     );
     expect(find.text('1200 kcal left for today'), findsOneWidget);
     expect(find.text('1800 daily target'), findsOneWidget);
+  });
+
+  testWidgets('calorie card shows exercise-adjusted net energy', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: HeroCard(foodCalories: 646, exerciseCalories: 80, target: 2100),
+        ),
+      ),
+    );
+    expect(find.text('566 net kcal after exercise'), findsOneWidget);
+    expect(find.text('1534 kcal left for today'), findsOneWidget);
   });
 
   testWidgets('shows dashboard and adds a meal', (tester) async {
@@ -131,6 +147,22 @@ void main() {
     expect(MealCategory.detect('Late supper', false), 'Supper');
     expect(MealCategory.detect('50ml whisky', false), 'Drinks');
     expect(MealCategory.detect('Tennis', true), 'Exercise');
+  });
+
+  test('diet styles produce centralized macro targets', () {
+    final balanced = NutritionTargets.forPlan(
+      calories: 2100,
+      style: 'Balanced',
+      weightKg: 90,
+    );
+    final keto = NutritionTargets.forPlan(
+      calories: 2100,
+      style: 'Keto',
+      weightKg: 90,
+    );
+    expect(balanced.carbs, 263);
+    expect(keto.carbs, 30);
+    expect(balanced.protein, greaterThanOrEqualTo(108));
   });
 
   test('dynamic translations insert their real values', () {

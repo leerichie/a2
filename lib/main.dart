@@ -402,12 +402,18 @@ class _AppShellState extends State<AppShell> {
   int index = 0;
   int importedCount = 0;
   int dailyTarget = 2100;
+  String dietStyle = 'Balanced';
+  double? bodyWeightKg;
   final entries = <FoodEntry>[];
   List<HistoryRecord> history = [];
   int get calories => entries
       .where((entry) => !entry.isExercise)
       .fold(0, (sum, entry) => sum + entry.calories);
   int get protein => entries.fold(0, (s, e) => s + e.protein);
+  int get carbs => entries.fold(0, (s, e) => s + e.carbs);
+  int get exerciseCalories => entries
+      .where((entry) => entry.isExercise)
+      .fold(0, (sum, entry) => sum + entry.calories);
   @override
   void initState() {
     super.initState();
@@ -429,8 +435,22 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _loadPlan() async {
     final prefs = await SharedPreferences.getInstance();
+    final planRaw = prefs.getString('active_diet_plan');
+    final bodyRaw = prefs.getString('body_profile');
     if (mounted) {
-      setState(() => dailyTarget = prefs.getInt('daily_target') ?? 2100);
+      setState(() {
+        dailyTarget = prefs.getInt('daily_target') ?? 2100;
+        if (planRaw != null) {
+          dietStyle = DietPlan.fromJson(
+            jsonDecode(planRaw) as Map<String, dynamic>,
+          ).style;
+        }
+        if (bodyRaw != null) {
+          bodyWeightKg = BodyProfile.fromJson(
+            jsonDecode(bodyRaw) as Map<String, dynamic>,
+          ).weightKg;
+        }
+      });
     }
   }
 
@@ -467,12 +487,19 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final targets = NutritionTargets.forPlan(
+      calories: dailyTarget,
+      style: dietStyle,
+      weightKg: bodyWeightKg,
+    );
     final pages = [
       TodayPage(
         entries: entries,
         calories: calories,
         protein: protein,
-        dailyTarget: dailyTarget,
+        carbs: carbs,
+        exerciseCalories: exerciseCalories,
+        targets: targets,
         onDelete: (entry) async {
           setState(() => entries.remove(entry));
           await _saveTodayEntries();
@@ -485,7 +512,13 @@ class _AppShellState extends State<AppShell> {
         onLocale: widget.onLocale,
         onImported: _loadImports,
         dailyTarget: dailyTarget,
-        onTargetChanged: (value) => setState(() => dailyTarget = value),
+        onPlanChanged: (value) => setState(() {
+          dailyTarget = value.target;
+          dietStyle = value.style;
+        }),
+        onBodyChanged: (value) => setState(() {
+          bodyWeightKg = value.weightKg;
+        }),
       ),
     ];
     return Scaffold(
@@ -544,18 +577,50 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
+class NutritionTargets {
+  const NutritionTargets({
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+  });
+  final int calories, protein, carbs;
+
+  factory NutritionTargets.forPlan({
+    required int calories,
+    required String style,
+    double? weightKg,
+  }) {
+    final proteinRatio = style == 'High protein' ? .30 : .25;
+    final proteinFromCalories = (calories * proteinRatio / 4).round();
+    final protein = weightKg == null
+        ? proteinFromCalories
+        : math.max(proteinFromCalories, (weightKg * 1.2).round());
+    final carbRatio = switch (style) {
+      'Keto' => 30 / calories * 4,
+      'Lower carbohydrate' => .25,
+      'High protein' => .35,
+      'Mediterranean' => .45,
+      _ => .50,
+    };
+    final carbs = style == 'Keto' ? 30 : (calories * carbRatio / 4).round();
+    return NutritionTargets(calories: calories, protein: protein, carbs: carbs);
+  }
+}
+
 class TodayPage extends StatelessWidget {
   const TodayPage({
     super.key,
     required this.entries,
     required this.calories,
     required this.protein,
-    required this.dailyTarget,
+    required this.carbs,
+    required this.exerciseCalories,
+    required this.targets,
     required this.onDelete,
   });
   final List<FoodEntry> entries;
-  final int calories, protein;
-  final int dailyTarget;
+  final int calories, protein, carbs, exerciseCalories;
+  final NutritionTargets targets;
   final ValueChanged<FoodEntry> onDelete;
 
   List<Widget> _timeline(BuildContext context) {
@@ -671,7 +736,11 @@ class TodayPage extends StatelessWidget {
               const SizedBox(height: 18),
               const SectionHeader('Today’s timeline', '0 ITEMS'),
             ] else ...[
-              HeroCard(calories: calories, target: dailyTarget),
+              HeroCard(
+                foodCalories: calories,
+                exerciseCalories: exerciseCalories,
+                target: targets.calories,
+              ),
               const SizedBox(height: 14),
               Row(
                 children: [
@@ -679,14 +748,20 @@ class TodayPage extends StatelessWidget {
                     child: MetricCard(
                       'Protein',
                       '$protein g',
-                      'of 145 g',
-                      protein / 145,
+                      'of ${targets.protein} g',
+                      protein / targets.protein,
                       coral,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: MetricCard('Fibre', '21 g', 'of 30 g', .7, gold),
+                  Expanded(
+                    child: MetricCard(
+                      'Carbohydrates',
+                      '$carbs g',
+                      'of ${targets.carbs} g',
+                      carbs / targets.carbs,
+                      gold,
+                    ),
                   ),
                 ],
               ),
@@ -712,12 +787,12 @@ class TodayPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           LText(
-                            'Add some colour at dinner',
+                            'Targets follow your active plan',
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                           SizedBox(height: 3),
                           LText(
-                            'One handful of vegetables gets you closer to today’s fibre goal.',
+                            'Calories, protein and carbohydrates update together when you change diet plan.',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.black54,
@@ -786,99 +861,133 @@ class TopBar extends StatelessWidget {
 }
 
 class HeroCard extends StatelessWidget {
-  const HeroCard({super.key, required this.calories, required this.target});
-  final int calories, target;
+  const HeroCard({
+    super.key,
+    required this.foodCalories,
+    required this.exerciseCalories,
+    required this.target,
+  });
+  final int foodCalories, exerciseCalories, target;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(22),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(28),
-      gradient: const LinearGradient(
-        colors: [Color(0xFF173B2E), ink],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+  Widget build(BuildContext context) {
+    final netCalories = math.max(0, foodCalories - exerciseCalories);
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF173B2E), ink],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-    ),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 132,
-          height: 132,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox.expand(
-                child: CircularProgressIndicator(
-                  value: (calories / target).clamp(0, 1),
-                  strokeWidth: 12,
-                  color: const Color(0xFF7AE0AC),
-                  backgroundColor: Colors.white12,
-                  strokeCap: StrokeCap.round,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 132,
+            height: 132,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: (foodCalories / target).clamp(0, 1),
+                    strokeWidth: 12,
+                    color: const Color(0xFF7AE0AC),
+                    backgroundColor: Colors.white12,
+                    strokeCap: StrokeCap.round,
+                  ),
                 ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                if (exerciseCalories > 0)
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: SizedBox.expand(
+                      child: CircularProgressIndicator(
+                        value: (netCalories / target).clamp(0, 1),
+                        strokeWidth: 6,
+                        color: gold,
+                        backgroundColor: Colors.white10,
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                  ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LText(
+                      '$foodCalories',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const LText(
+                      'KCAL EATEN',
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: 10,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 22),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const LText(
+                  'Looking steady',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                LText(
+                  '${math.max(0, target - netCalories)} kcal left for today',
+                  style: const TextStyle(color: Colors.white70, height: 1.35),
+                ),
+                const SizedBox(height: 18),
+                if (exerciseCalories > 0) ...[
                   LText(
-                    '$calories',
+                    '$netCalories net kcal after exercise',
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFF3C66E),
+                      fontSize: 12,
                     ),
                   ),
-                  const LText(
-                    'KCAL EATEN',
-                    style: TextStyle(
-                      color: Colors.white60,
-                      fontSize: 10,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
+                  const SizedBox(height: 8),
                 ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 22),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const LText(
-                'Looking steady',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.local_fire_department_outlined,
+                      color: Color(0xFF7AE0AC),
+                      size: 18,
+                    ),
+                    SizedBox(width: 6),
+                    LText(
+                      '$target daily target',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 6),
-              LText(
-                '${math.max(0, target - calories)} kcal left for today',
-                style: const TextStyle(color: Colors.white70, height: 1.35),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Icon(
-                    Icons.local_fire_department_outlined,
-                    color: Color(0xFF7AE0AC),
-                    size: 18,
-                  ),
-                  SizedBox(width: 6),
-                  LText(
-                    '$target daily target',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class MetricCard extends StatelessWidget {
@@ -977,12 +1086,14 @@ class FoodEntry {
     this.icon, {
     this.isExercise = false,
     this.category,
+    this.carbs = 0,
   });
   final String name, time;
   final int calories, protein;
   final IconData icon;
   final bool isExercise;
   final String? category;
+  final int carbs;
 
   String get dayCategory => category ?? MealCategory.detect(name, isExercise);
 
@@ -993,6 +1104,7 @@ class FoodEntry {
     'protein': protein,
     'isExercise': isExercise,
     'category': dayCategory,
+    'carbs': carbs,
   };
 
   factory FoodEntry.fromJson(Map<String, dynamic> json) {
@@ -1005,6 +1117,11 @@ class FoodEntry {
       isExercise ? Icons.directions_run : Icons.restaurant,
       isExercise: isExercise,
       category: json['category'] as String?,
+      carbs:
+          json['carbs'] as int? ??
+          (isExercise
+              ? 0
+              : FoodEstimator.estimate(json['name'] as String).carbs),
     );
   }
 }
@@ -1172,37 +1289,37 @@ class FoodTile extends StatelessWidget {
 }
 
 class FoodEstimate {
-  const FoodEstimate(this.calories, this.protein);
-  final int calories, protein;
+  const FoodEstimate(this.calories, this.protein, this.carbs);
+  final int calories, protein, carbs;
 }
 
 class FoodEstimator {
   static FoodEstimate estimate(String description) {
     final text = description.toLowerCase();
-    var kcal = 0.0, protein = 0.0;
-    final foods = <String, (double, double, double)>{
-      'oat': (389, 16.9, 40),
-      'porridge': (389, 16.9, 40),
-      'yoghurt': (80, 5, 100),
-      'yogurt': (80, 5, 100),
-      'milk': (50, 3.5, 150),
-      'peach': (39, .9, 100),
-      'plum': (46, .7, 80),
-      'crisp': (520, 6, 25),
-      'chips': (520, 6, 25),
-      'chocolate raisin': (400, 5, 30),
-      'raisin': (300, 3.1, 30),
-      'cottage cheese': (98, 11, 60),
-      'ham': (145, 21, 60),
-      'egg': (143, 13, 60),
-      'bread': (265, 9, 40),
-      'banana': (89, 1.1, 120),
-      'apple': (52, .3, 150),
-      'chicken': (165, 31, 150),
-      'rice': (130, 2.7, 180),
-      'pasta': (158, 5.8, 180),
-      'potato': (87, 1.9, 180),
-      'cheese': (350, 25, 30),
+    var kcal = 0.0, protein = 0.0, carbs = 0.0;
+    final foods = <String, (double, double, double, double)>{
+      'oat': (389, 16.9, 66.3, 40),
+      'porridge': (389, 16.9, 66.3, 40),
+      'yoghurt': (80, 5, 7, 100),
+      'yogurt': (80, 5, 7, 100),
+      'milk': (50, 3.5, 4.8, 150),
+      'peach': (39, .9, 9.5, 100),
+      'plum': (46, .7, 11.4, 80),
+      'crisp': (520, 6, 53, 25),
+      'chips': (520, 6, 53, 25),
+      'chocolate raisin': (400, 5, 72, 30),
+      'raisin': (300, 3.1, 79, 30),
+      'cottage cheese': (98, 11, 3.4, 60),
+      'ham': (145, 21, 1.5, 60),
+      'egg': (143, 13, .7, 60),
+      'bread': (265, 9, 49, 40),
+      'banana': (89, 1.1, 23, 120),
+      'apple': (52, .3, 14, 150),
+      'chicken': (165, 31, 0, 150),
+      'rice': (130, 2.7, 28, 180),
+      'pasta': (158, 5.8, 31, 180),
+      'potato': (87, 1.9, 20, 180),
+      'cheese': (350, 25, 1.3, 30),
     };
     final usedRanges = <String>[];
     for (final item in foods.entries) {
@@ -1221,19 +1338,20 @@ class FoodEstimator {
           ? int.parse(multiplied.group(1)!) * double.parse(multiplied.group(2)!)
           : gramMatch != null
           ? double.parse(gramMatch.group(1)!)
-          : item.value.$3;
+          : item.value.$4;
       kcal += item.value.$1 * grams / 100;
       protein += item.value.$2 * grams / 100;
+      carbs += item.value.$3 * grams / 100;
       usedRanges.add(item.key);
     }
-    final drinks = <String, (double, double)>{
-      'whisky': (220, 0),
-      'whiskey': (220, 0),
-      'vodka': (220, 0),
-      'gin': (220, 0),
-      'rum': (220, 0),
-      'wine': (83, 0.1),
-      'beer': (43, 0.5),
+    final drinks = <String, (double, double, double)>{
+      'whisky': (220, 0, 0),
+      'whiskey': (220, 0, 0),
+      'vodka': (220, 0, 0),
+      'gin': (220, 0, 0),
+      'rum': (220, 0, 0),
+      'wine': (83, 0.1, 2.6),
+      'beer': (43, 0.5, 3.6),
     };
     final usedDrinks = <String>{};
     for (final item in drinks.entries) {
@@ -1249,12 +1367,13 @@ class FoodEstimator {
           : double.parse(mlMatch.group(1)!);
       kcal += item.value.$1 * millilitres / 100;
       protein += item.value.$2 * millilitres / 100;
+      carbs += item.value.$3 * millilitres / 100;
       usedDrinks.add(item.key);
       if (item.key == 'whisky') usedDrinks.add('whiskey');
       if (item.key == 'whiskey') usedDrinks.add('whisky');
     }
-    if (kcal == 0) return const FoodEstimate(0, 0);
-    return FoodEstimate(kcal.round(), protein.round());
+    if (kcal == 0) return const FoodEstimate(0, 0, 0);
+    return FoodEstimate(kcal.round(), protein.round(), carbs.round());
   }
 }
 
@@ -1579,6 +1698,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                     estimate.calories,
                     estimate.protein,
                     Icons.restaurant,
+                    carbs: estimate.carbs,
                   ),
                 );
               },
@@ -2621,7 +2741,15 @@ class AccountService {
     final historyRaw =
         prefs.getString('personal_history_cache') ??
         await rootBundle.loadString('assets/data/ashley_history.json');
-    return {'history': jsonDecode(historyRaw), 'dailyEntries': daily};
+    return {
+      'history': jsonDecode(historyRaw),
+      'dailyEntries': daily,
+      'settings': {
+        'bodyProfile': prefs.getString('body_profile'),
+        'activeDietPlan': prefs.getString('active_diet_plan'),
+        'dailyTarget': prefs.getInt('daily_target'),
+      },
+    };
   }
 
   Future<void> uploadLocalData(String serverUrl) async {
@@ -2682,6 +2810,16 @@ class AccountService {
         (entry.value as List).map((item) => jsonEncode(item)).toList(),
       );
     }
+    final settings = payload['settings'] as Map<String, dynamic>? ?? const {};
+    if (settings['bodyProfile'] case final String value) {
+      await prefs.setString('body_profile', value);
+    }
+    if (settings['activeDietPlan'] case final String value) {
+      await prefs.setString('active_diet_plan', value);
+    }
+    if (settings['dailyTarget'] case final int value) {
+      await prefs.setInt('daily_target', value);
+    }
   }
 
   Future<void> logout(String serverUrl) async {
@@ -2708,13 +2846,15 @@ class ProfilePage extends StatefulWidget {
     required this.onLocale,
     required this.onImported,
     required this.dailyTarget,
-    required this.onTargetChanged,
+    required this.onPlanChanged,
+    required this.onBodyChanged,
   });
   final Locale locale;
   final ValueChanged<Locale> onLocale;
   final VoidCallback onImported;
   final int dailyTarget;
-  final ValueChanged<int> onTargetChanged;
+  final ValueChanged<DietPlan> onPlanChanged;
+  final ValueChanged<BodyProfile> onBodyChanged;
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -2733,7 +2873,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+14';
+  String installedVersion = '1.0.0+15';
   String? accountEmail;
   bool accountPrivateSync = false;
 
@@ -2919,6 +3059,8 @@ class _ProfilePageState extends State<ProfilePage> {
     if (value == null) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('body_profile', jsonEncode(value.toJson()));
+    widget.onBodyChanged(value);
+    await const AccountService().uploadLocalData(contentServerUrl);
     if (mounted) setState(() => body = value);
   }
 
@@ -2945,7 +3087,8 @@ class _ProfilePageState extends State<ProfilePage> {
       'saved_diet_plans',
       updated.map((item) => jsonEncode(item.toJson())).toList(),
     );
-    widget.onTargetChanged(value.target);
+    widget.onPlanChanged(value);
+    await const AccountService().uploadLocalData(contentServerUrl);
     if (mounted) {
       setState(() {
         plan = value;
@@ -2958,7 +3101,8 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('active_diet_plan', jsonEncode(value.toJson()));
     await prefs.setInt('daily_target', value.target);
-    widget.onTargetChanged(value.target);
+    widget.onPlanChanged(value);
+    await const AccountService().uploadLocalData(contentServerUrl);
     if (mounted) setState(() => plan = value);
   }
 

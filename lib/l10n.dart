@@ -6,6 +6,30 @@ const supportedLanguageCodes = ['en', 'pl', 'de', 'fr', 'es', 'it'];
 // imported personal records are not translated or rewritten.
 const _rows = <List<String>>[
   [
+    'Targets follow your active plan',
+    'Cele odpowiadają aktywnemu planowi',
+    'Ziele folgen deinem aktiven Plan',
+    'Les objectifs suivent votre plan actif',
+    'Los objetivos siguen tu plan activo',
+    'Gli obiettivi seguono il piano attivo',
+  ],
+  [
+    'Calories, protein and carbohydrates update together when you change diet plan.',
+    'Kalorie, białko i węglowodany aktualizują się razem po zmianie planu diety.',
+    'Kalorien, Eiweiß und Kohlenhydrate werden beim Planwechsel gemeinsam aktualisiert.',
+    'Calories, protéines et glucides sont actualisés ensemble lorsque vous changez de régime.',
+    'Calorías, proteínas y carbohidratos se actualizan juntos al cambiar de plan.',
+    'Calorie, proteine e carboidrati si aggiornano insieme cambiando piano.',
+  ],
+  [
+    'Carbohydrates',
+    'Węglowodany',
+    'Kohlenhydrate',
+    'Glucides',
+    'Carbohidratos',
+    'Carboidrati',
+  ],
+  [
     'Create an account to protect your records and use them on another device.',
     'Utwórz konto, aby chronić swoje dane i używać ich na innym urządzeniu.',
     'Erstelle ein Konto, um deine Daten zu schützen und auf einem anderen Gerät zu nutzen.',
@@ -1168,6 +1192,20 @@ String translateUi(String languageCode, String input) {
       r'Objectif quotidien : $1',
       r'Objetivo diario: $1',
       r'Obiettivo giornaliero: $1',
+    ],
+    RegExp(r'^of (\d+) g$'): [
+      r'z $1 g',
+      r'von $1 g',
+      r'sur $1 g',
+      r'de $1 g',
+      r'di $1 g',
+    ],
+    RegExp(r'^(\d+) net kcal after exercise$'): [
+      r'$1 kcal netto po ćwiczeniach',
+      r'$1 Netto-kcal nach Training',
+      r'$1 kcal nettes après exercice',
+      r'$1 kcal netas tras el ejercicio',
+      r'$1 kcal nette dopo l’esercizio',
     ],
     RegExp(r'^(\d+) historical records saved$'): [
       r'Zapisano $1 wpisów historycznych',

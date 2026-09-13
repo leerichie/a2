@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0+15 — 2026-09-13
+
+- Added a second calorie ring for exercise-adjusted net energy.
+- Replaced the hard-coded fibre card with calculated carbohydrate intake.
+- Centralized calorie, protein and carbohydrate targets by active diet plan.
+- Synced body and diet settings with account-owned private data.
+
 ## 1.0.0+14 — 2026-09-13
 
 - Simplified daily cards to show time only and grouped entries by meal category.
