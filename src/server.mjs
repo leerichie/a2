@@ -357,6 +357,10 @@ const server = createServer(async (req, res) => {
       if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
       if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
       if (typeof changes.aiEnabled === 'boolean') user.aiEnabled = changes.aiEnabled;
+      if (typeof changes.role === 'string') {
+        if (!['user', 'admin'].includes(changes.role)) return json(res, 400, {error: 'Role must be "user" or "admin"'});
+        user.role = changes.role;
+      }
       if (typeof changes.password === 'string') {
         if (!validPassword(changes.password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
         user.passwordHash = await hashPassword(changes.password);
