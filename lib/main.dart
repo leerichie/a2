@@ -441,6 +441,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   double? bodyWeightKg;
   int waterMl = 0;
   int waterTargetMl = 2000;
+  bool entrySyncAvailable = false;
   final entries = <FoodEntry>[];
   List<HistoryRecord> history = [];
   int get calories => entries
@@ -451,6 +452,19 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int get exerciseCalories => entries
       .where((entry) => entry.isExercise)
       .fold(0, (sum, entry) => sum + entry.calories);
+  List<HistoryRecord> get combinedHistory {
+    final today = dayOnly(DateTime.now());
+    final withoutToday = history
+        .where((r) => dayOnly(r.at) != today)
+        .toList();
+    final todayRecords = entries
+        .map((e) => HistoryRecord.fromFoodEntry(e, today))
+        .toList();
+    return [...todayRecords, ...withoutToday]
+      ..sort((a, b) => b.at.compareTo(a.at));
+  }
+
+  DateTime dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
   @override
   void initState() {
     super.initState();
@@ -476,6 +490,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       _loadHistory(),
       _loadPlan(),
       _loadWater(),
+      _loadEntrySyncAvailability(),
     ]);
     try {
       final enabled = await const AccountService().refreshAccount(
@@ -488,11 +503,24 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         _loadHistory(),
         _loadPlan(),
         _loadWater(),
+        _loadEntrySyncAvailability(),
       ]);
     } catch (_) {
       // The local app remains usable when the server is offline or signed out.
     }
   }
+
+  Future<void> _loadEntrySyncAvailability() async {
+    final available = await const EntrySyncService().isAvailable();
+    if (mounted) setState(() => entrySyncAvailable = available);
+  }
+
+  Future<void> _shareEntry(FoodEntry entry) =>
+      const EntrySyncService().shareEntry(
+        defaultServerUrl,
+        entry,
+        DateTime.now(),
+      );
 
   Future<void> _loadTodayEntries() async {
     final restored = await const DailyEntryRepository().load(DateTime.now());
@@ -599,13 +627,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         waterMl: waterMl,
         waterTargetMl: waterTargetMl,
         onAddWater: _addWater,
+        entrySyncAvailable: entrySyncAvailable,
+        onSyncEntry: _shareEntry,
         onDelete: (entry) async {
           setState(() => entries.remove(entry));
           await _saveTodayEntries();
         },
       ),
-      ProgressPage(importedCount: importedCount, history: history),
-      JourneyPage(history: history),
+      ProgressPage(importedCount: importedCount, history: combinedHistory),
+      JourneyPage(history: combinedHistory),
       ProfilePage(
         locale: widget.locale,
         onLocale: widget.onLocale,
@@ -805,6 +835,8 @@ class TodayPage extends StatelessWidget {
     required this.waterMl,
     required this.waterTargetMl,
     required this.onAddWater,
+    this.entrySyncAvailable = false,
+    this.onSyncEntry,
   });
   final List<FoodEntry> entries;
   final int calories, protein, carbs, exerciseCalories;
@@ -812,6 +844,8 @@ class TodayPage extends StatelessWidget {
   final ValueChanged<FoodEntry> onDelete;
   final int waterMl, waterTargetMl;
   final ValueChanged<int> onAddWater;
+  final bool entrySyncAvailable;
+  final Future<void> Function(FoodEntry entry)? onSyncEntry;
 
   List<Widget> _timeline(BuildContext context) {
     final grouped = <String, List<FoodEntry>>{};
@@ -834,8 +868,13 @@ class TodayPage extends StatelessWidget {
             ),
           ),
           ...grouped[category]!.map(
-            (entry) =>
-                FoodTile(entry, onDelete: () => _confirmDelete(context, entry)),
+            (entry) => FoodTile(
+              entry,
+              onDelete: () => _confirmDelete(context, entry),
+              onSync: entrySyncAvailable
+                  ? () => onSyncEntry!(entry)
+                  : null,
+            ),
           ),
         ],
     ];
@@ -949,7 +988,8 @@ class TodayPage extends StatelessWidget {
                     Expanded(
                       child: MetricCard(
                         'Protein',
-                        '$protein g',
+                        '$protein',
+                        'g',
                         '',
                         protein / targets.protein,
                         coral,
@@ -959,7 +999,8 @@ class TodayPage extends StatelessWidget {
                     Expanded(
                       child: MetricCard(
                         'Carbs',
-                        '$carbs g',
+                        '$carbs',
+                        'g',
                         '',
                         carbs / targets.carbs,
                         gold,
@@ -1225,56 +1266,32 @@ class WaterCard extends StatelessWidget {
       0.0,
       1.0,
     );
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const LText(
-                    'Water',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  LText(
-                    '$waterMl ml',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            WaterGlass(progress: progress),
-          ],
-        ),
-      ),
+    return MetricCard(
+      'Water',
+      '$waterMl',
+      'ml',
+      '',
+      progress,
+      aqua,
+      trailing: WaterGlass(progress: progress, width: 14, height: 20),
     );
   }
 }
 
 class WaterGlass extends StatelessWidget {
-  const WaterGlass({super.key, required this.progress});
+  const WaterGlass({
+    super.key,
+    required this.progress,
+    this.width = 22,
+    this.height = 30,
+  });
   final double progress;
+  final double width, height;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: 22,
-    height: 30,
+    width: width,
+    height: height,
     child: ClipPath(
       clipper: _GlassClipper(),
       child: Stack(
@@ -1319,15 +1336,18 @@ class MetricCard extends StatelessWidget {
   const MetricCard(
     this.label,
     this.value,
+    this.unit,
     this.detail,
     this.progress,
     this.color, {
     super.key,
+    this.trailing,
     this.onTap,
   });
-  final String label, value, detail;
+  final String label, value, unit, detail;
   final double progress;
   final Color color;
+  final Widget? trailing;
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) => Card(
@@ -1354,14 +1374,37 @@ class MetricCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Flexible(
-                  child: LText(
-                    value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: LText(
+                          value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      if (unit.isNotEmpty) ...[
+                        const SizedBox(width: 2),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: LText(
+                            unit,
+                            maxLines: 1,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 if (detail.isNotEmpty) ...[
@@ -1380,6 +1423,10 @@ class MetricCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                ],
+                if (trailing != null) ...[
+                  const SizedBox(width: 6),
+                  trailing!,
                 ],
               ],
             ),
@@ -1640,9 +1687,30 @@ class WaterRepository {
 }
 
 class FoodTile extends StatelessWidget {
-  const FoodTile(this.entry, {super.key, required this.onDelete});
+  const FoodTile(this.entry, {super.key, required this.onDelete, this.onSync});
   final FoodEntry entry;
   final VoidCallback onDelete;
+  final Future<void> Function()? onSync;
+
+  Future<void> _handleSync(BuildContext context) async {
+    try {
+      await onSync!();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: LText('Synced "${entry.name}"')),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: LText(error.toString().replaceFirst('Exception: ', '')),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -1683,6 +1751,15 @@ class FoodTile extends StatelessWidget {
                 ),
               ],
             ),
+            if (onSync != null) ...[
+              const SizedBox(width: 1),
+              IconButton(
+                onPressed: () => _handleSync(context),
+                tooltip: ui(context, 'Sync entry with linked people'),
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.sync, color: aqua, size: 20),
+              ),
+            ],
             const SizedBox(width: 3),
             IconButton(
               onPressed: onDelete,
@@ -1703,9 +1780,93 @@ class FoodEstimate {
 }
 
 class FoodEstimator {
+  static const _numberWords = {
+    'a': 1,
+    'an': 1,
+    'one': 1,
+    'two': 2,
+    'three': 3,
+    'four': 4,
+    'five': 5,
+    'six': 6,
+    'seven': 7,
+    'eight': 8,
+    'nine': 9,
+    'ten': 10,
+  };
+
+  // How many of an item precede a match, from either a bare/×-suffixed digit
+  // ("2x", "2 ") or a spelled-out number ("two") right before it. Defaults to
+  // one so a plain mention (no explicit quantity) still counts as itself.
+  static int _countBefore(String before) {
+    final digit = RegExp(r'(\d+)\s*x?\s*$').firstMatch(before);
+    if (digit != null) return int.parse(digit.group(1)!);
+    final word = RegExp(
+      r'\b(a|an|one|two|three|four|five|six|seven|eight|nine|ten)\s*$',
+      caseSensitive: false,
+    ).firstMatch(before);
+    if (word != null) {
+      return _numberWords[word.group(1)!.toLowerCase()] ?? 1;
+    }
+    return 1;
+  }
+
+  static bool _overlaps(List<(int, int)> claimed, int start, int end) =>
+      claimed.any((r) => start < r.$2 && end > r.$1);
+
   static FoodEstimate estimate(String description) {
     final text = description.toLowerCase();
     var kcal = 0.0, protein = 0.0, carbs = 0.0;
+    // Positions already accounted for, so a composite item (e.g.
+    // "cheeseburger") isn't also counted again for a shorter word it
+    // happens to contain (e.g. "cheese").
+    final claimed = <(int, int)>[];
+
+    // Whole-item fast-food/composite foods: values are per typical single
+    // serving, not per 100g — a bare or "Nx" quantity right before the
+    // match multiplies the whole serving.
+    final wholeItems = <String, (double, double, double)>{
+      'quarter pounder with cheese': (520, 30, 41),
+      'quarter pounder': (480, 28, 38),
+      'big mac': (550, 25, 45),
+      'mcchicken': (400, 14, 39),
+      'fillet-o-fish': (390, 15, 39),
+      'filet-o-fish': (390, 15, 39),
+      'chicken nuggets': (250, 14, 15),
+      'mcnuggets': (250, 14, 15),
+      'cheeseburger': (300, 15, 31),
+      'hamburger': (250, 12, 30),
+      'large fries': (444, 5, 58),
+      'medium fries': (340, 4, 44),
+      'small fries': (230, 3, 30),
+      'fries': (340, 4, 44),
+      'large coke': (210, 0, 58),
+      'medium coke': (170, 0, 46),
+      'small coke': (140, 0, 39),
+      'coke': (170, 0, 46),
+      'cola': (170, 0, 46),
+      'milkshake': (350, 8, 60),
+      'apple pie': (240, 2, 33),
+      'side salad': (25, 1, 4),
+    };
+    for (final item in wholeItems.entries) {
+      for (final match in item.key.allMatches(text)) {
+        if (_overlaps(claimed, match.start, match.end)) continue;
+        final before = text.substring(
+          math.max(0, match.start - 20),
+          match.start,
+        );
+        final count = _countBefore(before);
+        kcal += item.value.$1 * count;
+        protein += item.value.$2 * count;
+        carbs += item.value.$3 * count;
+        claimed.add((match.start, match.end));
+        break;
+      }
+    }
+
+    // Ingredients measured by weight: values per 100g plus a sensible
+    // default portion when no gram amount is given in the text.
     final foods = <String, (double, double, double, double)>{
       'oat': (389, 16.9, 66.3, 40),
       'porridge': (389, 16.9, 66.3, 40),
@@ -1720,23 +1881,39 @@ class FoodEstimator {
       'raisin': (300, 3.1, 79, 30),
       'cottage cheese': (98, 11, 3.4, 60),
       'ham': (145, 21, 1.5, 60),
+      'bacon': (450, 37, 1.3, 40),
+      'sausage': (300, 13, 3, 100),
       'egg': (143, 13, .7, 60),
+      'toast': (265, 9, 49, 35),
       'bread': (265, 9, 49, 40),
       'banana': (89, 1.1, 23, 120),
       'apple': (52, .3, 14, 150),
       'chicken': (165, 31, 0, 150),
+      'salmon': (208, 20, 0, 150),
+      'trout': (148, 20.8, 0, 150),
+      'tuna': (132, 28, 0, 120),
+      'cod': (105, 23, 0, 150),
       'rice': (130, 2.7, 28, 180),
       'pasta': (158, 5.8, 31, 180),
       'potato': (87, 1.9, 20, 180),
       'cheese': (350, 25, 1.3, 30),
+      'avocado': (160, 2, 8.5, 100),
+      'mushroom': (22, 3.1, 3.3, 60),
+      'tomato': (18, .9, 3.9, 100),
+      'onion': (40, 1.1, 9.3, 50),
+      'carrot': (41, .9, 10, 80),
+      'cabbage': (25, 1.3, 5.8, 100),
+      'lettuce': (15, 1.4, 2.9, 60),
+      'salad': (60, 2, 5, 100),
+      'vinegar': (18, 0, .4, 15),
+      'beans': (127, 6.6, 21, 150),
+      'soup': (55, 2.5, 7, 250),
     };
-    final usedRanges = <String>[];
     for (final item in foods.entries) {
       final matches = item.key.allMatches(text).toList();
-      if (matches.isEmpty || usedRanges.any((key) => key.contains(item.key))) {
-        continue;
-      }
+      if (matches.isEmpty) continue;
       final match = matches.first;
+      if (_overlaps(claimed, match.start, match.end)) continue;
       final before = text.substring(math.max(0, match.start - 32), match.start);
       final gramMatch = RegExp(r'(\d+(?:\.\d+)?)\s*g(?:\s+\w+){0,2}\s*$')
           .firstMatch(before);
@@ -1747,14 +1924,18 @@ class FoodEstimator {
           ? int.parse(multiplied.group(1)!) * double.parse(multiplied.group(2)!)
           : gramMatch != null
           ? double.parse(gramMatch.group(1)!)
-          : item.value.$4;
+          : item.value.$4 * _countBefore(before);
       kcal += item.value.$1 * grams / 100;
       protein += item.value.$2 * grams / 100;
       carbs += item.value.$3 * grams / 100;
-      usedRanges.add(item.key);
+      claimed.add((match.start, match.end));
     }
+
+    // Drinks measured by volume: values per 100ml plus a default single
+    // measure/glass when no ml amount is given in the text.
     final drinks = <String, (double, double, double)>{
       'whisky': (220, 0, 0),
+      'whiskies': (220, 0, 0),
       'whiskey': (220, 0, 0),
       'vodka': (220, 0, 0),
       'gin': (220, 0, 0),
@@ -1762,24 +1943,27 @@ class FoodEstimator {
       'wine': (83, 0.1, 2.6),
       'beer': (43, 0.5, 3.6),
     };
-    final usedDrinks = <String>{};
     for (final item in drinks.entries) {
-      if (!text.contains(item.key) || usedDrinks.contains(item.key)) continue;
-      final match = item.key.allMatches(text).first;
+      final matches = item.key.allMatches(text).toList();
+      if (matches.isEmpty) continue;
+      final match = matches.first;
+      if (_overlaps(claimed, match.start, match.end)) continue;
       final around = text.substring(
         math.max(0, match.start - 40),
         math.min(text.length, match.end + 40),
       );
       final mlMatch = RegExp(r'(\d+(?:\.\d+)?)\s*ml').firstMatch(around);
-      final millilitres = mlMatch == null
-          ? 25.0
-          : double.parse(mlMatch.group(1)!);
+      final before = text.substring(
+        math.max(0, match.start - 20),
+        match.start,
+      );
+      final millilitres = mlMatch != null
+          ? double.parse(mlMatch.group(1)!)
+          : 25.0 * _countBefore(before);
       kcal += item.value.$1 * millilitres / 100;
       protein += item.value.$2 * millilitres / 100;
       carbs += item.value.$3 * millilitres / 100;
-      usedDrinks.add(item.key);
-      if (item.key == 'whisky') usedDrinks.add('whiskey');
-      if (item.key == 'whiskey') usedDrinks.add('whisky');
+      claimed.add((match.start, match.end));
     }
     if (kcal == 0) return const FoodEstimate(0, 0, 0);
     return FoodEstimate(kcal.round(), protein.round(), carbs.round());
@@ -2615,6 +2799,35 @@ class CaptureChoice extends StatelessWidget {
 }
 
 class HistoryRecord {
+  factory HistoryRecord.fromFoodEntry(FoodEntry e, DateTime day) {
+    final parts = e.time.split(RegExp(r'[:\s]')).take(2).toList();
+    final hour = int.tryParse(parts.isNotEmpty ? parts[0] : '') ?? 0;
+    final minute = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0;
+    final category = e.dayCategory;
+    final kind = e.isExercise
+        ? 'activity'
+        : category == 'Drinks'
+        ? 'drink'
+        : category == 'Snack'
+        ? 'snack'
+        : 'meal';
+    return HistoryRecord.fromJson({
+      'id': 'today_${day.toIso8601String()}_${e.name.hashCode}_${e.time}',
+      'at': DateTime(
+        day.year,
+        day.month,
+        day.day,
+        hour,
+        minute,
+      ).toIso8601String(),
+      'kind': kind,
+      'title': e.name,
+      'detail': '',
+      'kcal': e.calories,
+      'evidence': '',
+    });
+  }
+
   HistoryRecord.fromJson(Map<String, dynamic> j)
     : id = j['id'],
       at = DateTime.parse(j['at']),
@@ -2889,7 +3102,7 @@ class _ProgressPageState extends State<ProgressPage> {
                   ),
                   const SizedBox(height: 18),
                   SizedBox(
-                    height: 150,
+                    height: 178,
                     child: HistoryBars(
                       records: visible,
                       start: start,
@@ -2951,66 +3164,137 @@ class HistoryBars extends StatelessWidget {
   });
   final List<HistoryRecord> records;
   final DateTime start, end;
+
+  static const foodColor = forest;
+  static const drinkColor = aqua;
+  static const exerciseColor = gold;
+
   @override
   Widget build(BuildContext context) {
     final count = end.difference(start).inDays;
-    final values = List<double>.filled(count, 0);
+    final food = List<double>.filled(count, 0);
+    final drink = List<double>.filled(count, 0);
+    final exercise = List<double>.filled(count, 0);
     for (final r in records) {
-      if (!['meal', 'snack', 'drink'].contains(r.kind)) continue;
       final i = DateTime(
         r.at.year,
         r.at.month,
         r.at.day,
       ).difference(start).inDays;
-      if (i >= 0 && i < count) {
-        values[i] +=
-            r.kcal ?? (r.kcalMin != null ? (r.kcalMin! + r.kcalMax!) / 2 : 0);
+      if (i < 0 || i >= count) continue;
+      final kcal =
+          r.kcal ?? (r.kcalMin != null ? (r.kcalMin! + r.kcalMax!) / 2 : 0);
+      if (r.kind == 'drink') {
+        drink[i] += kcal;
+      } else if (r.kind == 'activity') {
+        exercise[i] += kcal;
+      } else if (r.kind == 'meal' || r.kind == 'snack') {
+        food[i] += kcal;
       }
     }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(
-        count,
-        (i) => Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: count > 10 ? 1 : 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (_, box) => Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: values[i] == 0
-                            ? 3
-                            : math.max(
-                                8,
-                                box.maxHeight * (values[i] / 2800).clamp(0, 1),
+    return Column(
+      children: [
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(
+              count,
+              (i) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: count > 10 ? 1 : 4,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (_, box) {
+                            final total =
+                                food[i] + drink[i] + exercise[i];
+                            if (total == 0) {
+                              return Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
+                            }
+                            final scale =
+                                box.maxHeight *
+                                (total / 2800).clamp(0.05, 1) /
+                                total;
+                            Widget segment(double v, Color color) =>
+                                Container(
+                                  height: math.max(0, v * scale),
+                                  color: color,
+                                );
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (exercise[i] > 0)
+                                    segment(exercise[i], exerciseColor),
+                                  if (drink[i] > 0)
+                                    segment(drink[i], drinkColor),
+                                  if (food[i] > 0) segment(food[i], foodColor),
+                                ],
                               ),
-                        decoration: BoxDecoration(
-                          color: values[i] == 0 ? Colors.black12 : forest,
-                          borderRadius: BorderRadius.circular(8),
+                            );
+                          },
                         ),
                       ),
-                    ),
+                      if (count <= 7)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: LText(
+                            '${start.add(Duration(days: i)).day}',
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                if (count <= 7)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: LText(
-                      '${start.add(Duration(days: i)).day}',
-                      style: const TextStyle(fontSize: 10),
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 14,
+          children: const [
+            _BarLegendDot(color: foodColor, label: 'Food'),
+            _BarLegendDot(color: drinkColor, label: 'Drink'),
+            _BarLegendDot(color: exerciseColor, label: 'Exercise'),
+          ],
+        ),
+      ],
     );
   }
+}
+
+class _BarLegendDot extends StatelessWidget {
+  const _BarLegendDot({required this.color, required this.label});
+  final Color color;
+  final String label;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 5),
+      LText(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+    ],
+  );
 }
 
 class DayPreview extends StatelessWidget {
@@ -3826,6 +4110,104 @@ class NutritionEstimate {
   final int calories, protein, carbs;
 }
 
+class LinkedUser {
+  const LinkedUser({required this.id, required this.name, required this.email});
+  final String id, name, email;
+  String get label => name.isNotEmpty ? name : email;
+  factory LinkedUser.fromJson(Map<String, dynamic> j) => LinkedUser(
+    id: j['id'] as String,
+    name: (j['name'] as String?) ?? '',
+    email: (j['email'] as String?) ?? '',
+  );
+}
+
+class EntrySyncService {
+  const EntrySyncService();
+
+  Future<bool> isAvailable() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userRaw = prefs.getString('account_user');
+    if (userRaw == null) return false;
+    final user = jsonDecode(userRaw) as Map<String, dynamic>;
+    return user['entrySyncEnabled'] == true &&
+        ((user['linkedUserIds'] as List?)?.isNotEmpty ?? false);
+  }
+
+  Future<List<LinkedUser>> fetchPartners(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) return [];
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .get(
+          Uri.parse('$base/api/v1/auth/users'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode != 200) return [];
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    return ((body['users'] as List?) ?? [])
+        .map((e) => LinkedUser.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> updateLinks(
+    String serverUrl, {
+    List<String>? linkedUserIds,
+    bool? entrySyncEnabled,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to sync entries');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .patch(
+          Uri.parse('$base/api/v1/auth/link'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            if (linkedUserIds != null) 'linkedUserIds': linkedUserIds,
+            if (entrySyncEnabled != null) 'entrySyncEnabled': entrySyncEnabled,
+          }),
+        )
+        .timeout(const Duration(seconds: 10));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Could not update sync settings');
+    }
+    await prefs.setString('account_user', jsonEncode(body['user']));
+  }
+
+  Future<void> shareEntry(
+    String serverUrl,
+    FoodEntry entry,
+    DateTime date,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to sync entries');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final dateKey =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/entries/share'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'date': dateKey, 'entry': entry.toJson()}),
+        )
+        .timeout(const Duration(seconds: 10));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Could not share entry');
+    }
+  }
+}
+
 class AiService {
   const AiService();
 
@@ -3950,11 +4332,15 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+28';
+  String installedVersion = '1.0.0+29';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
   bool accountIsAdmin = false;
+  bool entrySyncEnabled = false;
+  List<String> linkedUserIds = [];
+  List<LinkedUser> syncPartners = [];
+  bool loadingSyncPartners = false;
 
   @override
   void initState() {
@@ -4036,6 +4422,16 @@ class _ProfilePageState extends State<ProfilePage> {
       accountIsAdmin =
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['role'] == 'admin';
+      entrySyncEnabled =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['entrySyncEnabled'] ==
+              true;
+      linkedUserIds = accountRaw == null
+          ? []
+          : (((jsonDecode(accountRaw) as Map<String, dynamic>)['linkedUserIds']
+                      as List?) ??
+                  const [])
+              .cast<String>();
       ai = prefs.getBool('ai_enabled') ?? true;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
@@ -4047,6 +4443,63 @@ class _ProfilePageState extends State<ProfilePage> {
                 .length;
       }
     });
+    if (accountEmail != null) _loadSyncPartners();
+  }
+
+  Future<void> _loadSyncPartners() async {
+    setState(() => loadingSyncPartners = true);
+    try {
+      final partners = await const EntrySyncService().fetchPartners(
+        defaultServerUrl,
+      );
+      if (mounted) setState(() => syncPartners = partners);
+    } catch (_) {
+      // Keep whatever was last loaded when offline.
+    } finally {
+      if (mounted) setState(() => loadingSyncPartners = false);
+    }
+  }
+
+  Future<void> _setEntrySyncEnabled(bool value) async {
+    setState(() => entrySyncEnabled = value);
+    try {
+      await const EntrySyncService().updateLinks(
+        defaultServerUrl,
+        entrySyncEnabled: value,
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(() => entrySyncEnabled = !value);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: LText(error.toString().replaceFirst('Exception: ', '')),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleSyncPartner(String id, bool selected) async {
+    final previous = linkedUserIds;
+    final updated = selected
+        ? [...linkedUserIds, id]
+        : linkedUserIds.where((item) => item != id).toList();
+    setState(() => linkedUserIds = updated);
+    try {
+      await const EntrySyncService().updateLinks(
+        defaultServerUrl,
+        linkedUserIds: updated,
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(() => linkedUserIds = previous);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: LText(error.toString().replaceFirst('Exception: ', '')),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _configureContentServer() async {
@@ -4416,6 +4869,72 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
+      if (accountEmail != null) ...[
+        const SizedBox(height: 22),
+        const SectionHeader('Sync diary with', 'SHARED'),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              SwitchListTile(
+                value: entrySyncEnabled,
+                onChanged: _setEntrySyncEnabled,
+                secondary: const Icon(Icons.sync, color: forest),
+                title: const LText(
+                  'Sync entries with linked people',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: const LText(
+                  'Tap the sync icon on an entry to copy it into a linked person’s day',
+                ),
+              ),
+              if (loadingSyncPartners) ...[
+                const Divider(height: 1, indent: 55),
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+              ] else if (syncPartners.isEmpty) ...[
+                const Divider(height: 1, indent: 55),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  child: LText(
+                    'No other registered accounts yet — once someone else creates an account on this server, they’ll appear here to link with.',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                ),
+              ] else
+                for (final partner in syncPartners) ...[
+                  const Divider(height: 1, indent: 55),
+                  CheckboxListTile(
+                    value: linkedUserIds.contains(partner.id),
+                    onChanged: (value) =>
+                        _toggleSyncPartner(partner.id, value ?? false),
+                    secondary: CircleAvatar(
+                      backgroundColor: mint,
+                      child: Text(
+                        partner.label.isEmpty
+                            ? '?'
+                            : partner.label[0].toUpperCase(),
+                        style: const TextStyle(color: forest),
+                      ),
+                    ),
+                    title: LText(partner.label),
+                    subtitle: partner.email.isNotEmpty && partner.name.isNotEmpty
+                        ? LText(partner.email)
+                        : null,
+                  ),
+                ],
+            ],
+          ),
+        ),
+      ],
       const SizedBox(height: 22),
       const SectionHeader('Diet plans', 'ACTIVE'),
       const SizedBox(height: 8),

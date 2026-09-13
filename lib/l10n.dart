@@ -1462,6 +1462,50 @@ const _rows = <List<String>>[
     'El agua no tiene calorías que registrar aquí — usa la tarjeta de Agua de tu panel.',
     'L’acqua non ha calorie da registrare qui: usa la scheda Acqua nella tua dashboard.',
   ],
+  ['g', 'g', 'g', 'g', 'g', 'g'],
+  ['ml', 'ml', 'ml', 'ml', 'ml', 'ml'],
+  ['Food', 'Jedzenie', 'Essen', 'Nourriture', 'Comida', 'Cibo'],
+  ['Drink', 'Napój', 'Getränk', 'Boisson', 'Bebida', 'Bevanda'],
+  [
+    'Sync diary with',
+    'Synchronizuj dziennik z',
+    'Tagebuch synchronisieren mit',
+    'Synchroniser le journal avec',
+    'Sincronizar el diario con',
+    'Sincronizza il diario con',
+  ],
+  [
+    'Sync entries with linked people',
+    'Synchronizuj wpisy z połączonymi osobami',
+    'Einträge mit verknüpften Personen synchronisieren',
+    'Synchroniser les entrées avec les personnes liées',
+    'Sincronizar entradas con las personas vinculadas',
+    'Sincronizza le voci con le persone collegate',
+  ],
+  [
+    'Tap the sync icon on an entry to copy it into a linked person’s day',
+    'Dotknij ikony synchronizacji przy wpisie, aby skopiować go do dnia połączonej osoby',
+    'Tippe auf das Sync-Symbol bei einem Eintrag, um ihn in den Tag einer verknüpften Person zu kopieren',
+    'Touchez l’icône de synchronisation sur une entrée pour la copier dans la journée d’une personne liée',
+    'Toca el icono de sincronización de una entrada para copiarla en el día de una persona vinculada',
+    'Tocca l’icona di sincronizzazione su una voce per copiarla nel giorno di una persona collegata',
+  ],
+  [
+    'No other registered accounts yet — once someone else creates an account on this server, they’ll appear here to link with.',
+    'Nie ma jeszcze innych zarejestrowanych kont — gdy ktoś inny założy konto na tym serwerze, pojawi się tutaj do połączenia.',
+    'Noch keine anderen registrierten Konten — sobald jemand ein Konto auf diesem Server erstellt, erscheint er hier zum Verknüpfen.',
+    'Aucun autre compte enregistré pour l’instant — dès qu’une autre personne crée un compte sur ce serveur, elle apparaîtra ici pour être liée.',
+    'Aún no hay otras cuentas registradas — en cuanto alguien más cree una cuenta en este servidor, aparecerá aquí para vincularla.',
+    'Nessun altro account registrato ancora — non appena qualcun altro crea un account su questo server, apparirà qui per essere collegato.',
+  ],
+  [
+    'Sync entry with linked people',
+    'Synchronizuj wpis z połączonymi osobami',
+    'Eintrag mit verknüpften Personen synchronisieren',
+    'Synchroniser l’entrée avec les personnes liées',
+    'Sincronizar entrada con las personas vinculadas',
+    'Sincronizza la voce con le persone collegate',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
@@ -1566,6 +1610,13 @@ String translateUi(String languageCode, String input) {
       r'Utiliser la valeur recommandée ($1 ml)',
       r'Usar la cantidad recomendada ($1 ml)',
       r'Usa il valore consigliato ($1 ml)',
+    ],
+    RegExp(r'^Synced "(.+)"$'): [
+      r'Zsynchronizowano „$1”',
+      r'„$1“ synchronisiert',
+      r'« $1 » synchronisé',
+      r'"$1" sincronizado',
+      r'"$1" sincronizzato',
     ],
   };
   for (final entry in replacements.entries) {

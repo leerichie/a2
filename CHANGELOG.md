@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.0+29 — 2026-09-13
+
+- Added diary entry sync between linked accounts: turn it on in Settings,
+  choose which other registered accounts to link with, then tap the sync
+  icon on any Today entry to copy it straight into their day.
+- Made the Protein, Carbs and Water cards the same size, with the unit (g/ml)
+  set smaller and right next to the number instead of a separate truncated
+  "of X" line.
+- Fixed today's entries not appearing in Progress or Journey — they only
+  ever showed imported history, so anything logged today was invisible
+  until it synced. The "Recorded energy" chart now also splits each day into
+  separate coloured bars for food, drink and exercise.
+- Rebuilt the free-text nutrition estimator: it now recognises whole
+  fast-food and composite items (a Big Mac, fries, a cheeseburger, etc. by
+  name, not just raw ingredients), correctly counts plain quantities like
+  "2 whiskies" or "2x cheeseburgers", and no longer under-counts a composite
+  item by only matching a short ingredient hiding inside its name (e.g.
+  "cheese" inside "cheeseburgers"). Added trout, salmon, cod, salad and
+  several other common ingredients that were previously ignored entirely.
+- Console: added full control over other console accounts — promote to
+  administrator, demote to view-only, or reset their password, matching the
+  control already available for app users. The earlier view-only role was
+  about console access only; app users are unaffected by it.
+
 ## 1.0.0+28 — 2026-09-13
 
 - Added a restricted, view-only console access level: can see every user,

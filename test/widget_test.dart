@@ -153,6 +153,31 @@ void main() {
     expect(whisky.protein, 0);
   });
 
+  test('counts a plain quantity with no explicit measure', () {
+    final one = FoodEstimator.estimate('a whisky');
+    final two = FoodEstimator.estimate('2 whiskies');
+    expect(two.calories, 2 * one.calories);
+  });
+
+  test(
+    'a named fast-food order sums each item instead of one stray ingredient',
+    () {
+      final order = FoodEstimator.estimate(
+        "McDonald's Big Mac, large fries, large coke, 2x cheeseburgers",
+      );
+      // Previously this only matched "cheese" inside "cheeseburgers" (~105
+      // kcal) — a realistic order should land well over 1000 kcal.
+      expect(order.calories, greaterThan(1500));
+    },
+  );
+
+  test('does not double count an ingredient inside a composite item name', () {
+    final order = FoodEstimator.estimate('a cheeseburger');
+    // Should be the whole-burger estimate, not that plus a separate "cheese"
+    // match from the same substring.
+    expect(order.calories, 300);
+  });
+
   test('detects and orders common meal descriptions', () {
     expect(MealCategory.detect('Bacon breakfast', false), 'Breakfast');
     expect(MealCategory.detect('Quick afternoon snack', false), 'Snack');
