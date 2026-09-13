@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+19 — 2026-09-13
+
+- Console user "Details" now shows and lets a superadmin edit everything
+  synced for that account — daily entries for every logged day and the
+  full history log, not just body profile and diet plan.
+
 ## 1.0.0+18 — 2026-09-13
 
 - Removed the AI content-research/drafts/publish screen from the console —
