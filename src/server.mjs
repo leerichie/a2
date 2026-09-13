@@ -268,14 +268,18 @@ const server = createServer(async (req, res) => {
       await save(data);
       return json(res, 200, release);
     }
-    if (req.method === 'GET' && (url.pathname === '/admin' || url.pathname === '/admin/')) {
+    if (['GET', 'HEAD'].includes(req.method) && (url.pathname === '/' || url.pathname === '/admin')) {
+      res.writeHead(302, {location: '/admin/', 'cache-control': 'no-store'});
+      return res.end();
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/') {
       const body = await readFile(join(publicDir, 'index.html'));
-      res.writeHead(200, {'content-type': 'text/html; charset=utf-8'}); return res.end(body);
+      res.writeHead(200, {'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store'}); return res.end(body);
     }
     const file = url.pathname.startsWith('/admin/') ? join(publicDir, url.pathname.slice(7)) : null;
     if (file && ['.js','.css'].includes(extname(file))) {
       const body = await readFile(file);
-      res.writeHead(200, {'content-type': extname(file) === '.js' ? 'text/javascript' : 'text/css'}); return res.end(body);
+      res.writeHead(200, {'content-type': extname(file) === '.js' ? 'text/javascript' : 'text/css', 'cache-control': 'no-store'}); return res.end(body);
     }
     json(res, 404, {error: 'Not found'});
   } catch (error) {
