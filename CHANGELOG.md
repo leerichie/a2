@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0+24 — 2026-09-13
+
+- Fixed the iOS build failing to install pods after adding on-device label
+  scanning — raised the iOS deployment target to 15.5, which the OCR
+  library requires.
+
 ## 1.0.0+23 — 2026-09-13
 
 - "Scan label" now reads nutrition labels on-device with no AI call and no

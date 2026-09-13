@@ -3470,7 +3470,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+23';
+  String installedVersion = '1.0.0+24';
   String? accountEmail;
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
