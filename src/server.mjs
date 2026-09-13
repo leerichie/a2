@@ -2,24 +2,32 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { randomUUID, timingSafeEqual } from 'node:crypto';
+import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const publicDir = join(root, 'public');
 const dataFile = join(process.env.DATA_DIR || join(root, 'data'), 'content.json');
+const usersFile = join(process.env.DATA_DIR || join(root, 'data'), 'users.json');
 const port = Number(process.env.PORT || 8787);
-const adminToken = process.env.ADMIN_TOKEN || '';
+const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
+const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
+const scrypt = promisify(scryptCallback);
+const sessions = new Map();
 
 const json = (res, status, body) => {
   res.writeHead(status, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'});
   res.end(JSON.stringify(body));
 };
-const safeEqual = (a, b) => {
-  const aa = Buffer.from(a || '');
-  const bb = Buffer.from(b || '');
-  return aa.length === bb.length && timingSafeEqual(aa, bb);
+const sessionFor = req => {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  const session = sessions.get(token);
+  if (!session || session.expiresAt < Date.now()) {
+    if (token) sessions.delete(token);
+    return null;
+  }
+  return {...session, token};
 };
-const isAdmin = req => adminToken && safeEqual(req.headers.authorization, `Bearer ${adminToken}`);
 const readBody = async req => {
   let raw = '';
   for await (const chunk of req) {
@@ -33,6 +41,35 @@ const save = async data => {
   await mkdir(dirname(dataFile), {recursive: true});
   await writeFile(dataFile, JSON.stringify(data, null, 2));
 };
+const hashPassword = async (password, salt = randomBytes(16).toString('hex')) => {
+  const hash = await scrypt(password, salt, 64);
+  return `${salt}:${Buffer.from(hash).toString('hex')}`;
+};
+const verifyPassword = async (password, stored) => {
+  const [salt, expectedHex] = String(stored || '').split(':');
+  if (!salt || !expectedHex) return false;
+  const actual = Buffer.from(await scrypt(password, salt, 64));
+  const expected = Buffer.from(expectedHex, 'hex');
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+};
+const saveUsers = async users => {
+  await mkdir(dirname(usersFile), {recursive: true});
+  await writeFile(usersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
+};
+const loadUsers = async () => {
+  try {
+    return JSON.parse(await readFile(usersFile, 'utf8')).users || [];
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    if (!initialAdminPassword) throw new Error('INITIAL_ADMIN_PASSWORD is not configured');
+    const users = [{id: randomUUID(), username: initialAdminUser, role: 'admin', passwordHash: await hashPassword(initialAdminPassword), createdAt: new Date().toISOString()}];
+    await saveUsers(users);
+    return users;
+  }
+};
+const publicUser = user => ({id: user.id, username: user.username, role: user.role, createdAt: user.createdAt});
+const validUsername = value => /^[A-Za-z0-9_.-]{3,32}$/.test(value || '');
+const validPassword = value => typeof value === 'string' && value.length >= 8 && value.length <= 128;
 const targetMatches = (target, userId, deviceId, groups) =>
   target.type === 'all' ||
   (target.type === 'user' && target.ids.includes(userId)) ||
@@ -79,7 +116,66 @@ const server = createServer(async (req, res) => {
       const releases = data.releases.filter(item => item.status === 'published' && targetMatches(item.target, userId, deviceId, groups));
       return json(res, 200, {schemaVersion: 1, checkedAt: new Date().toISOString(), releases});
     }
-    if (url.pathname.startsWith('/admin/api/') && !isAdmin(req)) return json(res, 401, {error: 'Unauthorized'});
+    if (req.method === 'POST' && url.pathname === '/admin/api/login') {
+      const {username, password} = await readBody(req);
+      const users = await loadUsers();
+      const user = users.find(item => item.username.toLowerCase() === String(username || '').toLowerCase());
+      if (!user || !(await verifyPassword(password, user.passwordHash))) return json(res, 401, {error: 'Incorrect username or password'});
+      const token = randomBytes(32).toString('hex');
+      sessions.set(token, {userId: user.id, username: user.username, role: user.role, expiresAt: Date.now() + 12 * 60 * 60 * 1000});
+      return json(res, 200, {token, user: publicUser(user)});
+    }
+    const session = url.pathname.startsWith('/admin/api/') ? sessionFor(req) : null;
+    if (url.pathname.startsWith('/admin/api/') && !session) return json(res, 401, {error: 'Unauthorized'});
+    if (req.method === 'POST' && url.pathname === '/admin/api/logout') {
+      sessions.delete(session.token);
+      return json(res, 200, {ok: true});
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/me') return json(res, 200, {user: session});
+    if (req.method === 'GET' && url.pathname === '/admin/api/users') {
+      const users = await loadUsers();
+      return json(res, 200, {users: users.map(publicUser)});
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/users') {
+      const {username, password, role = 'admin'} = await readBody(req);
+      if (!validUsername(username)) return json(res, 400, {error: 'Username must be 3–32 letters, numbers, dots, dashes or underscores'});
+      if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
+      if (role !== 'admin') return json(res, 400, {error: 'Only admin accounts are currently supported'});
+      const users = await loadUsers();
+      if (users.some(item => item.username.toLowerCase() === username.toLowerCase())) return json(res, 409, {error: 'Username already exists'});
+      const user = {id: randomUUID(), username, role, passwordHash: await hashPassword(password), createdAt: new Date().toISOString()};
+      users.push(user); await saveUsers(users);
+      return json(res, 201, {user: publicUser(user)});
+    }
+    const userMatch = url.pathname.match(/^\/admin\/api\/users\/([^/]+)$/);
+    if (userMatch && req.method === 'PATCH') {
+      const {username, password, currentPassword} = await readBody(req);
+      const users = await loadUsers();
+      const user = users.find(item => item.id === userMatch[1]);
+      if (!user) return json(res, 404, {error: 'User not found'});
+      if (user.id === session.userId && !(await verifyPassword(currentPassword, user.passwordHash))) return json(res, 403, {error: 'Current password is incorrect'});
+      if (username !== undefined) {
+        if (!validUsername(username)) return json(res, 400, {error: 'Username must be 3–32 valid characters'});
+        if (users.some(item => item.id !== user.id && item.username.toLowerCase() === username.toLowerCase())) return json(res, 409, {error: 'Username already exists'});
+        user.username = username;
+      }
+      if (password) {
+        if (!validPassword(password)) return json(res, 400, {error: 'Password must be at least 8 characters'});
+        user.passwordHash = await hashPassword(password);
+      }
+      await saveUsers(users);
+      for (const [token, item] of sessions) if (item.userId === user.id && token !== session.token) sessions.delete(token);
+      session.username = user.username;
+      return json(res, 200, {user: publicUser(user)});
+    }
+    if (userMatch && req.method === 'DELETE') {
+      if (userMatch[1] === session.userId) return json(res, 400, {error: 'You cannot delete your own account'});
+      const users = await loadUsers();
+      if (!users.some(item => item.id === userMatch[1])) return json(res, 404, {error: 'User not found'});
+      await saveUsers(users.filter(item => item.id !== userMatch[1]));
+      for (const [token, item] of sessions) if (item.userId === userMatch[1]) sessions.delete(token);
+      return json(res, 200, {ok: true});
+    }
     if (req.method === 'GET' && url.pathname === '/admin/api/content') return json(res, 200, await load());
     if (req.method === 'POST' && url.pathname === '/admin/api/research') {
       const {topic} = await readBody(req);

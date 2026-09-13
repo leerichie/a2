@@ -1,71 +1,17 @@
-const $ = id => document.getElementById(id);
-let data = {drafts: [], releases: []};
-let adminPassword = sessionStorage.getItem('a2-admin-password') || '';
-
-const api = async (path, options = {}) => {
-  const response = await fetch(`/admin/api/${path}`, {
-    ...options,
-    headers: {
-      'authorization': `Bearer ${adminPassword}`,
-      'content-type': 'application/json',
-      ...(options.headers || {}),
-    },
-  });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
-  return body;
-};
-const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-
-async function load() {
-  data = await api('content');
-  $('login').hidden = true;
-  $('console').hidden = false;
-  $('status').textContent = 'Connected';
-  $('draft-count').textContent = data.drafts.length;
-  $('release-count').textContent = data.releases.filter(item => item.status === 'published').length;
-  render();
-}
-function render() {
-  $('drafts').innerHTML = data.drafts.length ? data.drafts.map(d => `<div class="item"><span class="pill">${escapeHtml(d.content.category)}</span><h3>${escapeHtml(d.content.title)}</h3><p>${escapeHtml(d.content.summary)}</p><p><strong>Evidence:</strong> ${escapeHtml(d.content.evidence_note)}</p><p>${d.content.sources.map(s => `<a target="_blank" rel="noopener" href="${escapeHtml(s.url)}">${escapeHtml(s.title)}</a>`).join(' · ')}</p><div class="row"><select id="type-${d.id}"><option value="all">Everyone</option><option value="group">Group</option><option value="user">User</option><option value="device">Device</option></select><input id="ids-${d.id}" placeholder="IDs, comma separated"><button onclick="publishDraft('${d.id}')">Approve & publish</button></div></div>`).join('') : 'No drafts yet.';
-  $('releases').innerHTML = data.releases.length ? data.releases.map(r => `<div class="item"><div class="row"><span class="pill">${escapeHtml(r.status)}</span><small>${escapeHtml(r.target.type)}: ${escapeHtml(r.target.ids.join(', ') || 'all')}</small></div><h3>${escapeHtml(r.content.title)}</h3><p>Version ${r.version} · ${new Date(r.publishedAt).toLocaleString()}</p>${r.status === 'published' ? `<button class="danger" onclick="withdraw('${r.id}')">Withdraw</button>` : ''}</div>`).join('') : 'Nothing published yet.';
-}
-window.publishDraft = async id => {
-  const type = $(`type-${id}`).value;
-  const ids = $(`ids-${id}`).value.split(',').map(x => x.trim()).filter(Boolean);
-  if (type !== 'all' && !ids.length) return alert('Enter at least one target ID.');
-  await api('publish', {method:'POST', body:JSON.stringify({draftId:id,target:{type,ids}})});
-  await load();
-};
-window.withdraw = async id => {
-  if (confirm('Withdraw this release from future device updates?')) {
-    await api('unpublish', {method:'POST', body:JSON.stringify({releaseId:id})});
-    await load();
-  }
-};
-$('login-form').onsubmit = async event => {
-  event.preventDefault();
-  adminPassword = $('token').value;
-  $('login-error').textContent = '';
-  try {
-    await load();
-    sessionStorage.setItem('a2-admin-password', adminPassword);
-    $('token').value = '';
-  } catch (error) {
-    adminPassword = '';
-    $('login-error').textContent = error.message === 'Unauthorized' ? 'That admin password is not correct.' : error.message;
-  }
-};
-$('logout').onclick = () => {
-  adminPassword = '';
-  sessionStorage.removeItem('a2-admin-password');
-  $('console').hidden = true;
-  $('login').hidden = false;
-};
-$('research').onclick = async () => {
-  const topic = $('topic').value.trim(); if (!topic) return;
-  $('research').disabled = true; $('research').textContent = 'Researching…';
-  try { await api('research', {method:'POST', body:JSON.stringify({topic})}); $('topic').value=''; await load(); }
-  catch(error) { alert(error.message); } finally { $('research').disabled=false; $('research').textContent='Create review draft'; }
-};
-if (adminPassword) load().catch(() => sessionStorage.removeItem('a2-admin-password'));
+const $=id=>document.getElementById(id);let data={drafts:[],releases:[]},users=[],currentUser=null;let sessionToken=sessionStorage.getItem('a2-session')||'';
+const api=async(path,options={},auth=true)=>{const response=await fetch(`/admin/api/${path}`,{...options,headers:{'content-type':'application/json',...(auth&&sessionToken?{authorization:`Bearer ${sessionToken}`} :{}),...(options.headers||{})}});const body=await response.json();if(!response.ok)throw new Error(body.error||`Request failed (${response.status})`);return body;};
+const escapeHtml=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const message=(id,text,ok=false)=>{const node=$(id);node.textContent=text;node.className=`message ${ok?'success':'error'}`;};const toast=text=>{const node=$('toast');node.textContent=text;node.classList.add('show');setTimeout(()=>node.classList.remove('show'),2600);};
+async function load(){const[content,account,list]=await Promise.all([api('content'),api('me'),api('users')]);data=content;currentUser=account.user;users=list.users;$('login').hidden=true;$('console').hidden=false;$('side-user').textContent=currentUser.username;$('side-avatar').textContent=currentUser.username[0];$('account-username').value=currentUser.username;$('draft-count').textContent=data.drafts.length;$('release-count').textContent=data.releases.filter(x=>x.status==='published').length;renderContent();renderUsers();}
+function renderContent(){$('drafts').innerHTML=data.drafts.length?data.drafts.map(d=>`<div class="item"><span class="pill">${escapeHtml(d.content.category)}</span><h3>${escapeHtml(d.content.title)}</h3><p>${escapeHtml(d.content.summary)}</p><p><strong>Evidence:</strong> ${escapeHtml(d.content.evidence_note)}</p><p>${d.content.sources.map(s=>`<a target="_blank" rel="noopener" href="${escapeHtml(s.url)}">${escapeHtml(s.title)}</a>`).join(' · ')}</p><div class="row"><select id="type-${d.id}"><option value="all">Everyone</option><option value="group">Group</option><option value="user">User</option><option value="device">Device</option></select><input id="ids-${d.id}" placeholder="IDs, comma separated"><button class="primary" onclick="publishDraft('${d.id}')">Approve</button></div></div>`).join(''):'No drafts yet.';$('releases').innerHTML=data.releases.length?data.releases.map(r=>`<div class="item"><div class="row"><span class="pill">${escapeHtml(r.status)}</span><small>${escapeHtml(r.target.type)}: ${escapeHtml(r.target.ids.join(', ')||'all')}</small></div><h3>${escapeHtml(r.content.title)}</h3><p>Version ${r.version} · ${new Date(r.publishedAt).toLocaleString()}</p>${r.status==='published'?`<button class="danger" onclick="withdraw('${r.id}')">Withdraw</button>`:''}</div>`).join(''):'Nothing published yet.';}
+function renderUsers(){$('user-count').textContent=`${users.length} user${users.length===1?'':'s'}`;$('users-list').innerHTML=users.map(user=>`<div class="user-row"><div class="avatar">${escapeHtml(user.username[0])}</div><div><strong>${escapeHtml(user.username)}</strong><small>Administrator · Added ${new Date(user.createdAt).toLocaleDateString()}${user.id===currentUser.id?' · You':''}</small></div>${user.id===currentUser.id?'<span class="pill">Current</span>':`<button class="danger" onclick="deleteUser('${user.id}','${escapeHtml(user.username)}')">Remove</button>`}</div>`).join('');}
+function switchView(view){document.querySelectorAll('.view').forEach(x=>x.hidden=true);$(`${view}-view`).hidden=false;document.querySelectorAll('.nav-link').forEach(x=>x.classList.toggle('active',x.dataset.view===view));$('page-title').textContent=view==='users'?'Users & security':`Good to see you, ${currentUser.username}`;$('page-subtitle').textContent=view==='users'?'Manage console access and your login details.':'Research, review and selectively publish app knowledge.';}
+document.querySelectorAll('.nav-link').forEach(button=>button.onclick=()=>switchView(button.dataset.view));$('mobile-users').onclick=()=>switchView($('users-view').hidden?'users':'content');
+window.publishDraft=async id=>{const type=$(`type-${id}`).value,ids=$(`ids-${id}`).value.split(',').map(x=>x.trim()).filter(Boolean);if(type!=='all'&&!ids.length)return alert('Enter a target ID.');await api('publish',{method:'POST',body:JSON.stringify({draftId:id,target:{type,ids}})});await load();};window.withdraw=async id=>{if(confirm('Withdraw this release?')){await api('unpublish',{method:'POST',body:JSON.stringify({releaseId:id})});await load();}};window.deleteUser=async(id,name)=>{if(confirm(`Remove ${name}'s console access?`)){await api(`users/${id}`,{method:'DELETE'});await load();toast(`${name} removed`);}};
+$('show-password').onclick=()=>{const field=$('password');field.type=field.type==='password'?'text':'password';$('show-password').textContent=field.type==='password'?'Show':'Hide';};
+$('login-form').onsubmit=async event=>{event.preventDefault();$('login-error').textContent='';try{const result=await api('login',{method:'POST',body:JSON.stringify({username:$('username').value.trim(),password:$('password').value})},false);sessionToken=result.token;sessionStorage.setItem('a2-session',sessionToken);$('password').value='';await load();switchView('content');}catch(error){message('login-error',error.message);}};
+$('logout').onclick=async()=>{try{await api('logout',{method:'POST'});}catch{}sessionToken='';sessionStorage.removeItem('a2-session');$('console').hidden=true;$('login').hidden=false;};
+$('account-form').onsubmit=async event=>{event.preventDefault();try{const result=await api(`users/${currentUser.id}`,{method:'PATCH',body:JSON.stringify({username:$('account-username').value.trim(),currentPassword:$('current-password').value,password:$('new-password').value||undefined})});currentUser=result.user;$('current-password').value='';$('new-password').value='';message('account-message','Account updated successfully.',true);await load();}catch(error){message('account-message',error.message);}};
+$('add-user-form').onsubmit=async event=>{event.preventDefault();try{await api('users',{method:'POST',body:JSON.stringify({username:$('new-username').value.trim(),password:$('new-user-password').value})});event.target.reset();message('add-user-message','Administrator added.',true);await load();}catch(error){message('add-user-message',error.message);}};
+$('research').onclick=async()=>{const topic=$('topic').value.trim();if(!topic)return;$('research').disabled=true;$('research').textContent='Researching…';try{await api('research',{method:'POST',body:JSON.stringify({topic})});$('topic').value='';await load();toast('Draft created');}catch(error){alert(error.message);}finally{$('research').disabled=false;$('research').innerHTML='Create review draft <span>✦</span>';}};
+if(sessionToken)load().then(()=>switchView('content')).catch(()=>{sessionStorage.removeItem('a2-session');sessionToken='';});
