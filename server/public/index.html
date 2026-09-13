@@ -1,12 +1,28 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>a2 content console</title><link rel="stylesheet" href="style.css"></head>
-<body><main>
-  <header><div><small>AA-CLOUD-WP30</small><h1>a2 content console</h1><p>Research, review and selectively publish app knowledge.</p></div><span id="status">Not connected</span></header>
-  <section class="auth card"><label>Admin token<input id="token" type="password" autocomplete="current-password" placeholder="Stored only in this browser tab"></label><button id="connect">Connect</button></section>
-  <section class="grid">
-    <article class="card"><small>1 · ASK AI</small><h2>Research a change</h2><textarea id="topic" rows="6" placeholder="Example: Find current NHS guidance on Mediterranean-style diets. Use primary sources and state what changed."></textarea><button id="research">Create review draft</button><p class="hint">AI creates a draft only. It cannot publish.</p></article>
-    <article class="card"><small>2 · REVIEW</small><h2>Drafts</h2><div id="drafts" class="stack empty">Connect to load drafts.</div></article>
-    <article class="card"><small>3 · CONTROL DELIVERY</small><h2>Published releases</h2><div id="releases" class="stack empty">Connect to load releases.</div></article>
+<body>
+  <section id="login" class="login-screen">
+    <form id="login-form" class="login-card">
+      <div class="brand">a²</div><small>AA-CLOUD-WP30</small><h1>Welcome back</h1>
+      <p>Sign in to the private a2 content console.</p>
+      <label>Admin password<input id="token" type="password" autocomplete="current-password" required placeholder="Enter the generated admin password"></label>
+      <div id="login-error" class="error" role="alert"></div>
+      <button type="submit">Sign in securely</button>
+      <p class="hint">Your password stays in this browser tab and is never included in app updates.</p>
+    </form>
   </section>
-</main><script src="app.js"></script></body></html>
+  <main id="console" hidden>
+    <header><div><small>AA-CLOUD-WP30 · PRIVATE CONSOLE</small><h1>a2 content control</h1><p>Research, review and selectively publish app knowledge.</p></div><div class="header-actions"><span id="status">Connected</span><button id="logout" class="secondary">Log out</button></div></header>
+    <section class="summary">
+      <div class="summary-card"><span>Drafts</span><strong id="draft-count">0</strong></div>
+      <div class="summary-card"><span>Published</span><strong id="release-count">0</strong></div>
+      <div class="summary-card"><span>Workflow</span><strong>Human approved</strong></div>
+    </section>
+    <section class="grid">
+      <article class="card"><small>1 · ASK AI</small><h2>Research a change</h2><textarea id="topic" rows="6" placeholder="Example: Find current NHS guidance on Mediterranean-style diets. Use primary sources and state what changed."></textarea><button id="research">Create review draft</button><p class="hint">AI creates a draft only. It cannot publish.</p></article>
+      <article class="card"><small>2 · REVIEW</small><h2>Drafts</h2><div id="drafts" class="stack empty">No drafts yet.</div></article>
+      <article class="card"><small>3 · CONTROL DELIVERY</small><h2>Published releases</h2><div id="releases" class="stack empty">Nothing published yet.</div></article>
+    </section>
+  </main><script src="app.js"></script>
+</body></html>

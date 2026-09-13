@@ -9,6 +9,7 @@ services:
       DATA_DIR: /app/data
     ports:
       - "127.0.0.1:8787:8787"
+      - "0.0.0.0:8094:8787"
     volumes:
       - ./data:/app/data
     security_opt:

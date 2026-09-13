@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'l10n.dart';
+
 void main() => runApp(const A2App());
 
 const ink = Color(0xFF17231E),
@@ -244,7 +246,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           children: [
             Row(
               children: [
-                const Text(
+                const LText(
                   'a²',
                   style: TextStyle(
                     fontSize: 30,
@@ -262,13 +264,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       .map(
                         (e) => PopupMenuItem(
                           value: e,
-                          child: Text('${e.nativeName} · ${e.englishName}'),
+                          child: LText('${e.nativeName} · ${e.englishName}'),
                         ),
                       )
                       .toList(),
                   child: Chip(
                     avatar: const Icon(Icons.language, size: 18),
-                    label: Text(
+                    label: LText(
                       AppLanguage.values
                           .firstWhere(
                             (e) => e.code == widget.locale.languageCode,
@@ -306,7 +308,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                       const SizedBox(height: 42),
-                      Text(
+                      LText(
                         tr(widget.locale, keys[i].$1),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
@@ -317,7 +319,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text(
+                      LText(
                         tr(widget.locale, keys[i].$2),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
@@ -365,7 +367,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     widget.onDone();
                   }
                 },
-                child: Text(
+                child: LText(
                   tr(widget.locale, page == 2 ? 'start' : 'next'),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
@@ -494,7 +496,7 @@ class _AppShellState extends State<AppShell> {
               backgroundColor: ink,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add_a_photo_outlined),
-              label: const Text('Log food'),
+              label: const LText('Log food'),
               onPressed: () async {
                 final e = await showModalBottomSheet<FoodEntry>(
                   context: context,
@@ -550,7 +552,7 @@ class TodayPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      const LText(
                         'Nothing logged today',
                         style: TextStyle(
                           fontSize: 20,
@@ -558,7 +560,7 @@ class TodayPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 7),
-                      const Text(
+                      const LText(
                         'Your imported history is under Journey. Start today when you have your next meal.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.black54, height: 1.4),
@@ -610,12 +612,12 @@ class TodayPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LText(
                             'Add some colour at dinner',
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                           SizedBox(height: 3),
-                          Text(
+                          LText(
                             'One handful of vegetables gets you closer to today’s fibre goal.',
                             style: TextStyle(
                               fontSize: 12,
@@ -651,7 +653,7 @@ class TopBar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LText(
               subtitle.toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
@@ -661,7 +663,7 @@ class TopBar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            LText(
               title,
               style: const TextStyle(
                 fontSize: 26,
@@ -718,7 +720,7 @@ class HeroCard extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  LText(
                     '$calories',
                     style: const TextStyle(
                       color: Colors.white,
@@ -726,7 +728,7 @@ class HeroCard extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const Text(
+                  const LText(
                     'KCAL EATEN',
                     style: TextStyle(
                       color: Colors.white60,
@@ -744,7 +746,7 @@ class HeroCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              const LText(
                 'Looking steady',
                 style: TextStyle(
                   color: Colors.white,
@@ -753,7 +755,7 @@ class HeroCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
+              LText(
                 '${math.max(0, target - calories)} kcal left for today',
                 style: const TextStyle(color: Colors.white70, height: 1.35),
               ),
@@ -766,7 +768,7 @@ class HeroCard extends StatelessWidget {
                     size: 18,
                   ),
                   SizedBox(width: 6),
-                  Text(
+                  LText(
                     '$target daily target',
                     style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
@@ -799,7 +801,7 @@ class MetricCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          LText(
             label,
             style: const TextStyle(
               color: Colors.black54,
@@ -811,7 +813,7 @@ class MetricCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
+              LText(
                 value,
                 style: const TextStyle(
                   fontSize: 21,
@@ -821,7 +823,7 @@ class MetricCard extends StatelessWidget {
               const SizedBox(width: 5),
               Padding(
                 padding: const EdgeInsets.only(bottom: 3),
-                child: Text(
+                child: LText(
                   detail,
                   style: const TextStyle(fontSize: 11, color: Colors.black45),
                 ),
@@ -849,12 +851,12 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(
-        child: Text(
+        child: LText(
           title,
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
         ),
       ),
-      Text(
+      LText(
         action,
         style: const TextStyle(
           color: forest,
@@ -892,11 +894,11 @@ class FoodTile extends StatelessWidget {
           ),
           child: Icon(entry.icon, color: forest),
         ),
-        title: Text(
+        title: LText(
           entry.name,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(
+        subtitle: LText(
           '${entry.time}  ·  ${entry.protein} g protein',
           style: const TextStyle(fontSize: 12),
         ),
@@ -904,11 +906,11 @@ class FoodTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
+            LText(
               '${entry.calories}',
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
-            const Text(
+            const LText(
               'kcal',
               style: TextStyle(fontSize: 10, color: Colors.black45),
             ),
@@ -962,12 +964,12 @@ class _AddMealSheetState extends State<AddMealSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          const LText(
             'What did you have?',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 5),
-          const Text(
+          const LText(
             'A rough description is plenty. You can adjust it later.',
             style: TextStyle(color: Colors.black54),
           ),
@@ -1000,7 +1002,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 Expanded(child: Divider()),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
+                  child: LText(
                     'or describe it',
                     style: TextStyle(fontSize: 12, color: Colors.black45),
                   ),
@@ -1014,7 +1016,10 @@ class _AddMealSheetState extends State<AddMealSheet> {
             minLines: 3,
             maxLines: 5,
             decoration: InputDecoration(
-              hintText: 'e.g. 2 spoons cottage cheese, 4 slices ham, handful of slaw…',
+              hintText: ui(
+                context,
+                'e.g. 2 spoons cottage cheese, 4 slices ham, handful of slaw…',
+              ),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -1029,7 +1034,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
               Icon(Icons.auto_awesome, size: 16, color: forest),
               SizedBox(width: 7),
               Expanded(
-                child: Text(
+                child: LText(
                   'AI estimates include a confidence range—never fake precision.',
                   style: TextStyle(fontSize: 11, color: Colors.black54),
                 ),
@@ -1058,7 +1063,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 );
               },
               icon: const Icon(Icons.auto_awesome),
-              label: const Text(
+              label: const LText(
                 'Estimate & add',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
@@ -1098,7 +1103,7 @@ class CaptureChoice extends StatelessWidget {
         children: [
           Icon(icon, color: forest, size: 29),
           const SizedBox(height: 7),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          LText(label, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
     ),
@@ -1223,9 +1228,9 @@ class _ProgressPageState extends State<ProgressPage> {
           width: double.infinity,
           child: SegmentedButton<int>(
             segments: const [
-              ButtonSegment(value: 0, label: Text('Day')),
-              ButtonSegment(value: 1, label: Text('Week')),
-              ButtonSegment(value: 2, label: Text('Month')),
+              ButtonSegment(value: 0, label: LText('Day')),
+              ButtonSegment(value: 1, label: LText('Week')),
+              ButtonSegment(value: 2, label: LText('Month')),
             ],
             selected: {view},
             showSelectedIcon: false,
@@ -1243,7 +1248,7 @@ class _ProgressPageState extends State<ProgressPage> {
               icon: const Icon(Icons.chevron_left),
             ),
             Expanded(
-              child: Text(
+              child: LText(
                 periodLabel,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -1271,12 +1276,12 @@ class _ProgressPageState extends State<ProgressPage> {
                     color: forest,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  const LText(
                     'No records for this period',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 5),
-                  Text(
+                  LText(
                     'This is intentionally blank—nothing was reported in the conversation.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -1297,7 +1302,7 @@ class _ProgressPageState extends State<ProgressPage> {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text(
+                        child: LText(
                           'Recorded energy',
                           style: TextStyle(
                             fontSize: 18,
@@ -1314,7 +1319,7 @@ class _ProgressPageState extends State<ProgressPage> {
                           color: mint,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Text(
+                        child: LText(
                           '${known.length}/${foods.length} valued',
                           style: const TextStyle(
                             fontSize: 10,
@@ -1326,7 +1331,7 @@ class _ProgressPageState extends State<ProgressPage> {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  Text(
+                  LText(
                     known.isEmpty
                         ? 'No calorie values reported'
                         : '${total.round()} kcal across valued entries',
@@ -1342,7 +1347,7 @@ class _ProgressPageState extends State<ProgressPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  const LText(
                     'Bars show recorded intake only—not complete daily totals unless every meal was logged.',
                     style: TextStyle(
                       fontSize: 11,
@@ -1444,7 +1449,7 @@ class HistoryBars extends StatelessWidget {
                 if (count <= 7)
                   Padding(
                     padding: const EdgeInsets.only(top: 5),
-                    child: Text(
+                    child: LText(
                       '${start.add(Duration(days: i)).day}',
                       style: const TextStyle(fontSize: 10),
                     ),
@@ -1494,7 +1499,7 @@ class DayPreview extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Center(
-                    child: Text(
+                    child: LText(
                       '${date.day}',
                       style: const TextStyle(
                         fontSize: 20,
@@ -1509,12 +1514,12 @@ class DayPreview extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      LText(
                         '${shortDate(date)} · ${records.length} records',
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 3),
-                      Text(
+                      LText(
                         valued.isEmpty
                             ? 'No calorie values'
                             : '${total.round()} recorded kcal · ${valued.length}/${food.length} valued',
@@ -1554,12 +1559,12 @@ class DayDetailSheet extends StatelessWidget {
         children: [
           Center(child: Container(width: 42, height: 4, color: Colors.black12)),
           const SizedBox(height: 20),
-          Text(
+          LText(
             '${shortDate(date)} ${date.year}',
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
-          const Text(
+          const LText(
             'Only information recorded in ChatGPT',
             style: TextStyle(color: Colors.black54),
           ),
@@ -1575,11 +1580,11 @@ class DayDetailSheet extends StatelessWidget {
                     foregroundColor: forest,
                     child: Icon(r.icon),
                   ),
-                  title: Text(
+                  title: LText(
                     r.title,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  subtitle: Text(
+                  subtitle: LText(
                     '${recordDetail(r)}${r.images.isNotEmpty ? '\n${r.images.length} original image reference${r.images.length == 1 ? '' : 's'}' : ''}',
                   ),
                   trailing: r.images.isNotEmpty
@@ -1621,7 +1626,7 @@ class LegacyProgressPage extends StatelessWidget {
               const Icon(Icons.history, color: forest),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
+                child: LText(
                   '$importedCount historical records saved',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
@@ -1639,12 +1644,12 @@ class LegacyProgressPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const LText(
                   'What we actually know',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                LText(
                   '${shortDate(history.last.at)} – ${shortDate(history.first.at)}',
                   style: const TextStyle(color: Colors.black54),
                 ),
@@ -1652,19 +1657,19 @@ class LegacyProgressPage extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: LText(
                         '${history.where((e) => ['meal', 'snack', 'drink'].contains(e.kind)).length}\nfood & drink',
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: LText(
                         '${history.where((e) => e.kind == 'activity').length}\nactivities',
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                     Expanded(
-                      child: Text(
+                      child: LText(
                         '${history.where((e) => e.kind == 'measurement').length}\nweights',
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
@@ -1672,7 +1677,7 @@ class LegacyProgressPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                const LText(
                   'No daily average is shown because several days are incomplete. Missing days remain blank.',
                   style: TextStyle(
                     fontSize: 12,
@@ -1691,7 +1696,7 @@ class LegacyProgressPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              const LText(
                 'Recorded weights',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
@@ -1703,9 +1708,9 @@ class LegacyProgressPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Row(
                         children: [
-                          Text(shortDate(e.at)),
+                          LText(shortDate(e.at)),
                           const Spacer(),
-                          Text(
+                          LText(
                             '${e.weight!.toStringAsFixed(1)} kg',
                             style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
@@ -1770,11 +1775,11 @@ class StatTile extends StatelessWidget {
         children: [
           Icon(icon, color: forest),
           const SizedBox(height: 13),
-          Text(
+          LText(
             value,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
           ),
-          Text(
+          LText(
             label,
             style: const TextStyle(fontSize: 12, color: Colors.black54),
           ),
@@ -1802,7 +1807,7 @@ class Award extends StatelessWidget {
         child: Icon(icon, color: color, size: 32),
       ),
       const SizedBox(height: 8),
-      Text(
+      LText(
         label,
         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
       ),
@@ -1878,7 +1883,7 @@ class JourneyItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              LText(
                 date.toUpperCase(),
                 style: const TextStyle(
                   fontSize: 10,
@@ -1888,7 +1893,7 @@ class JourneyItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              LText(
                 label,
                 style: const TextStyle(
                   fontSize: 15,
@@ -1898,7 +1903,7 @@ class JourneyItem extends StatelessWidget {
               if (detail.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(
+                  child: LText(
                     detail,
                     style: const TextStyle(
                       fontSize: 12,
@@ -1914,7 +1919,7 @@ class JourneyItem extends StatelessWidget {
                     children: [
                       Icon(Icons.photo_outlined, size: 14, color: forest),
                       SizedBox(width: 4),
-                      Text(
+                      LText(
                         'Original image referenced',
                         style: TextStyle(fontSize: 11, color: forest),
                       ),
@@ -2060,7 +2065,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.2.0+3';
+  String installedVersion = '1.3.0+4';
 
   @override
   void initState() {
@@ -2128,25 +2133,25 @@ class _ProfilePageState extends State<ProfilePage> {
     final value = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Content update server'),
+        title: const LText('Content update server'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            const LText(
               'Use the HTTPS address pointing to the a2 service on aa-cloud-wp30.',
             ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'Server URL',
+              decoration: InputDecoration(
+                labelText: ui(context, 'Server URL'),
                 hintText: 'https://a2.example.com',
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            LText(
               'This device: $deviceId',
               style: const TextStyle(fontSize: 11, color: Colors.black54),
             ),
@@ -2155,11 +2160,11 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const LText('Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Save'),
+            child: const LText('Save'),
           ),
         ],
       ),
@@ -2169,7 +2174,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (value.isNotEmpty && (uri == null || uri.scheme != 'https')) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Use an HTTPS server address.')),
+          const SnackBar(content: LText('Use an HTTPS server address.')),
         );
       }
       return;
@@ -2200,7 +2205,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Update check failed: $error')));
+        ).showSnackBar(SnackBar(content: LText('Update check failed: $error')));
       }
     } finally {
       if (mounted) setState(() => checkingContent = false);
@@ -2291,7 +2296,7 @@ class _ProfilePageState extends State<ProfilePage> {
           leading: const CircleAvatar(
             radius: 27,
             backgroundColor: mint,
-            child: Text(
+            child: LText(
               'A',
               style: TextStyle(
                 color: forest,
@@ -2300,11 +2305,11 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          title: const Text(
+          title: const LText(
             'Local profile',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
-          subtitle: const Text('No account required · tap to sign in'),
+          subtitle: const LText('No account required · tap to sign in'),
           trailing: const Icon(Icons.chevron_right),
         ),
       ),
@@ -2314,14 +2319,14 @@ class _ProfilePageState extends State<ProfilePage> {
           onTap: () => showDialog(
             context: context,
             builder: (_) => AlertDialog(
-              title: const Text('App language'),
+              title: const LText('App language'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: AppLanguage.values
                     .map(
                       (e) => ListTile(
-                        title: Text(e.nativeName),
-                        subtitle: Text(e.englishName),
+                        title: LText(e.nativeName),
+                        subtitle: LText(e.englishName),
                         trailing: e.code == widget.locale.languageCode
                             ? const Icon(Icons.check_circle, color: forest)
                             : null,
@@ -2336,11 +2341,11 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           leading: const Icon(Icons.language, color: forest),
-          title: const Text(
+          title: const LText(
             'Language',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
-          subtitle: Text(
+          subtitle: LText(
             AppLanguage.values
                 .firstWhere((e) => e.code == widget.locale.languageCode)
                 .nativeName,
@@ -2357,21 +2362,21 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               onTap: _editBody,
               leading: const Icon(Icons.accessibility_new, color: forest),
-              title: const Text(
+              title: const LText(
                 'Your details',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: Text(bodySummary),
+              subtitle: LText(bodySummary),
               trailing: const Icon(Icons.chevron_right),
             ),
             if (body.maintenanceCalories != null) ...[
               const Divider(height: 1, indent: 55),
               ListTile(
                 leading: const Icon(Icons.calculate_outlined, color: forest),
-                title: Text(
+                title: LText(
                   'About ${body.maintenanceCalories!.round()} kcal maintenance',
                 ),
-                subtitle: Text(
+                subtitle: LText(
                   'Resting estimate ${body.restingCalories!.round()} kcal · ${body.activity.toLowerCase()}',
                 ),
               ),
@@ -2394,7 +2399,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   const Icon(Icons.restaurant_menu, color: forest),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
+                    child: LText(
                       plan.name,
                       style: const TextStyle(
                         fontSize: 18,
@@ -2402,7 +2407,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  Text(
+                  LText(
                     '${plan.target} kcal',
                     style: const TextStyle(
                       color: forest,
@@ -2412,13 +2417,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
               const SizedBox(height: 7),
-              Text(
+              LText(
                 '${plan.style} · active daily limit',
                 style: const TextStyle(color: Colors.black54),
               ),
               if (savedPlans.length > 1) ...[
                 const SizedBox(height: 12),
-                const Text(
+                const LText(
                   'SAVED PLANS',
                   style: TextStyle(
                     fontSize: 10,
@@ -2433,7 +2438,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: savedPlans
                       .map(
                         (item) => ChoiceChip(
-                          label: Text(item.name),
+                          label: LText(item.name),
                           selected: item.name == plan.name,
                           onSelected: (_) => _activatePlan(item),
                         ),
@@ -2447,7 +2452,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: OutlinedButton.icon(
                   onPressed: _editPlan,
                   icon: const Icon(Icons.tune),
-                  label: const Text('Change or create plan'),
+                  label: const LText('Change or create plan'),
                 ),
               ),
             ],
@@ -2461,11 +2466,11 @@ class _ProfilePageState extends State<ProfilePage> {
         child: ListTile(
           onTap: null,
           leading: const Icon(Icons.chat_bubble_outline, color: forest),
-          title: const Text(
+          title: const LText(
             'ChatGPT history imported',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
-          subtitle: const Text(
+          subtitle: const LText(
             '3 Aug – 12 Sep · meals, activity, weights and image references',
           ),
           trailing: const Icon(Icons.chevron_right),
@@ -2481,11 +2486,11 @@ class _ProfilePageState extends State<ProfilePage> {
               value: ai,
               onChanged: (v) => setState(() => ai = v),
               secondary: const Icon(Icons.auto_awesome, color: forest),
-              title: const Text(
+              title: const LText(
                 'AI meal estimates',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: const Text(
+              subtitle: const LText(
                 'Photos and descriptions are analysed only when you ask.',
               ),
             ),
@@ -2497,11 +2502,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 Icons.notifications_active_outlined,
                 color: forest,
               ),
-              title: const Text(
+              title: const LText(
                 'Helpful nudges',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: const Text('Gentle, useful reminders—not guilt.'),
+              subtitle: const LText('Gentle, useful reminders—not guilt.'),
             ),
           ],
         ),
@@ -2516,11 +2521,11 @@ class _ProfilePageState extends State<ProfilePage> {
               value: sync,
               onChanged: (v) => setState(() => sync = v),
               secondary: const Icon(Icons.cloud_outlined, color: forest),
-              title: const Text(
+              title: const LText(
                 'Private server sync',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: const Text('Off · your data stays on this device'),
+              subtitle: const LText('Off · your data stays on this device'),
             ),
             const Divider(height: 1, indent: 55),
             ListTile(
@@ -2529,22 +2534,22 @@ class _ProfilePageState extends State<ProfilePage> {
                 builder: (_) => const StorageSheet(),
               ),
               leading: const Icon(Icons.photo_library_outlined, color: forest),
-              title: const Text(
+              title: const LText(
                 'Photo storage',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: const Text('Device · compressed copies · 184 MB'),
+              subtitle: const LText('Device · compressed copies · 184 MB'),
               trailing: const Icon(Icons.chevron_right),
             ),
             const Divider(height: 1, indent: 55),
             ListTile(
               onTap: _configureContentServer,
               leading: const Icon(Icons.dns_outlined, color: forest),
-              title: const Text(
+              title: const LText(
                 'Server',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: Text(
+              subtitle: LText(
                 contentServerUrl.isEmpty
                     ? 'aa-cloud-wp30 · tap to configure'
                     : contentServerUrl,
@@ -2564,11 +2569,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     )
                   : const Icon(Icons.system_update_alt, color: forest),
-              title: const Text(
+              title: const LText(
                 'Content updates',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: Text(
+              subtitle: LText(
                 contentCheckedAt == null
                     ? 'Tap to check · controlled by your admin console'
                     : '$publishedUpdates published · last checked ${contentCheckedAt!.substring(0, 16).replaceFirst('T', ' ')}',
@@ -2578,7 +2583,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const Divider(height: 1, indent: 55),
             const ListTile(
               leading: Icon(Icons.file_download_outlined, color: forest),
-              title: Text(
+              title: LText(
                 'Export my data',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
@@ -2587,18 +2592,18 @@ class _ProfilePageState extends State<ProfilePage> {
             const Divider(height: 1, indent: 55),
             ListTile(
               leading: const Icon(Icons.info_outline, color: forest),
-              title: const Text(
+              title: const LText(
                 'App version',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              subtitle: Text(installedVersion),
+              subtitle: LText(installedVersion),
             ),
           ],
         ),
       ),
       const SizedBox(height: 16),
       const Center(
-        child: Text(
+        child: LText(
           'Private by default · Estimates, not medical advice',
           style: TextStyle(fontSize: 11, color: Colors.black45),
         ),
@@ -2658,12 +2663,12 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
               child: SizedBox(width: 42, child: Divider(thickness: 4)),
             ),
             const SizedBox(height: 10),
-            const Text(
+            const LText(
               'Your body details',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
-            const Text(
+            const LText(
               'Used only to estimate resting and maintenance energy. You stay in control of the calorie target.',
               style: TextStyle(color: Colors.black54, height: 1.4),
             ),
@@ -2674,8 +2679,8 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
                   child: TextFormField(
                     controller: age,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Age',
+                    decoration: InputDecoration(
+                      labelText: ui(context, 'Age'),
                       suffixText: 'years',
                     ),
                     validator: (v) => numberCheck(v, 18, 120),
@@ -2686,8 +2691,8 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
                   child: TextFormField(
                     controller: height,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Height',
+                    decoration: InputDecoration(
+                      labelText: ui(context, 'Height'),
                       suffixText: 'cm',
                     ),
                     validator: (v) => numberCheck(v, 100, 250),
@@ -2701,8 +2706,8 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Current weight',
+              decoration: InputDecoration(
+                labelText: ui(context, 'Current weight'),
                 suffixText: 'kg',
               ),
               validator: (v) => numberCheck(v, 30, 350),
@@ -2710,32 +2715,37 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
               initialValue: sex,
-              decoration: const InputDecoration(
-                labelText: 'Sex used by the equation',
+              decoration: InputDecoration(
+                labelText: ui(context, 'Sex used by the equation'),
               ),
-              hint: const Text('Choose one'),
+              hint: const LText('Choose one'),
               items: const [
-                DropdownMenuItem(value: 'Male', child: Text('Male')),
-                DropdownMenuItem(value: 'Female', child: Text('Female')),
+                DropdownMenuItem(value: 'Male', child: LText('Male')),
+                DropdownMenuItem(value: 'Female', child: LText('Female')),
               ],
               onChanged: (v) => setState(() => sex = v),
               validator: (v) => v == null ? 'Needed for this equation' : null,
             ),
             const SizedBox(height: 6),
-            const Text(
+            const LText(
               'This is a calculation input, not your gender identity.',
               style: TextStyle(fontSize: 11, color: Colors.black45),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: activity,
-              decoration: const InputDecoration(labelText: 'Typical activity'),
-              items: const [
-                'Mostly seated',
-                'Lightly active',
-                'Moderately active',
-                'Very active',
-              ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+              decoration: InputDecoration(
+                labelText: ui(context, 'Typical activity'),
+              ),
+              items:
+                  const [
+                        'Mostly seated',
+                        'Lightly active',
+                        'Moderately active',
+                        'Very active',
+                      ]
+                      .map((v) => DropdownMenuItem(value: v, child: LText(v)))
+                      .toList(),
               onChanged: (v) => setState(() => activity = v!),
             ),
             const SizedBox(height: 20),
@@ -2755,7 +2765,7 @@ class _BodyProfileSheetState extends State<BodyProfileSheet> {
                     ),
                   );
                 },
-                child: const Text('Save details'),
+                child: const LText('Save details'),
               ),
             ),
           ],
@@ -2811,12 +2821,12 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
               child: SizedBox(width: 42, child: Divider(thickness: 4)),
             ),
             const SizedBox(height: 10),
-            const Text(
+            const LText(
               'Choose your diet plan',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
-            const Text(
+            const LText(
               'Start from a familiar eating style, then make it yours. The style does not set your calorie limit.',
               style: TextStyle(color: Colors.black54, height: 1.4),
             ),
@@ -2833,18 +2843,18 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
                         : Icons.radio_button_off,
                     color: forest,
                   ),
-                  title: Text(
+                  title: LText(
                     entry.key,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  subtitle: Text(entry.value),
+                  subtitle: LText(entry.value),
                 ),
               ),
             ),
             const SizedBox(height: 10),
             TextFormField(
               controller: name,
-              decoration: const InputDecoration(labelText: 'Plan name'),
+              decoration: InputDecoration(labelText: ui(context, 'Plan name')),
               validator: (v) =>
                   (v ?? '').trim().isEmpty ? 'Give your plan a name' : null,
             ),
@@ -2852,8 +2862,8 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
             TextFormField(
               controller: target,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Daily calorie limit',
+              decoration: InputDecoration(
+                labelText: ui(context, 'Daily calorie limit'),
                 suffixText: 'kcal',
               ),
               validator: (v) {
@@ -2866,7 +2876,7 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
             if (widget.maintenance != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(
+                child: LText(
                   'Your estimated maintenance is about ${widget.maintenance!.round()} kcal. This is an estimate, not a prescription.',
                   style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
@@ -2886,7 +2896,7 @@ class _DietPlanSheetState extends State<DietPlanSheet> {
                     ),
                   );
                 },
-                child: const Text('Use this plan'),
+                child: const LText('Use this plan'),
               ),
             ),
           ],
@@ -3014,7 +3024,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
   Widget build(BuildContext context) {
     final count = selected.where((v) => v).length;
     return Scaffold(
-      appBar: AppBar(title: const Text('Review import')),
+      appBar: AppBar(title: const LText('Review import')),
       body: SafeArea(
         child: Column(
           children: [
@@ -3035,14 +3045,14 @@ class _ChatImportPageState extends State<ChatImportPage> {
                           children: [
                             Icon(Icons.verified_user_outlined, color: forest),
                             SizedBox(width: 8),
-                            Text(
+                            LText(
                               'Nothing is saved yet',
                               style: TextStyle(fontWeight: FontWeight.w800),
                             ),
                           ],
                         ),
                         SizedBox(height: 7),
-                        Text(
+                        LText(
                           'a2 found candidate records in “Keto Meal Plan Poland”. Check them first—ChatGPT estimates remain marked as estimates.',
                           style: TextStyle(color: Colors.black54, height: 1.4),
                         ),
@@ -3052,7 +3062,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      Text(
+                      LText(
                         '${candidates.length} RECORDS FOUND',
                         style: const TextStyle(
                           fontSize: 11,
@@ -3069,7 +3079,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
                             selected[i] = value;
                           }
                         }),
-                        child: const Text('Select all'),
+                        child: const LText('Select all'),
                       ),
                     ],
                   ),
@@ -3087,13 +3097,13 @@ class _ChatImportPageState extends State<ChatImportPage> {
                             horizontal: 10,
                             vertical: 7,
                           ),
-                          title: Text(
+                          title: LText(
                             candidates[i].title,
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Text(
+                            child: LText(
                               '${candidates[i].date} · ${candidates[i].detail}\n${candidates[i].kind} · ${candidates[i].confidence} confidence',
                               style: const TextStyle(height: 1.35),
                             ),
@@ -3105,11 +3115,11 @@ class _ChatImportPageState extends State<ChatImportPage> {
                   const Card(
                     child: ListTile(
                       leading: Icon(Icons.warning_amber_rounded, color: coral),
-                      title: Text(
+                      title: LText(
                         'Dates need a final check',
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      subtitle: Text(
+                      subtitle: LText(
                         'Some messages say “today” or “recently”. a2 will not invent dates for those records.',
                       ),
                     ),
@@ -3129,7 +3139,7 @@ class _ChatImportPageState extends State<ChatImportPage> {
                   ),
                   onPressed: count == 0 ? null : _save,
                   icon: const Icon(Icons.download_done),
-                  label: Text('Import $count records'),
+                  label: LText('Import $count records'),
                 ),
               ),
             ),
@@ -3150,12 +3160,12 @@ class AccountSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const LText(
             'Save your progress',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          const Text(
+          const LText(
             'An account is optional. Sign in when you want encrypted backup and access on another device.',
             style: TextStyle(color: Colors.black54, height: 1.4),
           ),
@@ -3165,7 +3175,7 @@ class AccountSheet extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.email_outlined),
-              label: const Text('Continue with email'),
+              label: const LText('Continue with email'),
             ),
           ),
           SizedBox(
@@ -3173,18 +3183,18 @@ class AccountSheet extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.g_mobiledata, size: 28),
-              label: const Text('Continue with Google'),
+              label: const LText('Continue with Google'),
             ),
           ),
           SizedBox(
             width: double.infinity,
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Keep using a2 locally'),
+              child: const LText('Keep using a2 locally'),
             ),
           ),
           const Center(
-            child: Text(
+            child: LText(
               'Never upload health data without clear consent.',
               style: TextStyle(fontSize: 11, color: Colors.black45),
             ),
@@ -3205,12 +3215,12 @@ class StorageSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          const LText(
             'Photo storage',
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          const Text(
+          const LText(
             'Keep a small, useful visual history without filling your phone.',
             style: TextStyle(color: Colors.black54),
           ),
@@ -3218,11 +3228,11 @@ class StorageSheet extends StatelessWidget {
           const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.phone_iphone, color: forest),
-            title: Text(
+            title: LText(
               'Optimised on this device',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
-            subtitle: Text(
+            subtitle: LText(
               'Recommended · compressed copy, originals removed after analysis',
             ),
             trailing: Icon(Icons.check_circle, color: forest),
@@ -3230,26 +3240,26 @@ class StorageSheet extends StatelessWidget {
           const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.cloud_outlined),
-            title: Text('a2 private sync'),
-            subtitle: Text(
+            title: LText('a2 private sync'),
+            subtitle: LText(
               'Sign in to use aa-cloud-wp30 or an a2 hosted account',
             ),
           ),
           const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.add_to_drive_outlined),
-            title: Text('Google Drive backup'),
-            subtitle: Text('Connect your own Google account · optional'),
+            title: LText('Google Drive backup'),
+            subtitle: LText('Connect your own Google account · optional'),
           ),
           const Divider(),
           const ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.auto_delete_outlined, color: coral),
-            title: Text(
+            title: LText(
               'Automatic cleanup',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
-            subtitle: Text(
+            subtitle: LText(
               'Keep thumbnails; remove meal originals after 30 days',
             ),
           ),

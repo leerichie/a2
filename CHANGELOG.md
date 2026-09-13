@@ -3,6 +3,14 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.3.0+4 — 2026-09-13
+
+- Completed app-wide UI translation support for English, Polish, German,
+  French, Spanish and Italian, including forms and dynamic status text.
+- Added a dedicated responsive A2 console login and dashboard.
+- Published the console on the server LAN at port 8094 while retaining private
+  HTTPS access through Tailscale.
+
 ## 1.2.0+3 — 2026-09-13
 
 - Added production Docker packaging for the controlled content service.
