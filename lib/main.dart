@@ -2354,7 +2354,7 @@ class ContentUpdateService {
   }
 }
 
-const defaultServerUrl = 'https://aa-cloud-wp30.tail52a6fb.ts.net';
+const defaultServerUrl = 'http://aa-cloud-wp30:8094';
 
 class AccountService {
   const AccountService();
@@ -2436,7 +2436,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+8';
+  String installedVersion = '1.0.0+9';
   String? accountEmail;
 
   @override
@@ -2488,7 +2488,11 @@ class _ProfilePageState extends State<ProfilePage> {
           .toList();
       if (savedPlans.isEmpty) savedPlans = [plan];
       final storedServer = prefs.getString('content_server_url') ?? '';
-      contentServerUrl = storedServer == 'https://aa-cloud-wp30:8094'
+      contentServerUrl =
+          {
+            'https://aa-cloud-wp30:8094',
+            'https://aa-cloud-wp30.tail52a6fb.ts.net',
+          }.contains(storedServer)
           ? defaultServerUrl
           : storedServer.isEmpty
           ? defaultServerUrl
@@ -2520,7 +2524,9 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const LText('Use the secure A2 server address below.'),
+            const LText(
+              'Use the A2 server address below. This local address works while you are on your home network.',
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
@@ -2551,10 +2557,19 @@ class _ProfilePageState extends State<ProfilePage> {
     );
     if (value == null) return;
     final uri = Uri.tryParse(value);
-    if (value.isNotEmpty && (uri == null || uri.scheme != 'https')) {
+    final allowedLocalHttp =
+        uri?.scheme == 'http' &&
+        uri?.host.toLowerCase() == 'aa-cloud-wp30' &&
+        uri?.port == 8094;
+    if (value.isNotEmpty &&
+        (uri == null || (uri.scheme != 'https' && !allowedLocalHttp))) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: LText('Use an HTTPS server address.')),
+          const SnackBar(
+            content: LText(
+              'Use HTTPS or the local address http://aa-cloud-wp30:8094.',
+            ),
+          ),
         );
       }
       return;

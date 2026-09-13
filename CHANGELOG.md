@@ -3,6 +3,12 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.0.0+9 — 2026-09-13
+
+- Switched the default backend address to the memorable home-network URL
+  `http://aa-cloud-wp30:8094` and migrated previously stored Tailscale URLs.
+- Added narrowly scoped Android and iOS permissions for the local HTTP server.
+
 ## 1.0.0+8 — 2026-09-13
 
 - Persisted food, drink and exercise entries in local device storage.
