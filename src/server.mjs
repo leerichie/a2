@@ -188,7 +188,15 @@ const server = createServer(async (req, res) => {
       sessions.delete(session.token);
       return json(res, 200, {ok: true});
     }
-    if (req.method === 'GET' && url.pathname === '/admin/api/me') return json(res, 200, {user: session});
+    if (req.method === 'GET' && url.pathname === '/admin/api/me') {
+      return json(res, 200, {
+        user: {
+          id: session.userId,
+          username: session.username,
+          role: session.role,
+        },
+      });
+    }
     if (req.method === 'GET' && url.pathname === '/admin/api/users') {
       const users = await loadUsers();
       return json(res, 200, {users: users.map(publicUser)});
