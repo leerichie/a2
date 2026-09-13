@@ -401,9 +401,19 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    _loadTodayEntries();
     _loadImports();
     _loadHistory();
     _loadPlan();
+  }
+
+  Future<void> _loadTodayEntries() async {
+    final restored = await const DailyEntryRepository().load(DateTime.now());
+    if (mounted) setState(() => entries.addAll(restored));
+  }
+
+  Future<void> _saveTodayEntries() async {
+    await const DailyEntryRepository().save(DateTime.now(), entries);
   }
 
   Future<void> _loadPlan() async {
@@ -506,7 +516,10 @@ class _AppShellState extends State<AppShell> {
                   backgroundColor: Colors.transparent,
                   builder: (_) => const AddItemSheet(),
                 );
-                if (e != null) setState(() => entries.add(e));
+                if (e != null) {
+                  setState(() => entries.add(e));
+                  await _saveTodayEntries();
+                }
               },
             )
           : null,
@@ -884,6 +897,59 @@ class FoodEntry {
   final int calories, protein;
   final IconData icon;
   final bool isExercise;
+
+  Map<String, Object> toJson() => {
+    'name': name,
+    'time': time,
+    'calories': calories,
+    'protein': protein,
+    'isExercise': isExercise,
+  };
+
+  factory FoodEntry.fromJson(Map<String, dynamic> json) {
+    final isExercise = json['isExercise'] as bool? ?? false;
+    return FoodEntry(
+      json['name'] as String,
+      json['time'] as String,
+      json['calories'] as int,
+      json['protein'] as int,
+      isExercise ? Icons.directions_run : Icons.restaurant,
+      isExercise: isExercise,
+    );
+  }
+}
+
+class DailyEntryRepository {
+  const DailyEntryRepository();
+
+  String keyFor(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return 'daily_entries_${date.year}-$month-$day';
+  }
+
+  Future<void> save(DateTime date, List<FoodEntry> entries) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      keyFor(date),
+      entries.map((entry) => jsonEncode(entry.toJson())).toList(),
+    );
+  }
+
+  Future<List<FoodEntry>> load(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    final restored = <FoodEntry>[];
+    for (final raw in prefs.getStringList(keyFor(date)) ?? const []) {
+      try {
+        restored.add(
+          FoodEntry.fromJson(jsonDecode(raw) as Map<String, dynamic>),
+        );
+      } catch (_) {
+        // A damaged entry must not prevent other local records from loading.
+      }
+    }
+    return restored;
+  }
 }
 
 class FoodTile extends StatelessWidget {
@@ -2370,7 +2436,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+7';
+  String installedVersion = '1.0.0+8';
   String? accountEmail;
 
   @override

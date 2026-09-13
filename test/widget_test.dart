@@ -2,8 +2,10 @@ import 'package:a2/main.dart';
 import 'package:a2/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   test('calculates resting and maintenance energy from body details', () {
     const profile = BodyProfile(
       age: 42,
@@ -38,6 +40,48 @@ void main() {
     await tester.tap(find.text('Estimate & add'));
     await tester.pumpAndSettle();
     expect(find.text('80'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 50));
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      prefs.getKeys().where((key) => key.startsWith('daily_entries_')),
+      isNotEmpty,
+    );
+    final dailyKey = prefs.getKeys().firstWhere(
+      (key) => key.startsWith('daily_entries_'),
+    );
+    expect(prefs.getStringList(dailyKey)!.single, contains('Greek yoghurt'));
+  });
+
+  test('daily entries persist and remain separated by date', () async {
+    const repository = DailyEntryRepository();
+    const meal = FoodEntry(
+      'Greek yoghurt and berries',
+      '08:30',
+      180,
+      14,
+      Icons.restaurant,
+    );
+    await repository.save(DateTime(2026, 9, 13), [meal]);
+    final restored = await repository.load(DateTime(2026, 9, 13));
+    expect(restored.single.name, meal.name);
+    expect(restored.single.calories, meal.calories);
+    expect(await repository.load(DateTime(2026, 9, 14)), isEmpty);
+  });
+
+  test('food and exercise entries survive serialization', () {
+    const exercise = FoodEntry(
+      'Tennis',
+      '18:30 · 60 min',
+      480,
+      0,
+      Icons.directions_run,
+      isExercise: true,
+    );
+    final restored = FoodEntry.fromJson(exercise.toJson());
+    expect(restored.name, exercise.name);
+    expect(restored.calories, 480);
+    expect(restored.isExercise, isTrue);
+    expect(restored.icon, Icons.directions_run);
   });
 
   test('food estimates vary with ingredients and quantities', () {

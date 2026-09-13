@@ -3,6 +3,12 @@
 All notable a2 releases are recorded here. The app uses semantic versions and
 an always-increasing build number: `major.minor.patch+build`.
 
+## 1.0.0+8 — 2026-09-13
+
+- Persisted food, drink and exercise entries in local device storage.
+- Restored the current calendar day's timeline after app restart or emulator
+  refresh while keeping records separated by day.
+
 ## 1.0.0+7 — 2026-09-13
 
 - Fixed an apparently unresponsive web-console login caused by stale browser
