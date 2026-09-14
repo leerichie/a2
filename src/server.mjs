@@ -159,6 +159,7 @@ const decodeHealthPayload = record => {
     bodyProfile: parse(settings.bodyProfile),
     activeDietPlan: parse(settings.activeDietPlan),
     dailyTarget: settings.dailyTarget ?? null,
+    dailyTargetCustom: settings.dailyTargetCustom === true,
     savedDietPlans: (settings.savedDietPlans || []).map(parse).filter(Boolean),
     dailyEntries: payload.dailyEntries || {},
     dailyWater: payload.dailyWater || {},
@@ -327,11 +328,19 @@ const server = createServer(async (req, res) => {
           // upload doesn't already have, per day, instead of dropping it.
           const existingDaily = data.users[appSession.userId]?.payload?.dailyEntries || {};
           const incomingDaily = body.payload?.dailyEntries || {};
+          const deletedDaily = Array.isArray(body.payload?.deletedDailyEntries) ? body.payload.deletedDailyEntries : [];
+          const wasDeleted = (key, item) => deletedDaily.some(deletion => {
+            if (deletion?.dateKey !== key || !deletion.entry) return false;
+            const removed = deletion.entry;
+            if (item.sharedEntryId && removed.sharedEntryId) return item.sharedEntryId === removed.sharedEntryId;
+            return ['name', 'time', 'calories', 'protein', 'carbs', 'sharedFrom']
+              .every(field => (item[field] ?? null) === (removed[field] ?? null));
+          });
           const mergedDaily = {...incomingDaily};
           for (const [key, existingList] of Object.entries(existingDaily)) {
             const incomingList = incomingDaily[key] || [];
             const incomingSerialized = new Set(incomingList.map(item => JSON.stringify(item)));
-            const missingShared = (existingList || []).filter(item => item?.sharedFrom && !incomingSerialized.has(JSON.stringify(item)));
+            const missingShared = (existingList || []).filter(item => item?.sharedFrom && !incomingSerialized.has(JSON.stringify(item)) && !wasDeleted(key, item));
             if (missingShared.length) mergedDaily[key] = [...incomingList, ...missingShared];
           }
           const mergedPayload = {...(body.payload || {}), dailyEntries: mergedDaily};
@@ -356,7 +365,7 @@ const server = createServer(async (req, res) => {
       }
       const data = await loadHealthData();
       const key = `daily_entries_${date}`;
-      const sharedEntry = {...entry, sharedFrom: user.name || user.email};
+      const sharedEntry = {...entry, sharedFrom: user.name || user.email, sharedEntryId: randomUUID()};
       for (const targetId of targetIds) {
         const existing = data.users[targetId]?.payload || {};
         const dailyEntries = {...(existing.dailyEntries || {})};
@@ -464,6 +473,7 @@ const server = createServer(async (req, res) => {
       const users = await loadAppUsers();
       const user = users.find(item => item.id === appUserMatch[1]);
       if (!user) return json(res, 404, {error: 'App user not found'});
+      if (typeof changes.name === 'string') user.name = changes.name.trim().slice(0, 60);
       if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
       if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
       if (typeof changes.aiEnabled === 'boolean') user.aiEnabled = changes.aiEnabled;
@@ -481,6 +491,7 @@ const server = createServer(async (req, res) => {
         await persistSessions();
       }
       const changeNotes = [];
+      if (typeof changes.name === 'string') changeNotes.push(`renamed the app account to ${user.name || user.email} for`);
       if (typeof changes.blocked === 'boolean') changeNotes.push(changes.blocked ? 'blocked' : 'unblocked');
       if (typeof changes.privateSync === 'boolean') changeNotes.push(`turned private sync ${changes.privateSync ? 'on' : 'off'} for`);
       if (typeof changes.aiEnabled === 'boolean') changeNotes.push(`turned AI ${changes.aiEnabled ? 'on' : 'off'} for`);
@@ -515,7 +526,10 @@ const server = createServer(async (req, res) => {
       const settings = {...(existing.settings || {})};
       if (changes.bodyProfile) settings.bodyProfile = JSON.stringify(changes.bodyProfile);
       if (changes.activeDietPlan) settings.activeDietPlan = JSON.stringify(changes.activeDietPlan);
-      if (typeof changes.dailyTarget === 'number') settings.dailyTarget = changes.dailyTarget;
+      if (typeof changes.dailyTarget === 'number') {
+        settings.dailyTarget = changes.dailyTarget;
+        settings.dailyTargetCustom = true;
+      }
       if (typeof changes.waterTargetMl === 'number') settings.waterTargetMl = changes.waterTargetMl;
       if (Array.isArray(changes.savedDietPlans)) {
         settings.savedDietPlans = changes.savedDietPlans.map(plan => JSON.stringify(plan));
