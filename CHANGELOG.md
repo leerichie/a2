@@ -1,5 +1,82 @@
 # Changelog
 
+## 1.0.0+37 — 2026-09-14
+
+- Added the foundation for a centralized, canonical food/exercise text parser
+  (`lib/parser/`, `assets/parser/`) to eventually replace the hardcoded
+  `FoodEstimator`: quantity/fraction/measurement/portion/size/modifier
+  parsing, a merged and de-duplicated 508-food + 55-activity catalogue, and
+  dataset validation tooling. Not yet wired into the food add-flow.
+- Replaced exercise's fixed kcal-per-minute guess with a real MET-based
+  calculation (`activity MET × body weight × duration`), using the new
+  activity catalogue and the user's own body weight from their profile.
+  Calculation evidence (activity, MET, weight, duration) is now stored with
+  each exercise entry.
+- Made AI strictly local-first and non-authoritative for both food and
+  exercise: the offline parser/estimator always runs first, AI is only
+  consulted when it finds nothing at all, and if AI's answer can itself be
+  resolved locally, the local deterministic numbers are kept over AI's.
+  Fixed the Settings AI toggle showing "on" by default when the underlying
+  setting actually defaulted to off.
+
+## 1.0.0+36 — 2026-09-14
+
+- Fixed simple water descriptions such as `glass water`, `half glass water`
+  and `half bottle water` being rejected as incomplete nutrition information.
+- Added glass, bottle and half-portion wording for water across English,
+  Polish, German, French, Spanish and Italian. A glass is treated as 250 ml
+  and a bottle as 500 ml unless an explicit volume is supplied.
+
+## 1.0.0+35 — 2026-09-14
+
+- Fixed deleted shared diary entries returning after restarting or syncing.
+  Deletions now create persistent local markers that are sent to the server,
+  including when the deletion happened while offline.
+- Added stable IDs to newly shared entries and retained compatibility with
+  existing shared entries, so intentional deletion is distinguished from a
+  phone that has simply not downloaded a newly shared entry yet.
+
+## 1.0.0+34 — 2026-09-14
+
+- Removed the separate Add → Water option and shortened the remaining chooser
+  label to simply "Food or drink".
+- Made the normal food-or-drink description recognize water amounts in ml,
+  litres, glasses and bottles and update the dashboard Water card directly.
+- Added offline estimates and automatic Drinks categorization for common drinks
+  including juice, coffee, tea, lemonade and soda. Caloric drinks contribute to
+  the dashboard nutrition totals; plain water contributes only to hydration.
+
+## 1.0.0+33 — 2026-09-14
+
+- Aligned the dashboard calorie target with the body calculation in Settings.
+  Completed body profiles now use their calculated maintenance as the default,
+  so a 70 kg woman and a 90 kg man no longer both receive 2,100 kcal.
+- Preserved deliberate plan limits: once someone edits or selects a diet-plan
+  calorie target, that custom value remains instead of being overwritten by
+  later body-profile calculations.
+- Synced whether the calorie target is calculated or custom so the mobile app
+  and console use the same source of truth.
+
+## 1.0.0+32 — 2026-09-14
+
+- Fixed the dashboard greeting using the hard-coded name Ashley for every
+  account. It now uses the authenticated app user's name and refreshes after
+  the name changes on the server.
+- Added app-user name editing to the console's Details panel. The same account
+  record is used whether registration happened in the app or the console.
+- Stopped new accounts from inheriting or uploading Ashley's bundled private
+  history when they have no history of their own. Local entries remain usable
+  when the private server or Tailscale connection is unavailable.
+
+## 1.0.0+31 — 2026-09-14
+
+- Fixed the offline food estimator silently discarding coleslaw, bell pepper,
+  pickle and fruit smoothie from a multi-item breakfast. The exact reported
+  meal now produces a realistic typical-portion estimate instead of 145 kcal
+  with only 2 g carbohydrate.
+- Added regression coverage for that complete breakfast description so these
+  components cannot disappear unnoticed again.
+
 ## 1.0.0+30 — 2026-09-13
 
 - Console: added a way to create a real app account (with email, the way

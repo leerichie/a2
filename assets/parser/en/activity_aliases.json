@@ -1,0 +1,226 @@
+{
+  "walking": [
+    "walk",
+    "walking",
+    "walking outdoors"
+  ],
+  "brisk_walking": [
+    "brisk walking",
+    "fast walk",
+    "power walk"
+  ],
+  "slow_walking": [
+    "easy walk",
+    "slow walking",
+    "stroll"
+  ],
+  "jogging": [
+    "easy run",
+    "jog",
+    "jogging"
+  ],
+  "running": [
+    "run",
+    "running"
+  ],
+  "fast_running": [
+    "fast run",
+    "fast running",
+    "sprinting"
+  ],
+  "easy_cycling": [
+    "easy bike ride",
+    "easy cycling",
+    "leisure cycling"
+  ],
+  "moderate_cycling": [
+    "bike ride",
+    "cycling",
+    "moderate cycling"
+  ],
+  "vigorous_cycling": [
+    "fast cycling",
+    "hard bike ride",
+    "vigorous cycling"
+  ],
+  "singles_tennis": [
+    "singles",
+    "singles tennis",
+    "tennis singles"
+  ],
+  "doubles_tennis": [
+    "doubles",
+    "doubles tennis",
+    "tennis doubles"
+  ],
+  "badminton": [
+    "badminton"
+  ],
+  "squash": [
+    "squash"
+  ],
+  "table_tennis": [
+    "ping pong",
+    "table tennis"
+  ],
+  "weight_training": [
+    "lifting weights",
+    "strength training",
+    "weight training",
+    "weights"
+  ],
+  "vigorous_weight_training": [
+    "heavy lifting",
+    "heavy weights",
+    "vigorous weight training"
+  ],
+  "bodyweight_training": [
+    "bodyweight training",
+    "bodyweight workout",
+    "calisthenics"
+  ],
+  "circuit_training": [
+    "circuit training",
+    "circuit workout"
+  ],
+  "hiit": [
+    "high intensity interval training",
+    "HIIT",
+    "interval workout"
+  ],
+  "cross_training": [
+    "cross trainer workout",
+    "cross training"
+  ],
+  "elliptical_trainer": [
+    "cross trainer",
+    "elliptical",
+    "elliptical trainer"
+  ],
+  "rowing_machine": [
+    "indoor rowing",
+    "rower",
+    "rowing machine"
+  ],
+  "stationary_bike": [
+    "exercise bike",
+    "spin bike",
+    "stationary bike"
+  ],
+  "spin_class": [
+    "spin class",
+    "spinning"
+  ],
+  "easy_swimming": [
+    "easy swimming",
+    "slow swimming"
+  ],
+  "lap_swimming": [
+    "lap swimming",
+    "swimming laps"
+  ],
+  "vigorous_swimming": [
+    "fast swimming",
+    "vigorous swimming"
+  ],
+  "football": [
+    "football",
+    "soccer"
+  ],
+  "basketball": [
+    "basketball"
+  ],
+  "volleyball": [
+    "volleyball"
+  ],
+  "handball": [
+    "handball"
+  ],
+  "rugby": [
+    "rugby"
+  ],
+  "skiing": [
+    "downhill skiing",
+    "skiing"
+  ],
+  "cross_country_skiing": [
+    "cross-country skiing",
+    "xc skiing"
+  ],
+  "snowboarding": [
+    "snowboarding"
+  ],
+  "yoga": [
+    "yoga"
+  ],
+  "pilates": [
+    "pilates"
+  ],
+  "aerobics": [
+    "aerobics"
+  ],
+  "dance_fitness": [
+    "dance fitness",
+    "zumba"
+  ],
+  "dancing": [
+    "dance",
+    "dancing"
+  ],
+  "fast_dancing": [
+    "fast dancing",
+    "vigorous dancing"
+  ],
+  "hiking": [
+    "hiking"
+  ],
+  "hill_walking": [
+    "hill walking",
+    "walking hills"
+  ],
+  "climbing": [
+    "climbing",
+    "rock climbing"
+  ],
+  "horse_riding": [
+    "horse riding",
+    "horseback riding"
+  ],
+  "gardening": [
+    "garden work",
+    "gardening"
+  ],
+  "heavy_gardening": [
+    "digging garden",
+    "heavy gardening"
+  ],
+  "house_cleaning": [
+    "cleaning",
+    "house cleaning",
+    "housework"
+  ],
+  "vacuuming": [
+    "vacuuming"
+  ],
+  "mopping": [
+    "mopping"
+  ],
+  "washing_car": [
+    "washing car"
+  ],
+  "carrying_groceries": [
+    "carrying groceries",
+    "carrying shopping"
+  ],
+  "stairs": [
+    "climbing stairs",
+    "stair climbing",
+    "stairs"
+  ],
+  "standing": [
+    "standing"
+  ],
+  "sitting": [
+    "sitting"
+  ]
+}

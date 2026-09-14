@@ -1,0 +1,1754 @@
+{
+  "ajvar": [
+    "ajvar"
+  ],
+  "ale": [
+    "ale"
+  ],
+  "almond_milk": [
+    "almond milk"
+  ],
+  "almonds": [
+    "almonds"
+  ],
+  "americano": [
+    "americano"
+  ],
+  "anchovy": [
+    "anchovy"
+  ],
+  "apple": [
+    "apple",
+    "apples"
+  ],
+  "apple_cider_vinegar": [
+    "apple cider vinegar"
+  ],
+  "apple_juice": [
+    "apple juice"
+  ],
+  "apricot": [
+    "apricot",
+    "apricots"
+  ],
+  "artichoke": [
+    "artichoke"
+  ],
+  "asparagus": [
+    "asparagus"
+  ],
+  "aubergine": [
+    "aubergine",
+    "aubergines",
+    "eggplant",
+    "eggplants"
+  ],
+  "avocado": [
+    "avocado",
+    "avocados"
+  ],
+  "back_bacon": [
+    "back bacon"
+  ],
+  "bacon": [
+    "bacon"
+  ],
+  "bagel": [
+    "bagel"
+  ],
+  "baguette": [
+    "baguette"
+  ],
+  "baked_beans": [
+    "baked beans"
+  ],
+  "balsamic_vinegar": [
+    "balsamic vinegar"
+  ],
+  "bamboo_shoots": [
+    "bamboo shoots"
+  ],
+  "banana": [
+    "banana",
+    "bananas"
+  ],
+  "barbecue_sauce": [
+    "barbecue sauce",
+    "bbq sauce"
+  ],
+  "barley_groats": [
+    "barley groats",
+    "kasza jęczmienna",
+    "pearl barley"
+  ],
+  "barszcz": [
+    "barszcz",
+    "beetroot soup",
+    "borscht"
+  ],
+  "basmati_rice": [
+    "basmati rice"
+  ],
+  "bean_sprouts": [
+    "bean sprouts"
+  ],
+  "beef_brisket": [
+    "beef brisket"
+  ],
+  "beef_curry": [
+    "beef curry"
+  ],
+  "beef_jerky": [
+    "beef jerky"
+  ],
+  "beef_ribeye": [
+    "beef ribeye"
+  ],
+  "beef_sirloin": [
+    "beef sirloin"
+  ],
+  "beef_steak": [
+    "beef steak",
+    "steak"
+  ],
+  "beef_stew_meat": [
+    "beef stew meat"
+  ],
+  "beef_tenderloin": [
+    "beef tenderloin"
+  ],
+  "beer": [
+    "beer"
+  ],
+  "beetroot": [
+    "beet",
+    "beetroot",
+    "beets"
+  ],
+  "bell_pepper": [
+    "bell pepper",
+    "bell peppers",
+    "capsicum",
+    "pepper",
+    "peppers",
+    "sweet pepper"
+  ],
+  "bigos": [
+    "bigos",
+    "hunter's stew"
+  ],
+  "biscuit": [
+    "biscuit"
+  ],
+  "black_beans": [
+    "black beans"
+  ],
+  "black_pudding": [
+    "black pudding",
+    "blood sausage",
+    "kaszanka"
+  ],
+  "blackberry": [
+    "blackberries",
+    "blackberry"
+  ],
+  "blackcurrant": [
+    "blackcurrant",
+    "blackcurrants"
+  ],
+  "blue_cheese": [
+    "blue cheese"
+  ],
+  "blueberries": [
+    "blueberries",
+    "blueberry"
+  ],
+  "boiled_egg": [
+    "boiled egg"
+  ],
+  "brandy": [
+    "brandy"
+  ],
+  "brazil_nuts": [
+    "brazil nuts"
+  ],
+  "bread": [
+    "bread",
+    "loaf bread"
+  ],
+  "bread_roll": [
+    "bread roll",
+    "bun",
+    "roll"
+  ],
+  "breaded_pork_cutlet": [
+    "breaded pork cutlet",
+    "kotlet schabowy",
+    "schabowy"
+  ],
+  "brie": [
+    "brie"
+  ],
+  "brioche": [
+    "brioche"
+  ],
+  "broccoli": [
+    "broccoli"
+  ],
+  "brown_lentils": [
+    "brown lentils"
+  ],
+  "brown_rice": [
+    "brown rice"
+  ],
+  "brownie": [
+    "brownie"
+  ],
+  "brussels_sprouts": [
+    "brussels sprouts"
+  ],
+  "buckwheat_groats": [
+    "buckwheat",
+    "buckwheat groats",
+    "kasza gryczana"
+  ],
+  "bulgur": [
+    "bulgur"
+  ],
+  "burger_bun": [
+    "burger bun"
+  ],
+  "burger_patty": [
+    "burger patty"
+  ],
+  "butter": [
+    "butter"
+  ],
+  "butter_beans": [
+    "butter beans"
+  ],
+  "buttermilk": [
+    "buttermilk",
+    "maślanka"
+  ],
+  "button_mushroom": [
+    "button mushroom"
+  ],
+  "cabbage": [
+    "cabbage"
+  ],
+  "caesar_dressing": [
+    "Caesar dressing"
+  ],
+  "caesar_salad": [
+    "Caesar salad"
+  ],
+  "camembert": [
+    "camembert"
+  ],
+  "cannellini_beans": [
+    "cannellini beans"
+  ],
+  "cappuccino": [
+    "cappuccino"
+  ],
+  "caramel": [
+    "caramel"
+  ],
+  "carbonara": [
+    "carbonara"
+  ],
+  "carp": [
+    "carp"
+  ],
+  "carrot": [
+    "carrot"
+  ],
+  "cashews": [
+    "cashews"
+  ],
+  "catfish": [
+    "catfish"
+  ],
+  "cauliflower": [
+    "cauliflower"
+  ],
+  "celeriac": [
+    "celeriac"
+  ],
+  "celery": [
+    "celery"
+  ],
+  "cereal_bar": [
+    "cereal bar"
+  ],
+  "champagne": [
+    "champagne"
+  ],
+  "chard": [
+    "chard"
+  ],
+  "cheddar": [
+    "cheddar",
+    "cheddar cheese"
+  ],
+  "cheese_spread": [
+    "cheese spread"
+  ],
+  "cheeseburger": [
+    "burger with cheese",
+    "cheeseburger"
+  ],
+  "cheesecake": [
+    "cheesecake"
+  ],
+  "cherry": [
+    "cherries",
+    "cherry"
+  ],
+  "chia_seeds": [
+    "chia seeds"
+  ],
+  "chicken_breast": [
+    "breast of chicken",
+    "chicken breast",
+    "chicken breast fillet",
+    "chicken breasts",
+    "chicken filet",
+    "chicken fillet"
+  ],
+  "chicken_curry": [
+    "chicken curry"
+  ],
+  "chicken_drumstick": [
+    "chicken drumstick"
+  ],
+  "chicken_nuggets": [
+    "chicken nuggets",
+    "nuggets"
+  ],
+  "chicken_soup": [
+    "chicken soup"
+  ],
+  "chicken_thigh": [
+    "chicken thigh",
+    "chicken thighs"
+  ],
+  "chicken_wing": [
+    "chicken wing"
+  ],
+  "chickpeas": [
+    "chickpeas"
+  ],
+  "chicory": [
+    "chicory"
+  ],
+  "chilli_con_carne": [
+    "chili con carne",
+    "chilli con carne"
+  ],
+  "chilli_sauce": [
+    "chili sauce",
+    "chilli sauce"
+  ],
+  "chocolate_bar": [
+    "chocolate bar"
+  ],
+  "chorizo": [
+    "chorizo"
+  ],
+  "cider": [
+    "cider"
+  ],
+  "clam": [
+    "clam"
+  ],
+  "clementine": [
+    "clementine",
+    "clementines"
+  ],
+  "coca_cola": [
+    "coca cola",
+    "coca-cola",
+    "Coca-Cola",
+    "coke"
+  ],
+  "coconut": [
+    "coconut",
+    "coconuts"
+  ],
+  "coconut_oil": [
+    "coconut oil"
+  ],
+  "cod": [
+    "cod"
+  ],
+  "coffee": [
+    "black coffee",
+    "coffee"
+  ],
+  "coke_zero": [
+    "coca cola zero",
+    "coca-cola zero",
+    "Coke Zero",
+    "coke zero",
+    "zero coke"
+  ],
+  "cola": [
+    "cola"
+  ],
+  "coleslaw": [
+    "cole slaw",
+    "coleslaw",
+    "slaw"
+  ],
+  "condensed_milk": [
+    "condensed milk"
+  ],
+  "cooked_ham": [
+    "cooked ham"
+  ],
+  "cookie": [
+    "cookie"
+  ],
+  "coriander_leaves": [
+    "cilantro",
+    "coriander",
+    "coriander leaves"
+  ],
+  "corn_cake": [
+    "corn cake"
+  ],
+  "corn_flour": [
+    "corn flour"
+  ],
+  "cornstarch": [
+    "cornstarch"
+  ],
+  "cottage_cheese": [
+    "cottage cheese",
+    "curd cottage cheese"
+  ],
+  "cottage_cheese_with_chives": [
+    "cottage cheese with chives",
+    "twaróg ze szczypiorkiem"
+  ],
+  "courgette": [
+    "courgette",
+    "courgettes",
+    "zucchini",
+    "zucchinis"
+  ],
+  "couscous": [
+    "couscous"
+  ],
+  "crab": [
+    "crab"
+  ],
+  "cracker": [
+    "cracker"
+  ],
+  "cranberry": [
+    "cranberries",
+    "cranberry"
+  ],
+  "crayfish": [
+    "crayfish"
+  ],
+  "cream_cheese": [
+    "cream cheese",
+    "soft cheese"
+  ],
+  "cream_soup": [
+    "cream soup"
+  ],
+  "crepe": [
+    "crepe"
+  ],
+  "crispbread": [
+    "crispbread",
+    "knäckebröd",
+    "rye crispbread"
+  ],
+  "crisps": [
+    "crisps",
+    "potato chips",
+    "potato crisps"
+  ],
+  "croissant": [
+    "croissant"
+  ],
+  "cucumber": [
+    "cucumber",
+    "cucumbers"
+  ],
+  "cupcake": [
+    "cupcake"
+  ],
+  "curry": [
+    "curry"
+  ],
+  "custard": [
+    "custard"
+  ],
+  "dark_chocolate": [
+    "dark chocolate"
+  ],
+  "date": [
+    "date",
+    "dates"
+  ],
+  "diet_coke": [
+    "diet coca cola",
+    "diet coca-cola",
+    "diet coke",
+    "Diet Coke"
+  ],
+  "dijon_mustard": [
+    "Dijon mustard"
+  ],
+  "double_espresso": [
+    "double espresso"
+  ],
+  "doughnut": [
+    "doughnut"
+  ],
+  "dragon_fruit": [
+    "dragon fruit",
+    "dragon fruits"
+  ],
+  "duck_breast": [
+    "duck breast"
+  ],
+  "duck_egg": [
+    "duck egg"
+  ],
+  "duck_leg": [
+    "duck leg"
+  ],
+  "edam": [
+    "edam"
+  ],
+  "edamame": [
+    "edamame"
+  ],
+  "eel": [
+    "eel"
+  ],
+  "egg": [
+    "chicken egg",
+    "egg",
+    "eggs",
+    "hen egg"
+  ],
+  "egg_noodles": [
+    "egg noodles"
+  ],
+  "egg_white": [
+    "egg white"
+  ],
+  "egg_yolk": [
+    "egg yolk"
+  ],
+  "elderberry": [
+    "elderberries",
+    "elderberry"
+  ],
+  "emmental": [
+    "emmental"
+  ],
+  "energy_drink": [
+    "energy drink",
+    "energy drinks"
+  ],
+  "espresso": [
+    "espresso"
+  ],
+  "evaporated_milk": [
+    "evaporated milk"
+  ],
+  "falafel": [
+    "falafel"
+  ],
+  "fennel": [
+    "fennel"
+  ],
+  "feta": [
+    "feta"
+  ],
+  "fig": [
+    "fig",
+    "figs"
+  ],
+  "fish_and_chips": [
+    "fish and chips"
+  ],
+  "flaki": [
+    "flaki",
+    "tripe soup"
+  ],
+  "flat_white": [
+    "flat white"
+  ],
+  "flaxseed": [
+    "flaxseed"
+  ],
+  "focaccia": [
+    "focaccia"
+  ],
+  "frankfurter": [
+    "frankfurter"
+  ],
+  "fried_chicken": [
+    "fried chicken"
+  ],
+  "fried_egg": [
+    "fried egg"
+  ],
+  "fried_rice": [
+    "fried rice"
+  ],
+  "fries": [
+    "chips",
+    "french fries",
+    "fries"
+  ],
+  "fruit_tea": [
+    "fruit tea"
+  ],
+  "fruit_yoghurt": [
+    "fruit yoghurt"
+  ],
+  "fusilli": [
+    "fusilli"
+  ],
+  "garlic": [
+    "garlic"
+  ],
+  "garlic_sauce": [
+    "garlic sauce"
+  ],
+  "ghee": [
+    "ghee"
+  ],
+  "gherkin": [
+    "gherkin",
+    "pickle",
+    "pickled cucumber"
+  ],
+  "gin": [
+    "gin"
+  ],
+  "go_bki": [
+    "golabki",
+    "gołąbki",
+    "stuffed cabbage rolls"
+  ],
+  "goat_cheese": [
+    "goat cheese"
+  ],
+  "goose_breast": [
+    "goose breast"
+  ],
+  "gooseberry": [
+    "gooseberries",
+    "gooseberry"
+  ],
+  "gouda": [
+    "gouda"
+  ],
+  "goulash": [
+    "goulash",
+    "gulasz"
+  ],
+  "granola_bar": [
+    "granola bar"
+  ],
+  "grapefruit": [
+    "grapefruit",
+    "grapefruits"
+  ],
+  "grapefruit_juice": [
+    "grapefruit juice"
+  ],
+  "grapes": [
+    "grape",
+    "grapes"
+  ],
+  "greek_salad": [
+    "Greek salad"
+  ],
+  "greek_yoghurt": [
+    "greek yoghurt",
+    "greek yogurt"
+  ],
+  "green_beans": [
+    "green beans"
+  ],
+  "green_lentils": [
+    "green lentils"
+  ],
+  "green_pepper": [
+    "green pepper"
+  ],
+  "green_tea": [
+    "green tea"
+  ],
+  "gruyere": [
+    "gruyere"
+  ],
+  "guacamole": [
+    "guacamole"
+  ],
+  "guava": [
+    "guava",
+    "guavas"
+  ],
+  "gummy_sweets": [
+    "gummy sweets"
+  ],
+  "gyros": [
+    "gyros"
+  ],
+  "haddock": [
+    "haddock"
+  ],
+  "hake": [
+    "hake"
+  ],
+  "halibut": [
+    "halibut"
+  ],
+  "halloumi": [
+    "halloumi"
+  ],
+  "ham": [
+    "ham"
+  ],
+  "hamburger": [
+    "burger",
+    "hamburger"
+  ],
+  "hard_candy": [
+    "hard candy"
+  ],
+  "hazelnuts": [
+    "hazelnuts"
+  ],
+  "hemp_seeds": [
+    "hemp seeds"
+  ],
+  "herbal_tea": [
+    "herbal tea"
+  ],
+  "herring": [
+    "herring"
+  ],
+  "horseradish": [
+    "horseradish"
+  ],
+  "hot_dog": [
+    "hot dog"
+  ],
+  "hot_dog_bun": [
+    "hot dog bun"
+  ],
+  "hot_dog_sausage": [
+    "hot dog sausage"
+  ],
+  "hot_sauce": [
+    "hot sauce"
+  ],
+  "hummus": [
+    "hummus"
+  ],
+  "ice_cream": [
+    "ice cream"
+  ],
+  "iceberg_lettuce": [
+    "iceberg lettuce"
+  ],
+  "instant_coffee": [
+    "instant coffee"
+  ],
+  "ipa": [
+    "IPA"
+  ],
+  "isotonic_drink": [
+    "isotonic drink"
+  ],
+  "jasmine_rice": [
+    "jasmine rice"
+  ],
+  "kabanos_sausage": [
+    "kabanos",
+    "kabanos sausage",
+    "kabanosy"
+  ],
+  "kale": [
+    "kale"
+  ],
+  "kebab": [
+    "doner kebab",
+    "döner",
+    "kebab"
+  ],
+  "kefir": [
+    "kefir",
+    "milk kefir"
+  ],
+  "ketchup": [
+    "ketchup",
+    "tomato ketchup"
+  ],
+  "king_prawn": [
+    "king prawn"
+  ],
+  "kiwi_fruit": [
+    "kiwi fruit",
+    "kiwi fruits"
+  ],
+  "lactose_free_milk": [
+    "lactose-free milk"
+  ],
+  "lager": [
+    "lager"
+  ],
+  "lamb_chop": [
+    "lamb chop"
+  ],
+  "lamb_leg": [
+    "lamb leg"
+  ],
+  "lamb_shoulder": [
+    "lamb shoulder"
+  ],
+  "lasagne": [
+    "lasagna",
+    "lasagne"
+  ],
+  "lasagne_sheets": [
+    "lasagne sheets"
+  ],
+  "latte": [
+    "latte"
+  ],
+  "leek": [
+    "leek"
+  ],
+  "lemon": [
+    "lemon",
+    "lemons"
+  ],
+  "lemon_lime_soda": [
+    "lemon-lime soda"
+  ],
+  "lemonade": [
+    "lemonade"
+  ],
+  "lettuce": [
+    "lettuce"
+  ],
+  "light_mayonnaise": [
+    "light mayo",
+    "light mayonnaise",
+    "lite mayo",
+    "reduced fat mayo",
+    "reduced-fat mayonnaise"
+  ],
+  "lime": [
+    "lime",
+    "limes"
+  ],
+  "linseed": [
+    "linseed"
+  ],
+  "liqueur": [
+    "liqueur"
+  ],
+  "liver_sausage": [
+    "liver sausage"
+  ],
+  "lobster": [
+    "lobster"
+  ],
+  "lychee": [
+    "lychee",
+    "lychees"
+  ],
+  "macadamia_nuts": [
+    "macadamia nuts"
+  ],
+  "macaroni": [
+    "macaroni"
+  ],
+  "mackerel": [
+    "mackerel"
+  ],
+  "malt_vinegar": [
+    "malt vinegar"
+  ],
+  "mandarin": [
+    "mandarin",
+    "mandarins"
+  ],
+  "mango": [
+    "mango",
+    "mangos"
+  ],
+  "margarine": [
+    "margarine"
+  ],
+  "marshmallow": [
+    "marshmallow"
+  ],
+  "mascarpone": [
+    "mascarpone"
+  ],
+  "mayonnaise": [
+    "mayo",
+    "mayonaise",
+    "mayonnaise"
+  ],
+  "meal_replacement_shake": [
+    "meal replacement shake"
+  ],
+  "meatballs": [
+    "meatballs"
+  ],
+  "melon": [
+    "melon",
+    "melons"
+  ],
+  "milk": [
+    "milk"
+  ],
+  "milk_chocolate": [
+    "milk chocolate"
+  ],
+  "milkshake": [
+    "milkshake"
+  ],
+  "millet_groats": [
+    "kasza jaglana",
+    "millet",
+    "millet groats"
+  ],
+  "minced_beef": [
+    "beef mince",
+    "ground beef",
+    "hamburger meat",
+    "minced beef"
+  ],
+  "minced_chicken": [
+    "chicken mince",
+    "ground chicken",
+    "minced chicken"
+  ],
+  "minced_lamb": [
+    "minced lamb"
+  ],
+  "minced_meat_cutlet": [
+    "kotlet mielony",
+    "mielony",
+    "minced meat cutlet"
+  ],
+  "minced_pork": [
+    "ground pork",
+    "minced pork",
+    "pork mince"
+  ],
+  "minced_turkey": [
+    "ground turkey",
+    "minced turkey",
+    "turkey mince"
+  ],
+  "mineral_water": [
+    "mineral water"
+  ],
+  "mizeria": [
+    "mizeria",
+    "Polish cucumber salad"
+  ],
+  "mocha": [
+    "mocha"
+  ],
+  "mortadella": [
+    "mortadella"
+  ],
+  "mozzarella": [
+    "mozzarella",
+    "mozzarella cheese"
+  ],
+  "muffin": [
+    "muffin"
+  ],
+  "mulberry": [
+    "mulberries",
+    "mulberry"
+  ],
+  "multigrain_bread": [
+    "multigrain bread"
+  ],
+  "multivitamin_juice": [
+    "multivitamin juice"
+  ],
+  "mushroom": [
+    "mushroom"
+  ],
+  "mussel": [
+    "mussel"
+  ],
+  "mustard": [
+    "mustard",
+    "yellow mustard"
+  ],
+  "naan_bread": [
+    "naan bread"
+  ],
+  "nectarine": [
+    "nectarine",
+    "nectarines"
+  ],
+  "oat_bran": [
+    "oat bran"
+  ],
+  "oat_milk": [
+    "oat milk"
+  ],
+  "oat_yoghurt": [
+    "oat yoghurt"
+  ],
+  "oats": [
+    "oatmeal",
+    "oats",
+    "porridge oats"
+  ],
+  "octopus": [
+    "octopus"
+  ],
+  "okra": [
+    "okra"
+  ],
+  "olive_oil": [
+    "evoo",
+    "extra virgin olive oil",
+    "olive oil"
+  ],
+  "omelette": [
+    "omelette"
+  ],
+  "onion": [
+    "onion"
+  ],
+  "orange": [
+    "orange",
+    "oranges"
+  ],
+  "orange_juice": [
+    "OJ",
+    "orange juice"
+  ],
+  "orange_soda": [
+    "orange soda"
+  ],
+  "oyster": [
+    "oyster"
+  ],
+  "p_t": [
+    "pâté"
+  ],
+  "paella": [
+    "paella"
+  ],
+  "pak_choi": [
+    "pak choi"
+  ],
+  "pancake": [
+    "pancake"
+  ],
+  "papaya": [
+    "papaya",
+    "papayas"
+  ],
+  "parmesan": [
+    "parmesan"
+  ],
+  "parsnip": [
+    "parsnip"
+  ],
+  "passion_fruit": [
+    "passion fruit",
+    "passion fruits"
+  ],
+  "pasta": [
+    "pasta"
+  ],
+  "pea": [
+    "pea"
+  ],
+  "peach": [
+    "peach",
+    "peachs"
+  ],
+  "peanuts": [
+    "peanuts"
+  ],
+  "pear": [
+    "pear",
+    "pears"
+  ],
+  "pecans": [
+    "pecans"
+  ],
+  "pecorino": [
+    "pecorino"
+  ],
+  "penne": [
+    "penne"
+  ],
+  "pepperoni": [
+    "pepperoni"
+  ],
+  "perch": [
+    "perch"
+  ],
+  "persimmon": [
+    "persimmon",
+    "persimmons"
+  ],
+  "pesto": [
+    "pesto"
+  ],
+  "pho": [
+    "pho"
+  ],
+  "pickled_beetroot": [
+    "pickled beetroot"
+  ],
+  "pickled_herring": [
+    "pickled herring"
+  ],
+  "pierogi": [
+    "pierogi",
+    "pierogies",
+    "Polish dumplings"
+  ],
+  "pike": [
+    "pike"
+  ],
+  "pineapple": [
+    "pineapple",
+    "pineapples"
+  ],
+  "pistachios": [
+    "pistachios"
+  ],
+  "pita_bread": [
+    "pita bread"
+  ],
+  "pizza": [
+    "pizza"
+  ],
+  "plaice": [
+    "plaice"
+  ],
+  "plain_yoghurt": [
+    "natural yoghurt",
+    "natural yogurt",
+    "plain yoghurt",
+    "plain yogurt"
+  ],
+  "plum": [
+    "plum",
+    "plums"
+  ],
+  "poached_egg": [
+    "poached egg"
+  ],
+  "poke_bowl": [
+    "poke bowl"
+  ],
+  "polenta": [
+    "polenta"
+  ],
+  "polish_sausage": [
+    "kielbasa",
+    "kiełbasa",
+    "Polish sausage"
+  ],
+  "pollock": [
+    "Alaska pollock",
+    "pollock"
+  ],
+  "pomegranate": [
+    "pomegranate",
+    "pomegranates"
+  ],
+  "popcorn": [
+    "popcorn"
+  ],
+  "poppy_seeds": [
+    "poppy seeds"
+  ],
+  "pork_belly": [
+    "pork belly"
+  ],
+  "pork_chop": [
+    "pork chop"
+  ],
+  "pork_loin": [
+    "pork loin"
+  ],
+  "pork_ribs": [
+    "pork ribs"
+  ],
+  "pork_tenderloin": [
+    "pork tenderloin"
+  ],
+  "porter": [
+    "porter"
+  ],
+  "portobello_mushroom": [
+    "portobello mushroom"
+  ],
+  "potato": [
+    "potato",
+    "potatoes"
+  ],
+  "potato_pancakes": [
+    "placki ziemniaczane",
+    "potato pancakes"
+  ],
+  "potato_starch": [
+    "potato starch"
+  ],
+  "pretzel": [
+    "pretzel"
+  ],
+  "processed_cheese": [
+    "processed cheese"
+  ],
+  "prosciutto": [
+    "prosciutto"
+  ],
+  "prosecco": [
+    "prosecco"
+  ],
+  "protein_bar": [
+    "protein bar"
+  ],
+  "protein_shake": [
+    "protein shake"
+  ],
+  "pudding": [
+    "pudding"
+  ],
+  "pumpkin": [
+    "pumpkin"
+  ],
+  "pumpkin_seeds": [
+    "pumpkin seeds"
+  ],
+  "quail_egg": [
+    "quail egg"
+  ],
+  "quark": [
+    "curd cheese",
+    "farmer cheese",
+    "quark",
+    "twaróg"
+  ],
+  "quince": [
+    "quince",
+    "quinces"
+  ],
+  "quinoa": [
+    "quinoa"
+  ],
+  "rabbit": [
+    "rabbit"
+  ],
+  "radish": [
+    "radish"
+  ],
+  "ramen": [
+    "ramen"
+  ],
+  "rapeseed_oil": [
+    "canola oil",
+    "rapeseed oil"
+  ],
+  "raspberry": [
+    "raspberries",
+    "raspberry"
+  ],
+  "red_cabbage": [
+    "red cabbage"
+  ],
+  "red_kidney_beans": [
+    "red kidney beans"
+  ],
+  "red_lentils": [
+    "red lentils"
+  ],
+  "red_onion": [
+    "red onion"
+  ],
+  "red_pepper": [
+    "red pepper"
+  ],
+  "red_wine": [
+    "red wine"
+  ],
+  "redcurrant": [
+    "redcurrant",
+    "redcurrants"
+  ],
+  "rhubarb": [
+    "rhubarb",
+    "rhubarbs"
+  ],
+  "rice": [
+    "rice"
+  ],
+  "rice_cake": [
+    "rice cake"
+  ],
+  "rice_milk": [
+    "rice milk"
+  ],
+  "rice_noodles": [
+    "rice noodles"
+  ],
+  "ricotta": [
+    "ricotta"
+  ],
+  "risotto": [
+    "risotto"
+  ],
+  "risotto_rice": [
+    "risotto rice"
+  ],
+  "rocket": [
+    "arugula",
+    "rocket"
+  ],
+  "rolled_oats": [
+    "rolled oats"
+  ],
+  "romaine_lettuce": [
+    "romaine lettuce"
+  ],
+  "ros": [
+    "broth",
+    "Polish chicken soup",
+    "rosol",
+    "rosół"
+  ],
+  "ros_wine": [
+    "rosé wine"
+  ],
+  "rum": [
+    "rum"
+  ],
+  "rye_bread": [
+    "rye bread"
+  ],
+  "rye_flour": [
+    "rye flour"
+  ],
+  "salami": [
+    "salami"
+  ],
+  "salmon": [
+    "salmon",
+    "salmon filet",
+    "salmon fillet"
+  ],
+  "salsa": [
+    "salsa"
+  ],
+  "salted_nuts": [
+    "salted nuts"
+  ],
+  "sardine": [
+    "sardine"
+  ],
+  "sauerkraut": [
+    "sauerkraut"
+  ],
+  "savoy_cabbage": [
+    "savoy cabbage"
+  ],
+  "scallop": [
+    "scallop"
+  ],
+  "scrambled_egg": [
+    "scrambled egg"
+  ],
+  "sea_bass": [
+    "sea bass"
+  ],
+  "sea_bream": [
+    "sea bream"
+  ],
+  "semi_skimmed_milk": [
+    "2% milk",
+    "reduced fat milk",
+    "reduced-fat milk",
+    "semi skimmed milk",
+    "semi-skimmed milk"
+  ],
+  "semolina": [
+    "kasza manna",
+    "semolina"
+  ],
+  "sesame_oil": [
+    "sesame oil"
+  ],
+  "sesame_seeds": [
+    "sesame seeds"
+  ],
+  "shawarma": [
+    "shawarma"
+  ],
+  "sheep_cheese": [
+    "sheep cheese"
+  ],
+  "shrimp": [
+    "prawn",
+    "prawns",
+    "shrimp",
+    "shrimps"
+  ],
+  "skimmed_milk": [
+    "fat free milk",
+    "fat-free milk",
+    "skim milk",
+    "skimmed milk"
+  ],
+  "skyr": [
+    "Icelandic yoghurt",
+    "Icelandic yogurt",
+    "skyr"
+  ],
+  "smoked_ham": [
+    "smoked ham"
+  ],
+  "smoked_mackerel": [
+    "smoked mackerel"
+  ],
+  "smoked_salmon": [
+    "smoked salmon"
+  ],
+  "smoked_trout": [
+    "smoked trout"
+  ],
+  "smoothie": [
+    "smoothie"
+  ],
+  "sole": [
+    "sole"
+  ],
+  "sorbet": [
+    "sorbet"
+  ],
+  "sour_cream": [
+    "sour cream",
+    "soured cream",
+    "śmietana"
+  ],
+  "sourdough_bread": [
+    "sourdough bread"
+  ],
+  "soy_milk": [
+    "soy milk"
+  ],
+  "soy_sauce": [
+    "soy sauce"
+  ],
+  "soy_yoghurt": [
+    "soy yoghurt"
+  ],
+  "spaghetti": [
+    "spaghetti"
+  ],
+  "spaghetti_bolognese": [
+    "bolognese",
+    "spaghetti bolognese"
+  ],
+  "sparkling_water": [
+    "carbonated water",
+    "fizzy water",
+    "sparkling water"
+  ],
+  "sparkling_wine": [
+    "sparkling wine"
+  ],
+  "spinach": [
+    "spinach"
+  ],
+  "split_peas": [
+    "split peas"
+  ],
+  "sponge_cake": [
+    "sponge cake"
+  ],
+  "sports_drink": [
+    "sports drink"
+  ],
+  "spring_onion": [
+    "green onion",
+    "green onions",
+    "scallion",
+    "scallions",
+    "spring onion",
+    "spring onions"
+  ],
+  "squid": [
+    "squid"
+  ],
+  "stew": [
+    "stew"
+  ],
+  "stir_fry": [
+    "stir fry",
+    "stir-fry"
+  ],
+  "stout": [
+    "stout"
+  ],
+  "strawberry": [
+    "strawberries",
+    "strawberry"
+  ],
+  "streaky_bacon": [
+    "streaky bacon"
+  ],
+  "sunflower_oil": [
+    "sunflower oil"
+  ],
+  "sunflower_seeds": [
+    "sunflower seeds"
+  ],
+  "surimi": [
+    "surimi"
+  ],
+  "sushi": [
+    "sushi"
+  ],
+  "swede": [
+    "rutabaga",
+    "swede"
+  ],
+  "sweet_potato": [
+    "sweet potato"
+  ],
+  "sweetcorn": [
+    "corn",
+    "maize",
+    "sweetcorn"
+  ],
+  "swordfish": [
+    "swordfish"
+  ],
+  "tartar_sauce": [
+    "tartar sauce",
+    "tartare sauce"
+  ],
+  "tea": [
+    "black tea",
+    "tea"
+  ],
+  "tempeh": [
+    "tempeh"
+  ],
+  "tequila": [
+    "tequila"
+  ],
+  "thousand_island_dressing": [
+    "thousand island dressing"
+  ],
+  "toffee": [
+    "toffee"
+  ],
+  "tofu": [
+    "tofu"
+  ],
+  "tomato": [
+    "tomato",
+    "tomatoes"
+  ],
+  "tomato_juice": [
+    "tomato juice"
+  ],
+  "tomato_paste": [
+    "tomato paste",
+    "tomato purée"
+  ],
+  "tomato_sauce": [
+    "tomato sauce"
+  ],
+  "tomato_soup": [
+    "tomato soup"
+  ],
+  "tonic_water": [
+    "tonic water"
+  ],
+  "tortilla_chips": [
+    "tortilla chips"
+  ],
+  "trout": [
+    "trout"
+  ],
+  "tuna": [
+    "canned tuna",
+    "tinned tuna",
+    "tuna",
+    "tuna fish"
+  ],
+  "tuna_in_brine": [
+    "canned tuna in brine",
+    "tinned tuna in brine",
+    "tuna in brine"
+  ],
+  "tuna_in_oil": [
+    "canned tuna in oil",
+    "tinned tuna in oil",
+    "tuna in oil"
+  ],
+  "tuna_salad": [
+    "tuna salad"
+  ],
+  "tuna_steak": [
+    "tuna steak"
+  ],
+  "turkey_breast": [
+    "turkey breast"
+  ],
+  "turkey_thigh": [
+    "turkey thigh"
+  ],
+  "turnip": [
+    "turnip"
+  ],
+  "urek": [
+    "sour rye soup",
+    "zurek",
+    "żurek"
+  ],
+  "veal_cutlet": [
+    "veal cutlet"
+  ],
+  "veal_steak": [
+    "veal steak"
+  ],
+  "vegetable_soup": [
+    "vegetable soup"
+  ],
+  "venison": [
+    "venison"
+  ],
+  "vinaigrette": [
+    "vinaigrette"
+  ],
+  "vinegar": [
+    "vinegar"
+  ],
+  "vodka": [
+    "vodka"
+  ],
+  "waffle": [
+    "waffle"
+  ],
+  "walnuts": [
+    "walnuts"
+  ],
+  "water": [
+    "still water",
+    "tap water",
+    "water"
+  ],
+  "watercress": [
+    "watercress"
+  ],
+  "watermelon": [
+    "watermelon",
+    "watermelons"
+  ],
+  "wheat_flour": [
+    "wheat flour"
+  ],
+  "wheat_pasta": [
+    "wheat pasta"
+  ],
+  "whisky": [
+    "whiskey",
+    "whisky"
+  ],
+  "white_beans": [
+    "white beans"
+  ],
+  "white_bread": [
+    "white bread"
+  ],
+  "white_cabbage": [
+    "white cabbage"
+  ],
+  "white_chocolate": [
+    "white chocolate"
+  ],
+  "white_rice": [
+    "white rice"
+  ],
+  "white_wine": [
+    "white wine"
+  ],
+  "whole_chicken": [
+    "whole chicken"
+  ],
+  "whole_milk": [
+    "full fat milk",
+    "full-fat milk",
+    "whole milk"
+  ],
+  "wholegrain_mustard": [
+    "wholegrain mustard"
+  ],
+  "wholemeal_bread": [
+    "brown bread",
+    "whole wheat bread",
+    "whole-wheat bread",
+    "wholemeal bread"
+  ],
+  "wholemeal_flour": [
+    "wholemeal flour"
+  ],
+  "wholewheat_pasta": [
+    "wholewheat pasta"
+  ],
+  "wild_boar": [
+    "wild boar"
+  ],
+  "wild_rice": [
+    "wild rice"
+  ],
+  "worcestershire_sauce": [
+    "Worcester sauce",
+    "Worcestershire sauce"
+  ],
+  "wrap": [
+    "tortilla wrap",
+    "tortilla wraps",
+    "wrap",
+    "wraps"
+  ],
+  "yellow_pepper": [
+    "yellow pepper"
+  ],
+  "yoghurt": [
+    "yoghurt",
+    "yogurt"
+  ]
+}

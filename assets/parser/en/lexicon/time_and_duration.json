@@ -1,0 +1,51 @@
+{
+  "units": {
+    "second": [
+      "s",
+      "sec",
+      "secs",
+      "second",
+      "seconds"
+    ],
+    "minute": [
+      "m",
+      "min",
+      "mins",
+      "minute",
+      "minutes"
+    ],
+    "hour": [
+      "h",
+      "hr",
+      "hrs",
+      "hour",
+      "hours"
+    ]
+  },
+  "fractions": {
+    "half an hour": 30,
+    "half hour": 30,
+    "quarter of an hour": 15,
+    "quarter hour": 15,
+    "three quarters of an hour": 45,
+    "an hour": 60,
+    "one hour": 60,
+    "one and a half hours": 90,
+    "1.5 hours": 90,
+    "two hours": 120
+  },
+  "patterns": [
+    "20 min",
+    "20 mins",
+    "20 minutes",
+    "0.5 h",
+    "0.5 hr",
+    "0.5 hour",
+    "1h",
+    "1 hr",
+    "1 hour",
+    "1:30",
+    "90 min",
+    "90 minutes"
+  ]
+}

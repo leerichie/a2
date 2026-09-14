@@ -1,0 +1,89 @@
+{
+  "canonical": {
+    "tiny": [
+      "tiny",
+      "very small"
+    ],
+    "mini": [
+      "mini",
+      "miniature"
+    ],
+    "extra_small": [
+      "extra small",
+      "xs"
+    ],
+    "small": [
+      "small",
+      "sm",
+      "smallish"
+    ],
+    "medium": [
+      "medium",
+      "med",
+      "regular",
+      "average"
+    ],
+    "large": [
+      "large",
+      "lg",
+      "big"
+    ],
+    "extra_large": [
+      "extra large",
+      "xl",
+      "very large"
+    ],
+    "jumbo": [
+      "jumbo",
+      "giant"
+    ]
+  },
+  "fullness": {
+    "quarter": [
+      "quarter",
+      "one quarter",
+      "1/4",
+      "¼"
+    ],
+    "third": [
+      "third",
+      "one third",
+      "1/3",
+      "⅓"
+    ],
+    "half": [
+      "half",
+      "half full",
+      "half-full",
+      "1/2",
+      "½",
+      "about half",
+      "roughly half",
+      "nearly half"
+    ],
+    "three_quarters": [
+      "three quarters",
+      "3/4",
+      "¾"
+    ],
+    "full": [
+      "full",
+      "whole",
+      "entire",
+      "filled"
+    ],
+    "almost_full": [
+      "almost full",
+      "nearly full",
+      "just under full"
+    ],
+    "over_half": [
+      "just over half",
+      "more than half"
+    ],
+    "under_half": [
+      "just under half",
+      "less than half"
+    ]
+  }
+}

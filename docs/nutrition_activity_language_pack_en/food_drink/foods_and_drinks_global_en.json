@@ -1,0 +1,4228 @@
+[
+  {
+    "id": "apple",
+    "canonical": "apple",
+    "aliases": [
+      "apple",
+      "apples"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "apricot",
+    "canonical": "apricot",
+    "aliases": [
+      "apricot",
+      "apricots"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "avocado",
+    "canonical": "avocado",
+    "aliases": [
+      "avocado",
+      "avocados"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "banana",
+    "canonical": "banana",
+    "aliases": [
+      "banana",
+      "bananas"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "blackberry",
+    "canonical": "blackberry",
+    "aliases": [
+      "blackberry",
+      "blackberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "blackcurrant",
+    "canonical": "blackcurrant",
+    "aliases": [
+      "blackcurrant",
+      "blackcurrants"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "blueberry",
+    "canonical": "blueberry",
+    "aliases": [
+      "blueberry",
+      "blueberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "cherry",
+    "canonical": "cherry",
+    "aliases": [
+      "cherry",
+      "cherrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "clementine",
+    "canonical": "clementine",
+    "aliases": [
+      "clementine",
+      "clementines"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "cranberry",
+    "canonical": "cranberry",
+    "aliases": [
+      "cranberry",
+      "cranberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "date",
+    "canonical": "date",
+    "aliases": [
+      "date",
+      "dates"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "fig",
+    "canonical": "fig",
+    "aliases": [
+      "fig",
+      "figs"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "gooseberry",
+    "canonical": "gooseberry",
+    "aliases": [
+      "gooseberry",
+      "gooseberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "grape",
+    "canonical": "grape",
+    "aliases": [
+      "grape",
+      "grapes"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "grapefruit",
+    "canonical": "grapefruit",
+    "aliases": [
+      "grapefruit",
+      "grapefruits"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "kiwi_fruit",
+    "canonical": "kiwi fruit",
+    "aliases": [
+      "kiwi fruit",
+      "kiwi fruits"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "lemon",
+    "canonical": "lemon",
+    "aliases": [
+      "lemon",
+      "lemons"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "lime",
+    "canonical": "lime",
+    "aliases": [
+      "lime",
+      "limes"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "mandarin",
+    "canonical": "mandarin",
+    "aliases": [
+      "mandarin",
+      "mandarins"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "mango",
+    "canonical": "mango",
+    "aliases": [
+      "mango",
+      "mangos"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "melon",
+    "canonical": "melon",
+    "aliases": [
+      "melon",
+      "melons"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "nectarine",
+    "canonical": "nectarine",
+    "aliases": [
+      "nectarine",
+      "nectarines"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "orange",
+    "canonical": "orange",
+    "aliases": [
+      "orange",
+      "oranges"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "papaya",
+    "canonical": "papaya",
+    "aliases": [
+      "papaya",
+      "papayas"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "peach",
+    "canonical": "peach",
+    "aliases": [
+      "peach",
+      "peachs"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "pear",
+    "canonical": "pear",
+    "aliases": [
+      "pear",
+      "pears"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "persimmon",
+    "canonical": "persimmon",
+    "aliases": [
+      "persimmon",
+      "persimmons"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "pineapple",
+    "canonical": "pineapple",
+    "aliases": [
+      "pineapple",
+      "pineapples"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "plum",
+    "canonical": "plum",
+    "aliases": [
+      "plum",
+      "plums"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "pomegranate",
+    "canonical": "pomegranate",
+    "aliases": [
+      "pomegranate",
+      "pomegranates"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "raspberry",
+    "canonical": "raspberry",
+    "aliases": [
+      "raspberry",
+      "raspberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "redcurrant",
+    "canonical": "redcurrant",
+    "aliases": [
+      "redcurrant",
+      "redcurrants"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "strawberry",
+    "canonical": "strawberry",
+    "aliases": [
+      "strawberry",
+      "strawberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "watermelon",
+    "canonical": "watermelon",
+    "aliases": [
+      "watermelon",
+      "watermelons"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "passion_fruit",
+    "canonical": "passion fruit",
+    "aliases": [
+      "passion fruit",
+      "passion fruits"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "guava",
+    "canonical": "guava",
+    "aliases": [
+      "guava",
+      "guavas"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "lychee",
+    "canonical": "lychee",
+    "aliases": [
+      "lychee",
+      "lychees"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "dragon_fruit",
+    "canonical": "dragon fruit",
+    "aliases": [
+      "dragon fruit",
+      "dragon fruits"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "coconut",
+    "canonical": "coconut",
+    "aliases": [
+      "coconut",
+      "coconuts"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "quince",
+    "canonical": "quince",
+    "aliases": [
+      "quince",
+      "quinces"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "elderberry",
+    "canonical": "elderberry",
+    "aliases": [
+      "elderberry",
+      "elderberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "mulberry",
+    "canonical": "mulberry",
+    "aliases": [
+      "mulberry",
+      "mulberrys"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "rhubarb",
+    "canonical": "rhubarb",
+    "aliases": [
+      "rhubarb",
+      "rhubarbs"
+    ],
+    "category": "fruit"
+  },
+  {
+    "id": "artichoke",
+    "canonical": "artichoke",
+    "aliases": [
+      "artichoke"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "asparagus",
+    "canonical": "asparagus",
+    "aliases": [
+      "asparagus"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "aubergine",
+    "canonical": "aubergine",
+    "aliases": [
+      "aubergine",
+      "eggplant"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "beetroot",
+    "canonical": "beetroot",
+    "aliases": [
+      "beet",
+      "beetroot",
+      "beets"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "broccoli",
+    "canonical": "broccoli",
+    "aliases": [
+      "broccoli"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "brussels_sprouts",
+    "canonical": "brussels sprouts",
+    "aliases": [
+      "brussels sprouts"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "cabbage",
+    "canonical": "cabbage",
+    "aliases": [
+      "cabbage"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "red_cabbage",
+    "canonical": "red cabbage",
+    "aliases": [
+      "red cabbage"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "white_cabbage",
+    "canonical": "white cabbage",
+    "aliases": [
+      "white cabbage"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "savoy_cabbage",
+    "canonical": "savoy cabbage",
+    "aliases": [
+      "savoy cabbage"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "carrot",
+    "canonical": "carrot",
+    "aliases": [
+      "carrot"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "cauliflower",
+    "canonical": "cauliflower",
+    "aliases": [
+      "cauliflower"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "celeriac",
+    "canonical": "celeriac",
+    "aliases": [
+      "celeriac"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "celery",
+    "canonical": "celery",
+    "aliases": [
+      "celery"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "chard",
+    "canonical": "chard",
+    "aliases": [
+      "chard"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "chicory",
+    "canonical": "chicory",
+    "aliases": [
+      "chicory"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "courgette",
+    "canonical": "courgette",
+    "aliases": [
+      "courgette",
+      "zucchini"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "cucumber",
+    "canonical": "cucumber",
+    "aliases": [
+      "cucumber"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "fennel",
+    "canonical": "fennel",
+    "aliases": [
+      "fennel"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "garlic",
+    "canonical": "garlic",
+    "aliases": [
+      "garlic"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "green_beans",
+    "canonical": "green beans",
+    "aliases": [
+      "green beans"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "kale",
+    "canonical": "kale",
+    "aliases": [
+      "kale"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "leek",
+    "canonical": "leek",
+    "aliases": [
+      "leek"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "lettuce",
+    "canonical": "lettuce",
+    "aliases": [
+      "lettuce"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "iceberg_lettuce",
+    "canonical": "iceberg lettuce",
+    "aliases": [
+      "iceberg lettuce"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "romaine_lettuce",
+    "canonical": "romaine lettuce",
+    "aliases": [
+      "romaine lettuce"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "mushroom",
+    "canonical": "mushroom",
+    "aliases": [
+      "mushroom"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "button_mushroom",
+    "canonical": "button mushroom",
+    "aliases": [
+      "button mushroom"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "portobello_mushroom",
+    "canonical": "portobello mushroom",
+    "aliases": [
+      "portobello mushroom"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "onion",
+    "canonical": "onion",
+    "aliases": [
+      "onion"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "red_onion",
+    "canonical": "red onion",
+    "aliases": [
+      "red onion"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "spring_onion",
+    "canonical": "spring onion",
+    "aliases": [
+      "green onion",
+      "scallion",
+      "spring onion"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "parsnip",
+    "canonical": "parsnip",
+    "aliases": [
+      "parsnip"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "pea",
+    "canonical": "pea",
+    "aliases": [
+      "pea"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "bell_pepper",
+    "canonical": "bell pepper",
+    "aliases": [
+      "bell pepper",
+      "capsicum",
+      "sweet pepper"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "green_pepper",
+    "canonical": "green pepper",
+    "aliases": [
+      "green pepper"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "red_pepper",
+    "canonical": "red pepper",
+    "aliases": [
+      "red pepper"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "yellow_pepper",
+    "canonical": "yellow pepper",
+    "aliases": [
+      "yellow pepper"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "pumpkin",
+    "canonical": "pumpkin",
+    "aliases": [
+      "pumpkin"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "radish",
+    "canonical": "radish",
+    "aliases": [
+      "radish"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "rocket",
+    "canonical": "rocket",
+    "aliases": [
+      "arugula",
+      "rocket"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "spinach",
+    "canonical": "spinach",
+    "aliases": [
+      "spinach"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "swede",
+    "canonical": "swede",
+    "aliases": [
+      "rutabaga",
+      "swede"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "sweet_potato",
+    "canonical": "sweet potato",
+    "aliases": [
+      "sweet potato"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "tomato",
+    "canonical": "tomato",
+    "aliases": [
+      "tomato"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "turnip",
+    "canonical": "turnip",
+    "aliases": [
+      "turnip"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "sweetcorn",
+    "canonical": "sweetcorn",
+    "aliases": [
+      "corn",
+      "maize",
+      "sweetcorn"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "coriander_leaves",
+    "canonical": "coriander leaves",
+    "aliases": [
+      "cilantro",
+      "coriander leaves"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "gherkin",
+    "canonical": "gherkin",
+    "aliases": [
+      "gherkin",
+      "pickle",
+      "pickled cucumber"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "okra",
+    "canonical": "okra",
+    "aliases": [
+      "okra"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "pak_choi",
+    "canonical": "pak choi",
+    "aliases": [
+      "pak choi"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "bamboo_shoots",
+    "canonical": "bamboo shoots",
+    "aliases": [
+      "bamboo shoots"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "bean_sprouts",
+    "canonical": "bean sprouts",
+    "aliases": [
+      "bean sprouts"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "watercress",
+    "canonical": "watercress",
+    "aliases": [
+      "watercress"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "sauerkraut",
+    "canonical": "sauerkraut",
+    "aliases": [
+      "sauerkraut"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "pickled_beetroot",
+    "canonical": "pickled beetroot",
+    "aliases": [
+      "pickled beetroot"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "pickled_cucumber",
+    "canonical": "pickled cucumber",
+    "aliases": [
+      "pickled cucumber"
+    ],
+    "category": "vegetable"
+  },
+  {
+    "id": "quark",
+    "canonical": "quark",
+    "aliases": [
+      "curd cheese",
+      "farmer cheese",
+      "quark",
+      "twaróg"
+    ],
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "kefir",
+    "canonical": "kefir",
+    "aliases": [
+      "kefir",
+      "milk kefir"
+    ],
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "buttermilk",
+    "canonical": "buttermilk",
+    "aliases": [
+      "buttermilk",
+      "maślanka"
+    ],
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "sour_cream",
+    "canonical": "sour cream",
+    "aliases": [
+      "sour cream",
+      "soured cream",
+      "śmietana"
+    ],
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "skyr",
+    "canonical": "skyr",
+    "aliases": [
+      "Icelandic yoghurt",
+      "Icelandic yogurt",
+      "skyr"
+    ],
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "buckwheat_groats",
+    "canonical": "buckwheat groats",
+    "aliases": [
+      "buckwheat",
+      "buckwheat groats",
+      "kasza gryczana"
+    ],
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "millet_groats",
+    "canonical": "millet groats",
+    "aliases": [
+      "kasza jaglana",
+      "millet",
+      "millet groats"
+    ],
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "barley_groats",
+    "canonical": "barley groats",
+    "aliases": [
+      "barley groats",
+      "kasza jęczmienna",
+      "pearl barley"
+    ],
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "semolina",
+    "canonical": "semolina",
+    "aliases": [
+      "kasza manna",
+      "semolina"
+    ],
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "polish_sausage",
+    "canonical": "Polish sausage",
+    "aliases": [
+      "Polish sausage",
+      "kielbasa",
+      "kiełbasa"
+    ],
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "kabanos_sausage",
+    "canonical": "kabanos sausage",
+    "aliases": [
+      "kabanos",
+      "kabanos sausage",
+      "kabanosy"
+    ],
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "black_pudding",
+    "canonical": "black pudding",
+    "aliases": [
+      "black pudding",
+      "blood sausage",
+      "kaszanka"
+    ],
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "pierogi",
+    "canonical": "pierogi",
+    "aliases": [
+      "Polish dumplings",
+      "pierogi",
+      "pierogies"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "bigos",
+    "canonical": "bigos",
+    "aliases": [
+      "bigos",
+      "hunter's stew"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "go_bki",
+    "canonical": "gołąbki",
+    "aliases": [
+      "golabki",
+      "gołąbki",
+      "stuffed cabbage rolls"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "urek",
+    "canonical": "żurek",
+    "aliases": [
+      "sour rye soup",
+      "zurek",
+      "żurek"
+    ],
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "barszcz",
+    "canonical": "barszcz",
+    "aliases": [
+      "barszcz",
+      "beetroot soup",
+      "borscht"
+    ],
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "ros",
+    "canonical": "rosół",
+    "aliases": [
+      "Polish chicken soup",
+      "broth",
+      "rosol",
+      "rosół"
+    ],
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "flaki",
+    "canonical": "flaki",
+    "aliases": [
+      "flaki",
+      "tripe soup"
+    ],
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "mizeria",
+    "canonical": "mizeria",
+    "aliases": [
+      "Polish cucumber salad",
+      "mizeria"
+    ],
+    "category": "salad",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "potato_pancakes",
+    "canonical": "potato pancakes",
+    "aliases": [
+      "placki ziemniaczane",
+      "potato pancakes"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "breaded_pork_cutlet",
+    "canonical": "breaded pork cutlet",
+    "aliases": [
+      "breaded pork cutlet",
+      "kotlet schabowy",
+      "schabowy"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "minced_meat_cutlet",
+    "canonical": "minced meat cutlet",
+    "aliases": [
+      "kotlet mielony",
+      "mielony",
+      "minced meat cutlet"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "cottage_cheese_with_chives",
+    "canonical": "cottage cheese with chives",
+    "aliases": [
+      "cottage cheese with chives",
+      "twaróg ze szczypiorkiem"
+    ],
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "whole_milk",
+    "canonical": "whole milk",
+    "aliases": [
+      "full-fat milk",
+      "whole milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "semi_skimmed_milk",
+    "canonical": "semi-skimmed milk",
+    "aliases": [
+      "2% milk",
+      "reduced-fat milk",
+      "semi-skimmed milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "skimmed_milk",
+    "canonical": "skimmed milk",
+    "aliases": [
+      "fat-free milk",
+      "skim milk",
+      "skimmed milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "lactose_free_milk",
+    "canonical": "lactose-free milk",
+    "aliases": [
+      "lactose-free milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "evaporated_milk",
+    "canonical": "evaporated milk",
+    "aliases": [
+      "evaporated milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "condensed_milk",
+    "canonical": "condensed milk",
+    "aliases": [
+      "condensed milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "plain_yoghurt",
+    "canonical": "plain yoghurt",
+    "aliases": [
+      "natural yoghurt",
+      "natural yogurt",
+      "plain yoghurt",
+      "plain yogurt"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "greek_yoghurt",
+    "canonical": "greek yoghurt",
+    "aliases": [
+      "greek yoghurt",
+      "greek yogurt"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "fruit_yoghurt",
+    "canonical": "fruit yoghurt",
+    "aliases": [
+      "fruit yoghurt"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cottage_cheese",
+    "canonical": "cottage cheese",
+    "aliases": [
+      "cottage cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cream_cheese",
+    "canonical": "cream cheese",
+    "aliases": [
+      "cream cheese",
+      "soft cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "mascarpone",
+    "canonical": "mascarpone",
+    "aliases": [
+      "mascarpone"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "ricotta",
+    "canonical": "ricotta",
+    "aliases": [
+      "ricotta"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "mozzarella",
+    "canonical": "mozzarella",
+    "aliases": [
+      "mozzarella"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cheddar",
+    "canonical": "cheddar",
+    "aliases": [
+      "cheddar"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "gouda",
+    "canonical": "gouda",
+    "aliases": [
+      "gouda"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "edam",
+    "canonical": "edam",
+    "aliases": [
+      "edam"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "emmental",
+    "canonical": "emmental",
+    "aliases": [
+      "emmental"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "gruyere",
+    "canonical": "gruyere",
+    "aliases": [
+      "gruyere"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "parmesan",
+    "canonical": "parmesan",
+    "aliases": [
+      "parmesan"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "pecorino",
+    "canonical": "pecorino",
+    "aliases": [
+      "pecorino"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "feta",
+    "canonical": "feta",
+    "aliases": [
+      "feta"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "halloumi",
+    "canonical": "halloumi",
+    "aliases": [
+      "halloumi"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "brie",
+    "canonical": "brie",
+    "aliases": [
+      "brie"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "camembert",
+    "canonical": "camembert",
+    "aliases": [
+      "camembert"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "blue_cheese",
+    "canonical": "blue cheese",
+    "aliases": [
+      "blue cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "goat_cheese",
+    "canonical": "goat cheese",
+    "aliases": [
+      "goat cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "sheep_cheese",
+    "canonical": "sheep cheese",
+    "aliases": [
+      "sheep cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "processed_cheese",
+    "canonical": "processed cheese",
+    "aliases": [
+      "processed cheese"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cheese_spread",
+    "canonical": "cheese spread",
+    "aliases": [
+      "cheese spread"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "butter",
+    "canonical": "butter",
+    "aliases": [
+      "butter"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "ghee",
+    "canonical": "ghee",
+    "aliases": [
+      "ghee"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "margarine",
+    "canonical": "margarine",
+    "aliases": [
+      "margarine"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "soy_milk",
+    "canonical": "soy milk",
+    "aliases": [
+      "soy milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "oat_milk",
+    "canonical": "oat milk",
+    "aliases": [
+      "oat milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "almond_milk",
+    "canonical": "almond milk",
+    "aliases": [
+      "almond milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "rice_milk",
+    "canonical": "rice milk",
+    "aliases": [
+      "rice milk"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "soy_yoghurt",
+    "canonical": "soy yoghurt",
+    "aliases": [
+      "soy yoghurt"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "oat_yoghurt",
+    "canonical": "oat yoghurt",
+    "aliases": [
+      "oat yoghurt"
+    ],
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "white_rice",
+    "canonical": "white rice",
+    "aliases": [
+      "white rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "brown_rice",
+    "canonical": "brown rice",
+    "aliases": [
+      "brown rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "basmati_rice",
+    "canonical": "basmati rice",
+    "aliases": [
+      "basmati rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "jasmine_rice",
+    "canonical": "jasmine rice",
+    "aliases": [
+      "jasmine rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wild_rice",
+    "canonical": "wild rice",
+    "aliases": [
+      "wild rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "risotto_rice",
+    "canonical": "risotto rice",
+    "aliases": [
+      "risotto rice"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rice_noodles",
+    "canonical": "rice noodles",
+    "aliases": [
+      "rice noodles"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "egg_noodles",
+    "canonical": "egg noodles",
+    "aliases": [
+      "egg noodles"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wheat_pasta",
+    "canonical": "wheat pasta",
+    "aliases": [
+      "wheat pasta"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wholewheat_pasta",
+    "canonical": "wholewheat pasta",
+    "aliases": [
+      "wholewheat pasta"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "spaghetti",
+    "canonical": "spaghetti",
+    "aliases": [
+      "spaghetti"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "penne",
+    "canonical": "penne",
+    "aliases": [
+      "penne"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "fusilli",
+    "canonical": "fusilli",
+    "aliases": [
+      "fusilli"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "macaroni",
+    "canonical": "macaroni",
+    "aliases": [
+      "macaroni"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "lasagne_sheets",
+    "canonical": "lasagne sheets",
+    "aliases": [
+      "lasagne sheets"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "couscous",
+    "canonical": "couscous",
+    "aliases": [
+      "couscous"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "bulgur",
+    "canonical": "bulgur",
+    "aliases": [
+      "bulgur"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "quinoa",
+    "canonical": "quinoa",
+    "aliases": [
+      "quinoa"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "porridge_oats",
+    "canonical": "porridge oats",
+    "aliases": [
+      "oatmeal",
+      "oats",
+      "porridge oats"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rolled_oats",
+    "canonical": "rolled oats",
+    "aliases": [
+      "rolled oats"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "oat_bran",
+    "canonical": "oat bran",
+    "aliases": [
+      "oat bran"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wheat_flour",
+    "canonical": "wheat flour",
+    "aliases": [
+      "wheat flour"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wholemeal_flour",
+    "canonical": "wholemeal flour",
+    "aliases": [
+      "wholemeal flour"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rye_flour",
+    "canonical": "rye flour",
+    "aliases": [
+      "rye flour"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "corn_flour",
+    "canonical": "corn flour",
+    "aliases": [
+      "corn flour"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "potato_starch",
+    "canonical": "potato starch",
+    "aliases": [
+      "potato starch"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cornstarch",
+    "canonical": "cornstarch",
+    "aliases": [
+      "cornstarch"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "polenta",
+    "canonical": "polenta",
+    "aliases": [
+      "polenta"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "white_bread",
+    "canonical": "white bread",
+    "aliases": [
+      "white bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wholemeal_bread",
+    "canonical": "wholemeal bread",
+    "aliases": [
+      "brown bread",
+      "whole wheat bread",
+      "wholemeal bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rye_bread",
+    "canonical": "rye bread",
+    "aliases": [
+      "rye bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "sourdough_bread",
+    "canonical": "sourdough bread",
+    "aliases": [
+      "sourdough bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "multigrain_bread",
+    "canonical": "multigrain bread",
+    "aliases": [
+      "multigrain bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "baguette",
+    "canonical": "baguette",
+    "aliases": [
+      "baguette"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "bread_roll",
+    "canonical": "bread roll",
+    "aliases": [
+      "bread roll",
+      "bun",
+      "roll"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "burger_bun",
+    "canonical": "burger bun",
+    "aliases": [
+      "burger bun"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "hot_dog_bun",
+    "canonical": "hot dog bun",
+    "aliases": [
+      "hot dog bun"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "pita_bread",
+    "canonical": "pita bread",
+    "aliases": [
+      "pita bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "naan_bread",
+    "canonical": "naan bread",
+    "aliases": [
+      "naan bread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "tortilla_wrap",
+    "canonical": "tortilla wrap",
+    "aliases": [
+      "tortilla wrap"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "crispbread",
+    "canonical": "crispbread",
+    "aliases": [
+      "crispbread",
+      "knäckebröd",
+      "rye crispbread"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rice_cake",
+    "canonical": "rice cake",
+    "aliases": [
+      "rice cake"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "corn_cake",
+    "canonical": "corn cake",
+    "aliases": [
+      "corn cake"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cracker",
+    "canonical": "cracker",
+    "aliases": [
+      "cracker"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "pretzel",
+    "canonical": "pretzel",
+    "aliases": [
+      "pretzel"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "croissant",
+    "canonical": "croissant",
+    "aliases": [
+      "croissant"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "bagel",
+    "canonical": "bagel",
+    "aliases": [
+      "bagel"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "brioche",
+    "canonical": "brioche",
+    "aliases": [
+      "brioche"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "focaccia",
+    "canonical": "focaccia",
+    "aliases": [
+      "focaccia"
+    ],
+    "category": "grain_bakery"
+  },
+  {
+    "id": "beef_steak",
+    "canonical": "beef steak",
+    "aliases": [
+      "beef steak",
+      "steak"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_sirloin",
+    "canonical": "beef sirloin",
+    "aliases": [
+      "beef sirloin"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_ribeye",
+    "canonical": "beef ribeye",
+    "aliases": [
+      "beef ribeye"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_tenderloin",
+    "canonical": "beef tenderloin",
+    "aliases": [
+      "beef tenderloin"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_brisket",
+    "canonical": "beef brisket",
+    "aliases": [
+      "beef brisket"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_stew_meat",
+    "canonical": "beef stew meat",
+    "aliases": [
+      "beef stew meat"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_beef",
+    "canonical": "minced beef",
+    "aliases": [
+      "beef mince",
+      "ground beef",
+      "minced beef"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_chop",
+    "canonical": "pork chop",
+    "aliases": [
+      "pork chop"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_loin",
+    "canonical": "pork loin",
+    "aliases": [
+      "pork loin"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_tenderloin",
+    "canonical": "pork tenderloin",
+    "aliases": [
+      "pork tenderloin"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_belly",
+    "canonical": "pork belly",
+    "aliases": [
+      "pork belly"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_ribs",
+    "canonical": "pork ribs",
+    "aliases": [
+      "pork ribs"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_pork",
+    "canonical": "minced pork",
+    "aliases": [
+      "ground pork",
+      "minced pork",
+      "pork mince"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb_chop",
+    "canonical": "lamb chop",
+    "aliases": [
+      "lamb chop"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb_leg",
+    "canonical": "lamb leg",
+    "aliases": [
+      "lamb leg"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb_shoulder",
+    "canonical": "lamb shoulder",
+    "aliases": [
+      "lamb shoulder"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_lamb",
+    "canonical": "minced lamb",
+    "aliases": [
+      "minced lamb"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "veal_cutlet",
+    "canonical": "veal cutlet",
+    "aliases": [
+      "veal cutlet"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "veal_steak",
+    "canonical": "veal steak",
+    "aliases": [
+      "veal steak"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_breast",
+    "canonical": "chicken breast",
+    "aliases": [
+      "chicken breast",
+      "chicken filet",
+      "chicken fillet"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_thigh",
+    "canonical": "chicken thigh",
+    "aliases": [
+      "chicken thigh"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_drumstick",
+    "canonical": "chicken drumstick",
+    "aliases": [
+      "chicken drumstick"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_wing",
+    "canonical": "chicken wing",
+    "aliases": [
+      "chicken wing"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "whole_chicken",
+    "canonical": "whole chicken",
+    "aliases": [
+      "whole chicken"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_chicken",
+    "canonical": "minced chicken",
+    "aliases": [
+      "chicken mince",
+      "ground chicken",
+      "minced chicken"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "turkey_breast",
+    "canonical": "turkey breast",
+    "aliases": [
+      "turkey breast"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "turkey_thigh",
+    "canonical": "turkey thigh",
+    "aliases": [
+      "turkey thigh"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_turkey",
+    "canonical": "minced turkey",
+    "aliases": [
+      "ground turkey",
+      "minced turkey",
+      "turkey mince"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "duck_breast",
+    "canonical": "duck breast",
+    "aliases": [
+      "duck breast"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "duck_leg",
+    "canonical": "duck leg",
+    "aliases": [
+      "duck leg"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "goose_breast",
+    "canonical": "goose breast",
+    "aliases": [
+      "goose breast"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "rabbit",
+    "canonical": "rabbit",
+    "aliases": [
+      "rabbit"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "venison",
+    "canonical": "venison",
+    "aliases": [
+      "venison"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "wild_boar",
+    "canonical": "wild boar",
+    "aliases": [
+      "wild boar"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "ham",
+    "canonical": "ham",
+    "aliases": [
+      "ham"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "cooked_ham",
+    "canonical": "cooked ham",
+    "aliases": [
+      "cooked ham"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "smoked_ham",
+    "canonical": "smoked ham",
+    "aliases": [
+      "smoked ham"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "prosciutto",
+    "canonical": "prosciutto",
+    "aliases": [
+      "prosciutto"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "bacon",
+    "canonical": "bacon",
+    "aliases": [
+      "bacon"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "streaky_bacon",
+    "canonical": "streaky bacon",
+    "aliases": [
+      "streaky bacon"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "back_bacon",
+    "canonical": "back bacon",
+    "aliases": [
+      "back bacon"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "salami",
+    "canonical": "salami",
+    "aliases": [
+      "salami"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pepperoni",
+    "canonical": "pepperoni",
+    "aliases": [
+      "pepperoni"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chorizo",
+    "canonical": "chorizo",
+    "aliases": [
+      "chorizo"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "mortadella",
+    "canonical": "mortadella",
+    "aliases": [
+      "mortadella"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "frankfurter",
+    "canonical": "frankfurter",
+    "aliases": [
+      "frankfurter"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "hot_dog_sausage",
+    "canonical": "hot dog sausage",
+    "aliases": [
+      "hot dog sausage"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "liver_sausage",
+    "canonical": "liver sausage",
+    "aliases": [
+      "liver sausage"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "p_t",
+    "canonical": "pâté",
+    "aliases": [
+      "pâté"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_jerky",
+    "canonical": "beef jerky",
+    "aliases": [
+      "beef jerky"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "meatballs",
+    "canonical": "meatballs",
+    "aliases": [
+      "meatballs"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "burger_patty",
+    "canonical": "burger patty",
+    "aliases": [
+      "burger patty"
+    ],
+    "category": "meat_poultry"
+  },
+  {
+    "id": "salmon",
+    "canonical": "salmon",
+    "aliases": [
+      "salmon"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoked_salmon",
+    "canonical": "smoked salmon",
+    "aliases": [
+      "smoked salmon"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "trout",
+    "canonical": "trout",
+    "aliases": [
+      "trout"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoked_trout",
+    "canonical": "smoked trout",
+    "aliases": [
+      "smoked trout"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "cod",
+    "canonical": "cod",
+    "aliases": [
+      "cod"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "haddock",
+    "canonical": "haddock",
+    "aliases": [
+      "haddock"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "hake",
+    "canonical": "hake",
+    "aliases": [
+      "hake"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pollock",
+    "canonical": "pollock",
+    "aliases": [
+      "Alaska pollock",
+      "pollock"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "mackerel",
+    "canonical": "mackerel",
+    "aliases": [
+      "mackerel"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoked_mackerel",
+    "canonical": "smoked mackerel",
+    "aliases": [
+      "smoked mackerel"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sardine",
+    "canonical": "sardine",
+    "aliases": [
+      "sardine"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "herring",
+    "canonical": "herring",
+    "aliases": [
+      "herring"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pickled_herring",
+    "canonical": "pickled herring",
+    "aliases": [
+      "pickled herring"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "anchovy",
+    "canonical": "anchovy",
+    "aliases": [
+      "anchovy"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_steak",
+    "canonical": "tuna steak",
+    "aliases": [
+      "tuna steak"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_in_brine",
+    "canonical": "tuna in brine",
+    "aliases": [
+      "canned tuna in brine",
+      "tinned tuna in brine",
+      "tuna in brine"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_in_oil",
+    "canonical": "tuna in oil",
+    "aliases": [
+      "canned tuna in oil",
+      "tinned tuna in oil",
+      "tuna in oil"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sea_bass",
+    "canonical": "sea bass",
+    "aliases": [
+      "sea bass"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sea_bream",
+    "canonical": "sea bream",
+    "aliases": [
+      "sea bream"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "halibut",
+    "canonical": "halibut",
+    "aliases": [
+      "halibut"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sole",
+    "canonical": "sole",
+    "aliases": [
+      "sole"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "plaice",
+    "canonical": "plaice",
+    "aliases": [
+      "plaice"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "carp",
+    "canonical": "carp",
+    "aliases": [
+      "carp"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pike",
+    "canonical": "pike",
+    "aliases": [
+      "pike"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "perch",
+    "canonical": "perch",
+    "aliases": [
+      "perch"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "eel",
+    "canonical": "eel",
+    "aliases": [
+      "eel"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "catfish",
+    "canonical": "catfish",
+    "aliases": [
+      "catfish"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "swordfish",
+    "canonical": "swordfish",
+    "aliases": [
+      "swordfish"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "prawn",
+    "canonical": "prawn",
+    "aliases": [
+      "prawn",
+      "shrimp"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "king_prawn",
+    "canonical": "king prawn",
+    "aliases": [
+      "king prawn"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "crab",
+    "canonical": "crab",
+    "aliases": [
+      "crab"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "lobster",
+    "canonical": "lobster",
+    "aliases": [
+      "lobster"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "mussel",
+    "canonical": "mussel",
+    "aliases": [
+      "mussel"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "clam",
+    "canonical": "clam",
+    "aliases": [
+      "clam"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "oyster",
+    "canonical": "oyster",
+    "aliases": [
+      "oyster"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "scallop",
+    "canonical": "scallop",
+    "aliases": [
+      "scallop"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "squid",
+    "canonical": "squid",
+    "aliases": [
+      "squid"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "octopus",
+    "canonical": "octopus",
+    "aliases": [
+      "octopus"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "crayfish",
+    "canonical": "crayfish",
+    "aliases": [
+      "crayfish"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "surimi",
+    "canonical": "surimi",
+    "aliases": [
+      "surimi"
+    ],
+    "category": "fish_seafood"
+  },
+  {
+    "id": "chicken_egg",
+    "canonical": "chicken egg",
+    "aliases": [
+      "chicken egg",
+      "egg",
+      "eggs"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "duck_egg",
+    "canonical": "duck egg",
+    "aliases": [
+      "duck egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "quail_egg",
+    "canonical": "quail egg",
+    "aliases": [
+      "quail egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "egg_white",
+    "canonical": "egg white",
+    "aliases": [
+      "egg white"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "egg_yolk",
+    "canonical": "egg yolk",
+    "aliases": [
+      "egg yolk"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "boiled_egg",
+    "canonical": "boiled egg",
+    "aliases": [
+      "boiled egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "fried_egg",
+    "canonical": "fried egg",
+    "aliases": [
+      "fried egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "scrambled_egg",
+    "canonical": "scrambled egg",
+    "aliases": [
+      "scrambled egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "poached_egg",
+    "canonical": "poached egg",
+    "aliases": [
+      "poached egg"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "omelette",
+    "canonical": "omelette",
+    "aliases": [
+      "omelette"
+    ],
+    "category": "egg"
+  },
+  {
+    "id": "chickpeas",
+    "canonical": "chickpeas",
+    "aliases": [
+      "chickpeas"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "red_kidney_beans",
+    "canonical": "red kidney beans",
+    "aliases": [
+      "red kidney beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "white_beans",
+    "canonical": "white beans",
+    "aliases": [
+      "white beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "black_beans",
+    "canonical": "black beans",
+    "aliases": [
+      "black beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "butter_beans",
+    "canonical": "butter beans",
+    "aliases": [
+      "butter beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "cannellini_beans",
+    "canonical": "cannellini beans",
+    "aliases": [
+      "cannellini beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "baked_beans",
+    "canonical": "baked beans",
+    "aliases": [
+      "baked beans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "green_lentils",
+    "canonical": "green lentils",
+    "aliases": [
+      "green lentils"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "red_lentils",
+    "canonical": "red lentils",
+    "aliases": [
+      "red lentils"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "brown_lentils",
+    "canonical": "brown lentils",
+    "aliases": [
+      "brown lentils"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "split_peas",
+    "canonical": "split peas",
+    "aliases": [
+      "split peas"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "edamame",
+    "canonical": "edamame",
+    "aliases": [
+      "edamame"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "tofu",
+    "canonical": "tofu",
+    "aliases": [
+      "tofu"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "tempeh",
+    "canonical": "tempeh",
+    "aliases": [
+      "tempeh"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "hummus",
+    "canonical": "hummus",
+    "aliases": [
+      "hummus"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "peanuts",
+    "canonical": "peanuts",
+    "aliases": [
+      "peanuts"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "almonds",
+    "canonical": "almonds",
+    "aliases": [
+      "almonds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "walnuts",
+    "canonical": "walnuts",
+    "aliases": [
+      "walnuts"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "cashews",
+    "canonical": "cashews",
+    "aliases": [
+      "cashews"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "hazelnuts",
+    "canonical": "hazelnuts",
+    "aliases": [
+      "hazelnuts"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pistachios",
+    "canonical": "pistachios",
+    "aliases": [
+      "pistachios"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pecans",
+    "canonical": "pecans",
+    "aliases": [
+      "pecans"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "brazil_nuts",
+    "canonical": "brazil nuts",
+    "aliases": [
+      "brazil nuts"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "macadamia_nuts",
+    "canonical": "macadamia nuts",
+    "aliases": [
+      "macadamia nuts"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "sunflower_seeds",
+    "canonical": "sunflower seeds",
+    "aliases": [
+      "sunflower seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pumpkin_seeds",
+    "canonical": "pumpkin seeds",
+    "aliases": [
+      "pumpkin seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "chia_seeds",
+    "canonical": "chia seeds",
+    "aliases": [
+      "chia seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "flaxseed",
+    "canonical": "flaxseed",
+    "aliases": [
+      "flaxseed"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "linseed",
+    "canonical": "linseed",
+    "aliases": [
+      "linseed"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "sesame_seeds",
+    "canonical": "sesame seeds",
+    "aliases": [
+      "sesame seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "poppy_seeds",
+    "canonical": "poppy seeds",
+    "aliases": [
+      "poppy seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "hemp_seeds",
+    "canonical": "hemp seeds",
+    "aliases": [
+      "hemp seeds"
+    ],
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "mayonnaise",
+    "canonical": "mayonnaise",
+    "aliases": [
+      "mayo",
+      "mayonaise",
+      "mayonnaise"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "light_mayonnaise",
+    "canonical": "light mayonnaise",
+    "aliases": [
+      "light mayo",
+      "light mayonnaise",
+      "lite mayo",
+      "reduced fat mayo",
+      "reduced-fat mayonnaise"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "ketchup",
+    "canonical": "ketchup",
+    "aliases": [
+      "ketchup",
+      "tomato ketchup"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "mustard",
+    "canonical": "mustard",
+    "aliases": [
+      "mustard",
+      "yellow mustard"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "dijon_mustard",
+    "canonical": "Dijon mustard",
+    "aliases": [
+      "Dijon mustard"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "wholegrain_mustard",
+    "canonical": "wholegrain mustard",
+    "aliases": [
+      "wholegrain mustard"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "barbecue_sauce",
+    "canonical": "barbecue sauce",
+    "aliases": [
+      "barbecue sauce",
+      "bbq sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "garlic_sauce",
+    "canonical": "garlic sauce",
+    "aliases": [
+      "garlic sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "chilli_sauce",
+    "canonical": "chilli sauce",
+    "aliases": [
+      "chili sauce",
+      "chilli sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "hot_sauce",
+    "canonical": "hot sauce",
+    "aliases": [
+      "hot sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "soy_sauce",
+    "canonical": "soy sauce",
+    "aliases": [
+      "soy sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "worcestershire_sauce",
+    "canonical": "Worcestershire sauce",
+    "aliases": [
+      "Worcester sauce",
+      "Worcestershire sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tartar_sauce",
+    "canonical": "tartar sauce",
+    "aliases": [
+      "tartar sauce",
+      "tartare sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "thousand_island_dressing",
+    "canonical": "thousand island dressing",
+    "aliases": [
+      "thousand island dressing"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "caesar_dressing",
+    "canonical": "Caesar dressing",
+    "aliases": [
+      "Caesar dressing"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "vinaigrette",
+    "canonical": "vinaigrette",
+    "aliases": [
+      "vinaigrette"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "olive_oil",
+    "canonical": "olive oil",
+    "aliases": [
+      "evoo",
+      "extra virgin olive oil",
+      "olive oil"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "rapeseed_oil",
+    "canonical": "rapeseed oil",
+    "aliases": [
+      "canola oil",
+      "rapeseed oil"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "sunflower_oil",
+    "canonical": "sunflower oil",
+    "aliases": [
+      "sunflower oil"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "coconut_oil",
+    "canonical": "coconut oil",
+    "aliases": [
+      "coconut oil"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "sesame_oil",
+    "canonical": "sesame oil",
+    "aliases": [
+      "sesame oil"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "vinegar",
+    "canonical": "vinegar",
+    "aliases": [
+      "vinegar"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "apple_cider_vinegar",
+    "canonical": "apple cider vinegar",
+    "aliases": [
+      "apple cider vinegar"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "balsamic_vinegar",
+    "canonical": "balsamic vinegar",
+    "aliases": [
+      "balsamic vinegar"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "malt_vinegar",
+    "canonical": "malt vinegar",
+    "aliases": [
+      "malt vinegar"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "horseradish",
+    "canonical": "horseradish",
+    "aliases": [
+      "horseradish"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "ajvar",
+    "canonical": "ajvar",
+    "aliases": [
+      "ajvar"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "pesto",
+    "canonical": "pesto",
+    "aliases": [
+      "pesto"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tomato_paste",
+    "canonical": "tomato paste",
+    "aliases": [
+      "tomato paste",
+      "tomato purée"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tomato_sauce",
+    "canonical": "tomato sauce",
+    "aliases": [
+      "tomato sauce"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "salsa",
+    "canonical": "salsa",
+    "aliases": [
+      "salsa"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "guacamole",
+    "canonical": "guacamole",
+    "aliases": [
+      "guacamole"
+    ],
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "milk_chocolate",
+    "canonical": "milk chocolate",
+    "aliases": [
+      "milk chocolate"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "dark_chocolate",
+    "canonical": "dark chocolate",
+    "aliases": [
+      "dark chocolate"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "white_chocolate",
+    "canonical": "white chocolate",
+    "aliases": [
+      "white chocolate"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "chocolate_bar",
+    "canonical": "chocolate bar",
+    "aliases": [
+      "chocolate bar"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "gummy_sweets",
+    "canonical": "gummy sweets",
+    "aliases": [
+      "gummy sweets"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "hard_candy",
+    "canonical": "hard candy",
+    "aliases": [
+      "hard candy"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "toffee",
+    "canonical": "toffee",
+    "aliases": [
+      "toffee"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "caramel",
+    "canonical": "caramel",
+    "aliases": [
+      "caramel"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "marshmallow",
+    "canonical": "marshmallow",
+    "aliases": [
+      "marshmallow"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "ice_cream",
+    "canonical": "ice cream",
+    "aliases": [
+      "ice cream"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "sorbet",
+    "canonical": "sorbet",
+    "aliases": [
+      "sorbet"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "custard",
+    "canonical": "custard",
+    "aliases": [
+      "custard"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "pudding",
+    "canonical": "pudding",
+    "aliases": [
+      "pudding"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "cheesecake",
+    "canonical": "cheesecake",
+    "aliases": [
+      "cheesecake"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "sponge_cake",
+    "canonical": "sponge cake",
+    "aliases": [
+      "sponge cake"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "brownie",
+    "canonical": "brownie",
+    "aliases": [
+      "brownie"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "muffin",
+    "canonical": "muffin",
+    "aliases": [
+      "muffin"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "cupcake",
+    "canonical": "cupcake",
+    "aliases": [
+      "cupcake"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "doughnut",
+    "canonical": "doughnut",
+    "aliases": [
+      "doughnut"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "waffle",
+    "canonical": "waffle",
+    "aliases": [
+      "waffle"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "pancake",
+    "canonical": "pancake",
+    "aliases": [
+      "pancake"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "crepe",
+    "canonical": "crepe",
+    "aliases": [
+      "crepe"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "biscuit",
+    "canonical": "biscuit",
+    "aliases": [
+      "biscuit"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "cookie",
+    "canonical": "cookie",
+    "aliases": [
+      "cookie"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "crisps",
+    "canonical": "crisps",
+    "aliases": [
+      "crisps",
+      "potato chips"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "tortilla_chips",
+    "canonical": "tortilla chips",
+    "aliases": [
+      "tortilla chips"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "popcorn",
+    "canonical": "popcorn",
+    "aliases": [
+      "popcorn"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "salted_nuts",
+    "canonical": "salted nuts",
+    "aliases": [
+      "salted nuts"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "protein_bar",
+    "canonical": "protein bar",
+    "aliases": [
+      "protein bar"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "granola_bar",
+    "canonical": "granola bar",
+    "aliases": [
+      "granola bar"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "cereal_bar",
+    "canonical": "cereal bar",
+    "aliases": [
+      "cereal bar"
+    ],
+    "category": "snack_dessert"
+  },
+  {
+    "id": "water",
+    "canonical": "water",
+    "aliases": [
+      "water"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "sparkling_water",
+    "canonical": "sparkling water",
+    "aliases": [
+      "carbonated water",
+      "fizzy water",
+      "sparkling water"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "mineral_water",
+    "canonical": "mineral water",
+    "aliases": [
+      "mineral water"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "coffee",
+    "canonical": "coffee",
+    "aliases": [
+      "coffee"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "espresso",
+    "canonical": "espresso",
+    "aliases": [
+      "espresso"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "double_espresso",
+    "canonical": "double espresso",
+    "aliases": [
+      "double espresso"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "americano",
+    "canonical": "americano",
+    "aliases": [
+      "americano"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "latte",
+    "canonical": "latte",
+    "aliases": [
+      "latte"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "cappuccino",
+    "canonical": "cappuccino",
+    "aliases": [
+      "cappuccino"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "flat_white",
+    "canonical": "flat white",
+    "aliases": [
+      "flat white"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "mocha",
+    "canonical": "mocha",
+    "aliases": [
+      "mocha"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "instant_coffee",
+    "canonical": "instant coffee",
+    "aliases": [
+      "instant coffee"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "tea",
+    "canonical": "tea",
+    "aliases": [
+      "tea"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "black_tea",
+    "canonical": "black tea",
+    "aliases": [
+      "black tea"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "green_tea",
+    "canonical": "green tea",
+    "aliases": [
+      "green tea"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "herbal_tea",
+    "canonical": "herbal tea",
+    "aliases": [
+      "herbal tea"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "fruit_tea",
+    "canonical": "fruit tea",
+    "aliases": [
+      "fruit tea"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "orange_juice",
+    "canonical": "orange juice",
+    "aliases": [
+      "OJ",
+      "orange juice"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "apple_juice",
+    "canonical": "apple juice",
+    "aliases": [
+      "apple juice"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "grapefruit_juice",
+    "canonical": "grapefruit juice",
+    "aliases": [
+      "grapefruit juice"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "tomato_juice",
+    "canonical": "tomato juice",
+    "aliases": [
+      "tomato juice"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "multivitamin_juice",
+    "canonical": "multivitamin juice",
+    "aliases": [
+      "multivitamin juice"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "smoothie",
+    "canonical": "smoothie",
+    "aliases": [
+      "smoothie"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "milkshake",
+    "canonical": "milkshake",
+    "aliases": [
+      "milkshake"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "lemonade",
+    "canonical": "lemonade",
+    "aliases": [
+      "lemonade"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "coca_cola",
+    "canonical": "Coca-Cola",
+    "aliases": [
+      "Coca-Cola",
+      "coca cola",
+      "coke",
+      "cola"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "coke_zero",
+    "canonical": "Coke Zero",
+    "aliases": [
+      "Coke Zero",
+      "coca cola zero",
+      "coke zero",
+      "zero coke"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "diet_coke",
+    "canonical": "Diet Coke",
+    "aliases": [
+      "Diet Coke",
+      "diet coca cola",
+      "diet coke"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "cola",
+    "canonical": "cola",
+    "aliases": [
+      "cola"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "orange_soda",
+    "canonical": "orange soda",
+    "aliases": [
+      "orange soda"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "lemon_lime_soda",
+    "canonical": "lemon-lime soda",
+    "aliases": [
+      "lemon-lime soda"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "tonic_water",
+    "canonical": "tonic water",
+    "aliases": [
+      "tonic water"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "energy_drink",
+    "canonical": "energy drink",
+    "aliases": [
+      "energy drink",
+      "energy drinks"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "isotonic_drink",
+    "canonical": "isotonic drink",
+    "aliases": [
+      "isotonic drink"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "sports_drink",
+    "canonical": "sports drink",
+    "aliases": [
+      "sports drink"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "protein_shake",
+    "canonical": "protein shake",
+    "aliases": [
+      "protein shake"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "meal_replacement_shake",
+    "canonical": "meal replacement shake",
+    "aliases": [
+      "meal replacement shake"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "beer",
+    "canonical": "beer",
+    "aliases": [
+      "beer"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "lager",
+    "canonical": "lager",
+    "aliases": [
+      "lager"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "ale",
+    "canonical": "ale",
+    "aliases": [
+      "ale"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "ipa",
+    "canonical": "IPA",
+    "aliases": [
+      "IPA"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "stout",
+    "canonical": "stout",
+    "aliases": [
+      "stout"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "porter",
+    "canonical": "porter",
+    "aliases": [
+      "porter"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "cider",
+    "canonical": "cider",
+    "aliases": [
+      "cider"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "red_wine",
+    "canonical": "red wine",
+    "aliases": [
+      "red wine"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "white_wine",
+    "canonical": "white wine",
+    "aliases": [
+      "white wine"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "ros_wine",
+    "canonical": "rosé wine",
+    "aliases": [
+      "rosé wine"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "sparkling_wine",
+    "canonical": "sparkling wine",
+    "aliases": [
+      "sparkling wine"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "champagne",
+    "canonical": "champagne",
+    "aliases": [
+      "champagne"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "prosecco",
+    "canonical": "prosecco",
+    "aliases": [
+      "prosecco"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "vodka",
+    "canonical": "vodka",
+    "aliases": [
+      "vodka"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "whisky",
+    "canonical": "whisky",
+    "aliases": [
+      "whisky"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "whiskey",
+    "canonical": "whiskey",
+    "aliases": [
+      "whiskey"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "rum",
+    "canonical": "rum",
+    "aliases": [
+      "rum"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "gin",
+    "canonical": "gin",
+    "aliases": [
+      "gin"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "tequila",
+    "canonical": "tequila",
+    "aliases": [
+      "tequila"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "brandy",
+    "canonical": "brandy",
+    "aliases": [
+      "brandy"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "liqueur",
+    "canonical": "liqueur",
+    "aliases": [
+      "liqueur"
+    ],
+    "category": "drink"
+  },
+  {
+    "id": "pizza",
+    "canonical": "pizza",
+    "aliases": [
+      "pizza"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "cheeseburger",
+    "canonical": "cheeseburger",
+    "aliases": [
+      "burger with cheese",
+      "cheeseburger"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "hamburger",
+    "canonical": "hamburger",
+    "aliases": [
+      "burger",
+      "hamburger"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "hot_dog",
+    "canonical": "hot dog",
+    "aliases": [
+      "hot dog"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fried_chicken",
+    "canonical": "fried chicken",
+    "aliases": [
+      "fried chicken"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_nuggets",
+    "canonical": "chicken nuggets",
+    "aliases": [
+      "chicken nuggets",
+      "nuggets"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fish_and_chips",
+    "canonical": "fish and chips",
+    "aliases": [
+      "fish and chips"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "kebab",
+    "canonical": "kebab",
+    "aliases": [
+      "doner kebab",
+      "döner",
+      "kebab"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "gyros",
+    "canonical": "gyros",
+    "aliases": [
+      "gyros"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "shawarma",
+    "canonical": "shawarma",
+    "aliases": [
+      "shawarma"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "falafel",
+    "canonical": "falafel",
+    "aliases": [
+      "falafel"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "lasagne",
+    "canonical": "lasagne",
+    "aliases": [
+      "lasagna",
+      "lasagne"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "spaghetti_bolognese",
+    "canonical": "spaghetti bolognese",
+    "aliases": [
+      "bolognese",
+      "spaghetti bolognese"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "carbonara",
+    "canonical": "carbonara",
+    "aliases": [
+      "carbonara"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "risotto",
+    "canonical": "risotto",
+    "aliases": [
+      "risotto"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "paella",
+    "canonical": "paella",
+    "aliases": [
+      "paella"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "curry",
+    "canonical": "curry",
+    "aliases": [
+      "curry"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_curry",
+    "canonical": "chicken curry",
+    "aliases": [
+      "chicken curry"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "beef_curry",
+    "canonical": "beef curry",
+    "aliases": [
+      "beef curry"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chilli_con_carne",
+    "canonical": "chilli con carne",
+    "aliases": [
+      "chili con carne",
+      "chilli con carne"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "stew",
+    "canonical": "stew",
+    "aliases": [
+      "stew"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "goulash",
+    "canonical": "goulash",
+    "aliases": [
+      "goulash",
+      "gulasz"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_soup",
+    "canonical": "chicken soup",
+    "aliases": [
+      "chicken soup"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "tomato_soup",
+    "canonical": "tomato soup",
+    "aliases": [
+      "tomato soup"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "vegetable_soup",
+    "canonical": "vegetable soup",
+    "aliases": [
+      "vegetable soup"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "cream_soup",
+    "canonical": "cream soup",
+    "aliases": [
+      "cream soup"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "greek_salad",
+    "canonical": "Greek salad",
+    "aliases": [
+      "Greek salad"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "caesar_salad",
+    "canonical": "Caesar salad",
+    "aliases": [
+      "Caesar salad"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "tuna_salad",
+    "canonical": "tuna salad",
+    "aliases": [
+      "tuna salad"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "coleslaw",
+    "canonical": "coleslaw",
+    "aliases": [
+      "cole slaw",
+      "coleslaw",
+      "slaw"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "poke_bowl",
+    "canonical": "poke bowl",
+    "aliases": [
+      "poke bowl"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "sushi",
+    "canonical": "sushi",
+    "aliases": [
+      "sushi"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "ramen",
+    "canonical": "ramen",
+    "aliases": [
+      "ramen"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "pho",
+    "canonical": "pho",
+    "aliases": [
+      "pho"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fried_rice",
+    "canonical": "fried rice",
+    "aliases": [
+      "fried rice"
+    ],
+    "category": "prepared_meal"
+  },
+  {
+    "id": "stir_fry",
+    "canonical": "stir fry",
+    "aliases": [
+      "stir fry",
+      "stir-fry"
+    ],
+    "category": "prepared_meal"
+  }
+]

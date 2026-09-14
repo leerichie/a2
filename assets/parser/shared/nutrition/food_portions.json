@@ -1,0 +1,42 @@
+[
+  {
+    "foodId": "cheddar",
+    "foodNameAsGiven": "cheddar cheese",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 20,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bread",
+    "foodNameAsGiven": "bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": null,
+    "foodNameAsGiven": "leafy vegetables",
+    "unit": "handful",
+    "size": "medium",
+    "grams": 30,
+    "confidence": "low"
+  },
+  {
+    "foodId": "mayonnaise",
+    "foodNameAsGiven": "mayonnaise",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 14,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "olive_oil",
+    "foodNameAsGiven": "olive oil",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 13.5,
+    "confidence": "medium"
+  }
+]

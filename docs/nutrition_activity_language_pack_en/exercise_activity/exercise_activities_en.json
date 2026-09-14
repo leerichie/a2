@@ -1,0 +1,611 @@
+[
+  {
+    "id": "walking",
+    "canonical": "walking",
+    "aliases": [
+      "walk",
+      "walking",
+      "walking outdoors"
+    ],
+    "category": "walking",
+    "intensity": "moderate",
+    "met": 3.3
+  },
+  {
+    "id": "brisk_walking",
+    "canonical": "brisk walking",
+    "aliases": [
+      "brisk walking",
+      "fast walk",
+      "power walk"
+    ],
+    "category": "walking",
+    "intensity": "moderate",
+    "met": 4.8
+  },
+  {
+    "id": "slow_walking",
+    "canonical": "slow walking",
+    "aliases": [
+      "easy walk",
+      "slow walking",
+      "stroll"
+    ],
+    "category": "walking",
+    "intensity": "light",
+    "met": 2.5
+  },
+  {
+    "id": "jogging",
+    "canonical": "jogging",
+    "aliases": [
+      "easy run",
+      "jog",
+      "jogging"
+    ],
+    "category": "running",
+    "intensity": "moderate",
+    "met": 7.0
+  },
+  {
+    "id": "running",
+    "canonical": "running",
+    "aliases": [
+      "run",
+      "running"
+    ],
+    "category": "running",
+    "intensity": "vigorous",
+    "met": 9.8
+  },
+  {
+    "id": "fast_running",
+    "canonical": "fast running",
+    "aliases": [
+      "fast run",
+      "fast running",
+      "sprinting"
+    ],
+    "category": "running",
+    "intensity": "vigorous",
+    "met": 12.0
+  },
+  {
+    "id": "easy_cycling",
+    "canonical": "easy cycling",
+    "aliases": [
+      "easy bike ride",
+      "easy cycling",
+      "leisure cycling"
+    ],
+    "category": "cycling",
+    "intensity": "light",
+    "met": 4.0
+  },
+  {
+    "id": "moderate_cycling",
+    "canonical": "moderate cycling",
+    "aliases": [
+      "bike ride",
+      "cycling",
+      "moderate cycling"
+    ],
+    "category": "cycling",
+    "intensity": "moderate",
+    "met": 6.8
+  },
+  {
+    "id": "vigorous_cycling",
+    "canonical": "vigorous cycling",
+    "aliases": [
+      "fast cycling",
+      "hard bike ride",
+      "vigorous cycling"
+    ],
+    "category": "cycling",
+    "intensity": "vigorous",
+    "met": 10.0
+  },
+  {
+    "id": "singles_tennis",
+    "canonical": "singles tennis",
+    "aliases": [
+      "singles",
+      "singles tennis",
+      "tennis singles"
+    ],
+    "category": "tennis",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "doubles_tennis",
+    "canonical": "doubles tennis",
+    "aliases": [
+      "doubles",
+      "doubles tennis",
+      "tennis doubles"
+    ],
+    "category": "tennis",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
+    "id": "badminton",
+    "canonical": "badminton",
+    "aliases": [
+      "badminton"
+    ],
+    "category": "racket_sport",
+    "intensity": "moderate",
+    "met": 5.5
+  },
+  {
+    "id": "squash",
+    "canonical": "squash",
+    "aliases": [
+      "squash"
+    ],
+    "category": "racket_sport",
+    "intensity": "vigorous",
+    "met": 12.0
+  },
+  {
+    "id": "table_tennis",
+    "canonical": "table tennis",
+    "aliases": [
+      "ping pong",
+      "table tennis"
+    ],
+    "category": "racket_sport",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "weight_training",
+    "canonical": "weight training",
+    "aliases": [
+      "lifting weights",
+      "strength training",
+      "weight training",
+      "weights"
+    ],
+    "category": "gym",
+    "intensity": "moderate",
+    "met": 3.5
+  },
+  {
+    "id": "vigorous_weight_training",
+    "canonical": "vigorous weight training",
+    "aliases": [
+      "heavy lifting",
+      "heavy weights",
+      "vigorous weight training"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "bodyweight_training",
+    "canonical": "bodyweight training",
+    "aliases": [
+      "bodyweight training",
+      "bodyweight workout",
+      "calisthenics"
+    ],
+    "category": "gym",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "circuit_training",
+    "canonical": "circuit training",
+    "aliases": [
+      "circuit training",
+      "circuit workout"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "hiit",
+    "canonical": "HIIT",
+    "aliases": [
+      "HIIT",
+      "high intensity interval training",
+      "interval workout"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 9.0
+  },
+  {
+    "id": "cross_training",
+    "canonical": "cross training",
+    "aliases": [
+      "cross trainer workout",
+      "cross training"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "elliptical_trainer",
+    "canonical": "elliptical trainer",
+    "aliases": [
+      "cross trainer",
+      "elliptical",
+      "elliptical trainer"
+    ],
+    "category": "gym",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "rowing_machine",
+    "canonical": "rowing machine",
+    "aliases": [
+      "indoor rowing",
+      "rower",
+      "rowing machine"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "stationary_bike",
+    "canonical": "stationary bike",
+    "aliases": [
+      "exercise bike",
+      "spin bike",
+      "stationary bike"
+    ],
+    "category": "gym",
+    "intensity": "moderate",
+    "met": 6.8
+  },
+  {
+    "id": "spin_class",
+    "canonical": "spin class",
+    "aliases": [
+      "spin class",
+      "spinning"
+    ],
+    "category": "gym",
+    "intensity": "vigorous",
+    "met": 8.5
+  },
+  {
+    "id": "easy_swimming",
+    "canonical": "easy swimming",
+    "aliases": [
+      "easy swimming",
+      "slow swimming"
+    ],
+    "category": "swimming",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "lap_swimming",
+    "canonical": "lap swimming",
+    "aliases": [
+      "lap swimming",
+      "swimming laps"
+    ],
+    "category": "swimming",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "vigorous_swimming",
+    "canonical": "vigorous swimming",
+    "aliases": [
+      "fast swimming",
+      "vigorous swimming"
+    ],
+    "category": "swimming",
+    "intensity": "vigorous",
+    "met": 9.8
+  },
+  {
+    "id": "football",
+    "canonical": "football",
+    "aliases": [
+      "football",
+      "soccer"
+    ],
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "basketball",
+    "canonical": "basketball",
+    "aliases": [
+      "basketball"
+    ],
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 6.5
+  },
+  {
+    "id": "volleyball",
+    "canonical": "volleyball",
+    "aliases": [
+      "volleyball"
+    ],
+    "category": "team_sport",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "handball",
+    "canonical": "handball",
+    "aliases": [
+      "handball"
+    ],
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "rugby",
+    "canonical": "rugby",
+    "aliases": [
+      "rugby"
+    ],
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.3
+  },
+  {
+    "id": "skiing",
+    "canonical": "skiing",
+    "aliases": [
+      "downhill skiing",
+      "skiing"
+    ],
+    "category": "winter_sport",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
+    "id": "cross_country_skiing",
+    "canonical": "cross-country skiing",
+    "aliases": [
+      "cross-country skiing",
+      "xc skiing"
+    ],
+    "category": "winter_sport",
+    "intensity": "vigorous",
+    "met": 9.0
+  },
+  {
+    "id": "snowboarding",
+    "canonical": "snowboarding",
+    "aliases": [
+      "snowboarding"
+    ],
+    "category": "winter_sport",
+    "intensity": "moderate",
+    "met": 5.3
+  },
+  {
+    "id": "yoga",
+    "canonical": "yoga",
+    "aliases": [
+      "yoga"
+    ],
+    "category": "fitness",
+    "intensity": "light",
+    "met": 2.5
+  },
+  {
+    "id": "pilates",
+    "canonical": "pilates",
+    "aliases": [
+      "pilates"
+    ],
+    "category": "fitness",
+    "intensity": "light",
+    "met": 3.0
+  },
+  {
+    "id": "aerobics",
+    "canonical": "aerobics",
+    "aliases": [
+      "aerobics"
+    ],
+    "category": "fitness",
+    "intensity": "vigorous",
+    "met": 6.5
+  },
+  {
+    "id": "dance_fitness",
+    "canonical": "dance fitness",
+    "aliases": [
+      "dance fitness",
+      "zumba"
+    ],
+    "category": "fitness",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "dancing",
+    "canonical": "dancing",
+    "aliases": [
+      "dance",
+      "dancing"
+    ],
+    "category": "dance",
+    "intensity": "moderate",
+    "met": 4.5
+  },
+  {
+    "id": "fast_dancing",
+    "canonical": "fast dancing",
+    "aliases": [
+      "fast dancing",
+      "vigorous dancing"
+    ],
+    "category": "dance",
+    "intensity": "vigorous",
+    "met": 7.5
+  },
+  {
+    "id": "hiking",
+    "canonical": "hiking",
+    "aliases": [
+      "hiking"
+    ],
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
+    "id": "hill_walking",
+    "canonical": "hill walking",
+    "aliases": [
+      "hill walking",
+      "walking hills"
+    ],
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 6.5
+  },
+  {
+    "id": "climbing",
+    "canonical": "climbing",
+    "aliases": [
+      "climbing",
+      "rock climbing"
+    ],
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "horse_riding",
+    "canonical": "horse riding",
+    "aliases": [
+      "horse riding",
+      "horseback riding"
+    ],
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 5.5
+  },
+  {
+    "id": "gardening",
+    "canonical": "gardening",
+    "aliases": [
+      "garden work",
+      "gardening"
+    ],
+    "category": "daily_activity",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "heavy_gardening",
+    "canonical": "heavy gardening",
+    "aliases": [
+      "digging garden",
+      "heavy gardening"
+    ],
+    "category": "daily_activity",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "house_cleaning",
+    "canonical": "house cleaning",
+    "aliases": [
+      "cleaning",
+      "house cleaning",
+      "housework"
+    ],
+    "category": "daily_activity",
+    "intensity": "moderate",
+    "met": 3.3
+  },
+  {
+    "id": "vacuuming",
+    "canonical": "vacuuming",
+    "aliases": [
+      "vacuuming"
+    ],
+    "category": "daily_activity",
+    "intensity": "moderate",
+    "met": 3.3
+  },
+  {
+    "id": "mopping",
+    "canonical": "mopping",
+    "aliases": [
+      "mopping"
+    ],
+    "category": "daily_activity",
+    "intensity": "moderate",
+    "met": 3.5
+  },
+  {
+    "id": "washing_car",
+    "canonical": "washing car",
+    "aliases": [
+      "washing car"
+    ],
+    "category": "daily_activity",
+    "intensity": "light",
+    "met": 3.0
+  },
+  {
+    "id": "carrying_groceries",
+    "canonical": "carrying groceries",
+    "aliases": [
+      "carrying groceries",
+      "carrying shopping"
+    ],
+    "category": "daily_activity",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "stairs",
+    "canonical": "stairs",
+    "aliases": [
+      "climbing stairs",
+      "stair climbing",
+      "stairs"
+    ],
+    "category": "daily_activity",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "standing",
+    "canonical": "standing",
+    "aliases": [
+      "standing"
+    ],
+    "category": "daily_activity",
+    "intensity": "light",
+    "met": 1.8
+  },
+  {
+    "id": "sitting",
+    "canonical": "sitting",
+    "aliases": [
+      "sitting"
+    ],
+    "category": "daily_activity",
+    "intensity": "light",
+    "met": 1.3
+  }
+]

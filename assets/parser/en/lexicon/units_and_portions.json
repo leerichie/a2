@@ -1,0 +1,396 @@
+{
+  "standard_volume": {
+    "teaspoon": [
+      "tsp",
+      "tsp.",
+      "teaspoon",
+      "teaspoons",
+      "tea spoon",
+      "tea spoons"
+    ],
+    "tablespoon": [
+      "tbsp",
+      "tbsp.",
+      "tbs",
+      "tablespoon",
+      "tablespoons",
+      "table spoon",
+      "table spoons"
+    ],
+    "dessertspoon": [
+      "dessert spoon",
+      "dessertspoon",
+      "dsp"
+    ],
+    "cup": [
+      "cup",
+      "cups"
+    ],
+    "fluid_ounce": [
+      "fl oz",
+      "fluid ounce",
+      "fluid ounces"
+    ],
+    "millilitre": [
+      "ml",
+      "millilitre",
+      "millilitres",
+      "milliliter",
+      "milliliters"
+    ],
+    "litre": [
+      "l",
+      "litre",
+      "litres",
+      "liter",
+      "liters"
+    ]
+  },
+  "approx_household": {
+    "spoonful": [
+      "spoon",
+      "spoons",
+      "spoonful",
+      "spoonfuls"
+    ],
+    "small_spoonful": [
+      "small spoon",
+      "small spoonful"
+    ],
+    "large_spoonful": [
+      "large spoon",
+      "big spoon",
+      "large spoonful",
+      "big spoonful"
+    ],
+    "heaped_teaspoon": [
+      "heaped teaspoon",
+      "heaping teaspoon",
+      "rounded teaspoon"
+    ],
+    "level_teaspoon": [
+      "level teaspoon"
+    ],
+    "heaped_tablespoon": [
+      "heaped tablespoon",
+      "heaping tablespoon",
+      "rounded tablespoon"
+    ],
+    "level_tablespoon": [
+      "level tablespoon"
+    ],
+    "glass": [
+      "glass",
+      "glasses"
+    ],
+    "mug": [
+      "mug",
+      "mugs"
+    ],
+    "bowl": [
+      "bowl",
+      "bowls"
+    ],
+    "plate": [
+      "plate",
+      "plates"
+    ],
+    "dish": [
+      "dish",
+      "dishes"
+    ],
+    "ramekin": [
+      "ramekin",
+      "ramekins"
+    ],
+    "container": [
+      "container",
+      "containers"
+    ],
+    "tub": [
+      "tub",
+      "tubs"
+    ],
+    "tray": [
+      "tray",
+      "trays"
+    ],
+    "handful": [
+      "handful",
+      "handfuls"
+    ],
+    "palm": [
+      "palm",
+      "palm-sized",
+      "palm size"
+    ],
+    "fist": [
+      "fist",
+      "fist-sized",
+      "fist size"
+    ],
+    "thumb": [
+      "thumb",
+      "thumb-sized",
+      "thumb size"
+    ],
+    "pinch": [
+      "pinch",
+      "pinches"
+    ],
+    "dash": [
+      "dash",
+      "dashes"
+    ],
+    "splash": [
+      "splash",
+      "splashes"
+    ],
+    "sprinkle": [
+      "sprinkle",
+      "sprinkling",
+      "sprinkles"
+    ],
+    "scoop": [
+      "scoop",
+      "scoops"
+    ],
+    "ladle": [
+      "ladle",
+      "ladles"
+    ],
+    "serving": [
+      "serving",
+      "servings"
+    ],
+    "portion": [
+      "portion",
+      "portions"
+    ],
+    "helping": [
+      "helping",
+      "helpings"
+    ],
+    "dollop": [
+      "dollop",
+      "dollops"
+    ],
+    "blob": [
+      "blob",
+      "blobs"
+    ],
+    "smear": [
+      "smear",
+      "smears"
+    ],
+    "layer": [
+      "layer",
+      "layers"
+    ],
+    "sip": [
+      "sip",
+      "sips"
+    ],
+    "mouthful": [
+      "mouthful",
+      "mouthfuls"
+    ]
+  },
+  "count_piece": {
+    "piece": [
+      "piece",
+      "pieces"
+    ],
+    "slice": [
+      "slice",
+      "slices"
+    ],
+    "chunk": [
+      "chunk",
+      "chunks"
+    ],
+    "cube": [
+      "cube",
+      "cubes"
+    ],
+    "strip": [
+      "strip",
+      "strips"
+    ],
+    "stick": [
+      "stick",
+      "sticks"
+    ],
+    "wedge": [
+      "wedge",
+      "wedges"
+    ],
+    "segment": [
+      "segment",
+      "segments"
+    ],
+    "section": [
+      "section",
+      "sections"
+    ],
+    "rasher": [
+      "rasher",
+      "rashers"
+    ],
+    "fillet": [
+      "fillet",
+      "fillets",
+      "filet",
+      "filets"
+    ],
+    "steak": [
+      "steak",
+      "steaks"
+    ],
+    "cutlet": [
+      "cutlet",
+      "cutlets"
+    ],
+    "chop": [
+      "chop",
+      "chops"
+    ],
+    "patty": [
+      "patty",
+      "patties"
+    ],
+    "sausage": [
+      "sausage",
+      "sausages"
+    ],
+    "link": [
+      "link",
+      "links"
+    ],
+    "breast": [
+      "breast",
+      "breasts"
+    ],
+    "thigh": [
+      "thigh",
+      "thighs"
+    ],
+    "leg": [
+      "leg",
+      "legs"
+    ],
+    "wing": [
+      "wing",
+      "wings"
+    ],
+    "drumstick": [
+      "drumstick",
+      "drumsticks"
+    ],
+    "loaf": [
+      "loaf",
+      "loaves"
+    ],
+    "roll": [
+      "roll",
+      "rolls"
+    ],
+    "bun": [
+      "bun",
+      "buns"
+    ],
+    "wrap": [
+      "wrap",
+      "wraps"
+    ],
+    "tortilla": [
+      "tortilla",
+      "tortillas"
+    ],
+    "cracker": [
+      "cracker",
+      "crackers"
+    ],
+    "biscuit": [
+      "biscuit",
+      "biscuits"
+    ],
+    "cookie": [
+      "cookie",
+      "cookies"
+    ],
+    "bar": [
+      "bar",
+      "bars"
+    ],
+    "square": [
+      "square",
+      "squares"
+    ],
+    "block": [
+      "block",
+      "blocks"
+    ]
+  },
+  "packaging": {
+    "pack": [
+      "pack",
+      "packs",
+      "packet",
+      "packets",
+      "package",
+      "packages"
+    ],
+    "bag": [
+      "bag",
+      "bags"
+    ],
+    "box": [
+      "box",
+      "boxes"
+    ],
+    "can": [
+      "can",
+      "cans",
+      "tin",
+      "tins"
+    ],
+    "jar": [
+      "jar",
+      "jars"
+    ],
+    "bottle": [
+      "bottle",
+      "bottles"
+    ],
+    "carton": [
+      "carton",
+      "cartons"
+    ],
+    "pot": [
+      "pot",
+      "pots"
+    ],
+    "tube": [
+      "tube",
+      "tubes"
+    ],
+    "pouch": [
+      "pouch",
+      "pouches"
+    ],
+    "sachet": [
+      "sachet",
+      "sachets"
+    ],
+    "stick_pack": [
+      "stick pack",
+      "stick packs"
+    ],
+    "multipack": [
+      "multipack",
+      "multi-pack",
+      "multipacks"
+    ]
+  }
+}

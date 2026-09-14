@@ -1,0 +1,69 @@
+[
+  {
+    "input": "20 min HIIT",
+    "expected": {
+      "activity": "HIIT",
+      "duration_minutes": 20,
+      "intensity": "vigorous"
+    }
+  },
+  {
+    "input": "2 hours tennis singles",
+    "expected": {
+      "activity": "singles tennis",
+      "duration_minutes": 120
+    }
+  },
+  {
+    "input": "90 mins doubles tennis",
+    "expected": {
+      "activity": "doubles tennis",
+      "duration_minutes": 90
+    }
+  },
+  {
+    "input": "half an hour brisk walking",
+    "expected": {
+      "activity": "brisk walking",
+      "duration_minutes": 30
+    }
+  },
+  {
+    "input": "45 min easy cycling",
+    "expected": {
+      "activity": "easy cycling",
+      "duration_minutes": 45,
+      "intensity": "light"
+    }
+  },
+  {
+    "input": "1h vigorous swimming",
+    "expected": {
+      "activity": "vigorous swimming",
+      "duration_minutes": 60,
+      "intensity": "vigorous"
+    }
+  },
+  {
+    "input": "30 minutes weights",
+    "expected": {
+      "activity": "weight training",
+      "duration_minutes": 30
+    }
+  },
+  {
+    "input": "15 min stair climbing",
+    "expected": {
+      "activity": "stairs",
+      "duration_minutes": 15
+    }
+  },
+  {
+    "input": "about 40 min gardening",
+    "expected": {
+      "activity": "gardening",
+      "duration_minutes": 40,
+      "approximate": true
+    }
+  }
+]

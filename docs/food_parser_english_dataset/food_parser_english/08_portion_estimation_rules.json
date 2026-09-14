@@ -1,0 +1,47 @@
+{
+  "principles": [
+    "Never assign one universal gram value to ambiguous household units such as handful, bowl, slice, scoop, glass, spoonful or piece.",
+    "Portion conversion should be food-aware and, where possible, size-aware.",
+    "Standard units such as tsp/tbsp/cup/ml may use standard volume conversions, but density-dependent foods still need food-aware gram conversion.",
+    "Packaging measures such as pack, pot, bottle and can should prefer product/package metadata if known.",
+    "Modifiers such as light, low-fat, skinless and sugar-free must be preserved for nutrition lookup.",
+    "Approximation words should lower confidence rather than be discarded."
+  ],
+  "examples": [
+    {
+      "food": "cheddar cheese",
+      "unit": "slice",
+      "size": "medium",
+      "estimated_grams": 20,
+      "confidence": "medium"
+    },
+    {
+      "food": "bread",
+      "unit": "slice",
+      "size": "medium",
+      "estimated_grams": 35,
+      "confidence": "medium"
+    },
+    {
+      "food": "leafy vegetables",
+      "unit": "handful",
+      "size": "medium",
+      "estimated_grams": 30,
+      "confidence": "low"
+    },
+    {
+      "food": "mayonnaise",
+      "unit": "tablespoon",
+      "size": "standard",
+      "estimated_grams": 14,
+      "confidence": "medium"
+    },
+    {
+      "food": "olive oil",
+      "unit": "tablespoon",
+      "size": "standard",
+      "estimated_grams": 13.5,
+      "confidence": "medium"
+    }
+  ]
+}

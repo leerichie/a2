@@ -1,0 +1,27 @@
+{
+  "categories": [
+    "dairy",
+    "dairy_alternative",
+    "drink",
+    "egg",
+    "fish_seafood",
+    "fruit",
+    "grain",
+    "grain_bakery",
+    "legume_nut_seed",
+    "meat_poultry",
+    "prepared_food",
+    "prepared_meal",
+    "processed_meat",
+    "salad",
+    "sauce_condiment_fat",
+    "snack_dessert",
+    "soup",
+    "vegetable"
+  ],
+  "notes": [
+    "Canonical IDs are language-neutral anchors for future translation tables.",
+    "Aliases are English/regional aliases only; Polish/German/French/Spanish/Italian should later map to the same canonical IDs.",
+    "Brand/SKU products should remain separate from this generic taxonomy."
+  ]
+}

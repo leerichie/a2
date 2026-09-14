@@ -1,0 +1,56 @@
+[
+  {
+    "foodId": "cottage_cheese",
+    "kcalPer100g": 98,
+    "proteinPer100g": 11,
+    "carbsPer100g": 3.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['cottage cheese']"
+  },
+  {
+    "foodId": "banana",
+    "kcalPer100g": 89,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 23,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['banana']"
+  },
+  {
+    "foodId": "egg",
+    "kcalPer100g": 143,
+    "proteinPer100g": 13,
+    "carbsPer100g": 0.7,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['egg']"
+  },
+  {
+    "foodId": "milk",
+    "kcalPer100g": 50,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 4.8,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['milk']"
+  },
+  {
+    "foodId": "yoghurt",
+    "kcalPer100g": 80,
+    "proteinPer100g": 5,
+    "carbsPer100g": 7,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['yoghurt']"
+  },
+  {
+    "foodId": "beer",
+    "kcalPer100g": 43,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 3.6,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['beer']"
+  }
+]

@@ -1,0 +1,131 @@
+[
+  {
+    "input": "2 tbsp light mayo",
+    "expected": {
+      "quantity": 2,
+      "unit": "tablespoon",
+      "food": "mayonnaise",
+      "modifiers": [
+        "light"
+      ]
+    }
+  },
+  {
+    "input": "two tablespoons light mayonnaise",
+    "expected": {
+      "quantity": 2,
+      "unit": "tablespoon",
+      "food": "mayonnaise",
+      "modifiers": [
+        "light"
+      ]
+    }
+  },
+  {
+    "input": "2x tbsp mayo",
+    "expected": {
+      "quantity": 2,
+      "unit": "tablespoon",
+      "food": "mayonnaise"
+    }
+  },
+  {
+    "input": "half bowl coleslaw",
+    "expected": {
+      "quantity": 0.5,
+      "unit": "bowl",
+      "food": "coleslaw"
+    }
+  },
+  {
+    "input": "about half a large bowl of coleslaw",
+    "expected": {
+      "quantity": 0.5,
+      "unit": "bowl",
+      "size": "large",
+      "food": "coleslaw",
+      "approximate": true
+    }
+  },
+  {
+    "input": "1x large banana",
+    "expected": {
+      "quantity": 1,
+      "size": "large",
+      "food": "banana"
+    }
+  },
+  {
+    "input": "two small eggs",
+    "expected": {
+      "quantity": 2,
+      "size": "small",
+      "food": "egg"
+    }
+  },
+  {
+    "input": "3 slices cheddar",
+    "expected": {
+      "quantity": 3,
+      "unit": "slice",
+      "food": "cheddar cheese"
+    }
+  },
+  {
+    "input": "one handful grapes",
+    "expected": {
+      "quantity": 1,
+      "unit": "handful",
+      "food": "grapes"
+    }
+  },
+  {
+    "input": "half a pack mozzarella",
+    "expected": {
+      "quantity": 0.5,
+      "unit": "pack",
+      "food": "mozzarella"
+    }
+  },
+  {
+    "input": "small splash milk",
+    "expected": {
+      "quantity": 1,
+      "unit": "splash",
+      "size": "small",
+      "food": "milk"
+    }
+  },
+  {
+    "input": "2 large spoonfuls cottage cheese",
+    "expected": {
+      "quantity": 2,
+      "unit": "spoonful",
+      "size": "large",
+      "food": "cottage cheese"
+    }
+  },
+  {
+    "input": "2 x 25g cheese",
+    "expected": {
+      "multiplier": 2,
+      "weight_g_each": 25
+    }
+  },
+  {
+    "input": "½ glass milk",
+    "expected": {
+      "quantity": 0.5,
+      "unit": "glass",
+      "food": "milk"
+    }
+  },
+  {
+    "input": "three quarters of a mug of yoghurt",
+    "expected": {
+      "quantity": 0.75,
+      "unit": "mug",
+      "food": "yoghurt"
+    }
+  }
+]

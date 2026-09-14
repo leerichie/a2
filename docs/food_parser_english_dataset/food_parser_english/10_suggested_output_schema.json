@@ -1,0 +1,26 @@
+{
+  "suggested_output_schema": {
+    "quantity": {
+      "value": "number",
+      "approximate": "boolean",
+      "source": "string|null"
+    },
+    "portion": {
+      "unit": "string|null",
+      "size": "string|null",
+      "fullness": "string|null"
+    },
+    "food": {
+      "canonical_id": "string|null",
+      "canonical_name": "string|null",
+      "matched_alias": "string|null",
+      "modifiers": [
+        "string"
+      ],
+      "preparations": [
+        "string"
+      ]
+    },
+    "confidence": "high|medium|low"
+  }
+}

@@ -1,0 +1,2582 @@
+[
+  {
+    "id": "ajvar",
+    "canonical": "ajvar",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "ale",
+    "canonical": "ale",
+    "category": "drink"
+  },
+  {
+    "id": "almond_milk",
+    "canonical": "almond milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "almonds",
+    "canonical": "almonds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "americano",
+    "canonical": "americano",
+    "category": "drink"
+  },
+  {
+    "id": "anchovy",
+    "canonical": "anchovy",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "apple",
+    "canonical": "apple",
+    "category": "fruit"
+  },
+  {
+    "id": "apple_cider_vinegar",
+    "canonical": "apple cider vinegar",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "apple_juice",
+    "canonical": "apple juice",
+    "category": "drink"
+  },
+  {
+    "id": "apricot",
+    "canonical": "apricot",
+    "category": "fruit"
+  },
+  {
+    "id": "artichoke",
+    "canonical": "artichoke",
+    "category": "vegetable"
+  },
+  {
+    "id": "asparagus",
+    "canonical": "asparagus",
+    "category": "vegetable"
+  },
+  {
+    "id": "aubergine",
+    "canonical": "aubergine",
+    "category": "vegetable"
+  },
+  {
+    "id": "avocado",
+    "canonical": "avocado",
+    "category": "fruit"
+  },
+  {
+    "id": "back_bacon",
+    "canonical": "back bacon",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "bacon",
+    "canonical": "bacon",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "bagel",
+    "canonical": "bagel",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "baguette",
+    "canonical": "baguette",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "baked_beans",
+    "canonical": "baked beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "balsamic_vinegar",
+    "canonical": "balsamic vinegar",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "bamboo_shoots",
+    "canonical": "bamboo shoots",
+    "category": "vegetable"
+  },
+  {
+    "id": "banana",
+    "canonical": "banana",
+    "category": "fruit"
+  },
+  {
+    "id": "barbecue_sauce",
+    "canonical": "barbecue sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "barley_groats",
+    "canonical": "barley groats",
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "barszcz",
+    "canonical": "barszcz",
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "basmati_rice",
+    "canonical": "basmati rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "bean_sprouts",
+    "canonical": "bean sprouts",
+    "category": "vegetable"
+  },
+  {
+    "id": "beef_brisket",
+    "canonical": "beef brisket",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_curry",
+    "canonical": "beef curry",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "beef_jerky",
+    "canonical": "beef jerky",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_ribeye",
+    "canonical": "beef ribeye",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_sirloin",
+    "canonical": "beef sirloin",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_steak",
+    "canonical": "beef steak",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_stew_meat",
+    "canonical": "beef stew meat",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beef_tenderloin",
+    "canonical": "beef tenderloin",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "beer",
+    "canonical": "beer",
+    "category": "drink"
+  },
+  {
+    "id": "beetroot",
+    "canonical": "beetroot",
+    "category": "vegetable"
+  },
+  {
+    "id": "bell_pepper",
+    "canonical": "bell pepper",
+    "category": "vegetable"
+  },
+  {
+    "id": "bigos",
+    "canonical": "bigos",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "biscuit",
+    "canonical": "biscuit",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "black_beans",
+    "canonical": "black beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "black_pudding",
+    "canonical": "black pudding",
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "blackberry",
+    "canonical": "blackberry",
+    "category": "fruit"
+  },
+  {
+    "id": "blackcurrant",
+    "canonical": "blackcurrant",
+    "category": "fruit"
+  },
+  {
+    "id": "blue_cheese",
+    "canonical": "blue cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "blueberries",
+    "canonical": "blueberries",
+    "category": "fruit"
+  },
+  {
+    "id": "boiled_egg",
+    "canonical": "boiled egg",
+    "category": "egg"
+  },
+  {
+    "id": "brandy",
+    "canonical": "brandy",
+    "category": "drink"
+  },
+  {
+    "id": "brazil_nuts",
+    "canonical": "brazil nuts",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "bread",
+    "canonical": "bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "bread_roll",
+    "canonical": "bread roll",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "breaded_pork_cutlet",
+    "canonical": "breaded pork cutlet",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "brie",
+    "canonical": "brie",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "brioche",
+    "canonical": "brioche",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "broccoli",
+    "canonical": "broccoli",
+    "category": "vegetable"
+  },
+  {
+    "id": "brown_lentils",
+    "canonical": "brown lentils",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "brown_rice",
+    "canonical": "brown rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "brownie",
+    "canonical": "brownie",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "brussels_sprouts",
+    "canonical": "brussels sprouts",
+    "category": "vegetable"
+  },
+  {
+    "id": "buckwheat_groats",
+    "canonical": "buckwheat groats",
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "bulgur",
+    "canonical": "bulgur",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "burger_bun",
+    "canonical": "burger bun",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "burger_patty",
+    "canonical": "burger patty",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "butter",
+    "canonical": "butter",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "butter_beans",
+    "canonical": "butter beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "buttermilk",
+    "canonical": "buttermilk",
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "button_mushroom",
+    "canonical": "button mushroom",
+    "category": "vegetable"
+  },
+  {
+    "id": "cabbage",
+    "canonical": "cabbage",
+    "category": "vegetable"
+  },
+  {
+    "id": "caesar_dressing",
+    "canonical": "Caesar dressing",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "caesar_salad",
+    "canonical": "Caesar salad",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "camembert",
+    "canonical": "camembert",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cannellini_beans",
+    "canonical": "cannellini beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "cappuccino",
+    "canonical": "cappuccino",
+    "category": "drink"
+  },
+  {
+    "id": "caramel",
+    "canonical": "caramel",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "carbonara",
+    "canonical": "carbonara",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "carp",
+    "canonical": "carp",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "carrot",
+    "canonical": "carrot",
+    "category": "vegetable"
+  },
+  {
+    "id": "cashews",
+    "canonical": "cashews",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "catfish",
+    "canonical": "catfish",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "cauliflower",
+    "canonical": "cauliflower",
+    "category": "vegetable"
+  },
+  {
+    "id": "celeriac",
+    "canonical": "celeriac",
+    "category": "vegetable"
+  },
+  {
+    "id": "celery",
+    "canonical": "celery",
+    "category": "vegetable"
+  },
+  {
+    "id": "cereal_bar",
+    "canonical": "cereal bar",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "champagne",
+    "canonical": "champagne",
+    "category": "drink"
+  },
+  {
+    "id": "chard",
+    "canonical": "chard",
+    "category": "vegetable"
+  },
+  {
+    "id": "cheddar",
+    "canonical": "cheddar cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cheese_spread",
+    "canonical": "cheese spread",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cheeseburger",
+    "canonical": "cheeseburger",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "cheesecake",
+    "canonical": "cheesecake",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "cherry",
+    "canonical": "cherry",
+    "category": "fruit"
+  },
+  {
+    "id": "chia_seeds",
+    "canonical": "chia seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "chicken_breast",
+    "canonical": "chicken breast",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_curry",
+    "canonical": "chicken curry",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_drumstick",
+    "canonical": "chicken drumstick",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_nuggets",
+    "canonical": "chicken nuggets",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_soup",
+    "canonical": "chicken soup",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chicken_thigh",
+    "canonical": "chicken thigh",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chicken_wing",
+    "canonical": "chicken wing",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "chickpeas",
+    "canonical": "chickpeas",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "chicory",
+    "canonical": "chicory",
+    "category": "vegetable"
+  },
+  {
+    "id": "chilli_con_carne",
+    "canonical": "chilli con carne",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "chilli_sauce",
+    "canonical": "chilli sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "chocolate_bar",
+    "canonical": "chocolate bar",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "chorizo",
+    "canonical": "chorizo",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "cider",
+    "canonical": "cider",
+    "category": "drink"
+  },
+  {
+    "id": "clam",
+    "canonical": "clam",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "clementine",
+    "canonical": "clementine",
+    "category": "fruit"
+  },
+  {
+    "id": "coca_cola",
+    "canonical": "Coca-Cola",
+    "category": "drink"
+  },
+  {
+    "id": "coconut",
+    "canonical": "coconut",
+    "category": "fruit"
+  },
+  {
+    "id": "coconut_oil",
+    "canonical": "coconut oil",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "cod",
+    "canonical": "cod",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "coffee",
+    "canonical": "coffee",
+    "category": "drink"
+  },
+  {
+    "id": "coke_zero",
+    "canonical": "Coke Zero",
+    "category": "drink"
+  },
+  {
+    "id": "cola",
+    "canonical": "cola",
+    "category": "drink"
+  },
+  {
+    "id": "coleslaw",
+    "canonical": "coleslaw",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "condensed_milk",
+    "canonical": "condensed milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cooked_ham",
+    "canonical": "cooked ham",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "cookie",
+    "canonical": "cookie",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "coriander_leaves",
+    "canonical": "coriander leaves",
+    "category": "vegetable"
+  },
+  {
+    "id": "corn_cake",
+    "canonical": "corn cake",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "corn_flour",
+    "canonical": "corn flour",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cornstarch",
+    "canonical": "cornstarch",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cottage_cheese",
+    "canonical": "cottage cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cottage_cheese_with_chives",
+    "canonical": "cottage cheese with chives",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "courgette",
+    "canonical": "courgette",
+    "category": "vegetable"
+  },
+  {
+    "id": "couscous",
+    "canonical": "couscous",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "crab",
+    "canonical": "crab",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "cracker",
+    "canonical": "cracker",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cranberry",
+    "canonical": "cranberry",
+    "category": "fruit"
+  },
+  {
+    "id": "crayfish",
+    "canonical": "crayfish",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "cream_cheese",
+    "canonical": "cream cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "cream_soup",
+    "canonical": "cream soup",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "crepe",
+    "canonical": "crepe",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "crispbread",
+    "canonical": "crispbread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "crisps",
+    "canonical": "crisps",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "croissant",
+    "canonical": "croissant",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "cucumber",
+    "canonical": "cucumber",
+    "category": "vegetable"
+  },
+  {
+    "id": "cupcake",
+    "canonical": "cupcake",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "curry",
+    "canonical": "curry",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "custard",
+    "canonical": "custard",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "dark_chocolate",
+    "canonical": "dark chocolate",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "date",
+    "canonical": "date",
+    "category": "fruit"
+  },
+  {
+    "id": "diet_coke",
+    "canonical": "Diet Coke",
+    "category": "drink"
+  },
+  {
+    "id": "dijon_mustard",
+    "canonical": "Dijon mustard",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "double_espresso",
+    "canonical": "double espresso",
+    "category": "drink"
+  },
+  {
+    "id": "doughnut",
+    "canonical": "doughnut",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "dragon_fruit",
+    "canonical": "dragon fruit",
+    "category": "fruit"
+  },
+  {
+    "id": "duck_breast",
+    "canonical": "duck breast",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "duck_egg",
+    "canonical": "duck egg",
+    "category": "egg"
+  },
+  {
+    "id": "duck_leg",
+    "canonical": "duck leg",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "edam",
+    "canonical": "edam",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "edamame",
+    "canonical": "edamame",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "eel",
+    "canonical": "eel",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "egg",
+    "canonical": "egg",
+    "category": "egg"
+  },
+  {
+    "id": "egg_noodles",
+    "canonical": "egg noodles",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "egg_white",
+    "canonical": "egg white",
+    "category": "egg"
+  },
+  {
+    "id": "egg_yolk",
+    "canonical": "egg yolk",
+    "category": "egg"
+  },
+  {
+    "id": "elderberry",
+    "canonical": "elderberry",
+    "category": "fruit"
+  },
+  {
+    "id": "emmental",
+    "canonical": "emmental",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "energy_drink",
+    "canonical": "energy drink",
+    "category": "drink"
+  },
+  {
+    "id": "espresso",
+    "canonical": "espresso",
+    "category": "drink"
+  },
+  {
+    "id": "evaporated_milk",
+    "canonical": "evaporated milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "falafel",
+    "canonical": "falafel",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fennel",
+    "canonical": "fennel",
+    "category": "vegetable"
+  },
+  {
+    "id": "feta",
+    "canonical": "feta",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "fig",
+    "canonical": "fig",
+    "category": "fruit"
+  },
+  {
+    "id": "fish_and_chips",
+    "canonical": "fish and chips",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "flaki",
+    "canonical": "flaki",
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "flat_white",
+    "canonical": "flat white",
+    "category": "drink"
+  },
+  {
+    "id": "flaxseed",
+    "canonical": "flaxseed",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "focaccia",
+    "canonical": "focaccia",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "frankfurter",
+    "canonical": "frankfurter",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "fried_chicken",
+    "canonical": "fried chicken",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fried_egg",
+    "canonical": "fried egg",
+    "category": "egg"
+  },
+  {
+    "id": "fried_rice",
+    "canonical": "fried rice",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "fries",
+    "canonical": "fries",
+    "category": "prepared_food"
+  },
+  {
+    "id": "fruit_tea",
+    "canonical": "fruit tea",
+    "category": "drink"
+  },
+  {
+    "id": "fruit_yoghurt",
+    "canonical": "fruit yoghurt",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "fusilli",
+    "canonical": "fusilli",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "garlic",
+    "canonical": "garlic",
+    "category": "vegetable"
+  },
+  {
+    "id": "garlic_sauce",
+    "canonical": "garlic sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "ghee",
+    "canonical": "ghee",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "gherkin",
+    "canonical": "gherkin",
+    "category": "vegetable"
+  },
+  {
+    "id": "gin",
+    "canonical": "gin",
+    "category": "drink"
+  },
+  {
+    "id": "go_bki",
+    "canonical": "gołąbki",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "goat_cheese",
+    "canonical": "goat cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "goose_breast",
+    "canonical": "goose breast",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "gooseberry",
+    "canonical": "gooseberry",
+    "category": "fruit"
+  },
+  {
+    "id": "gouda",
+    "canonical": "gouda",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "goulash",
+    "canonical": "goulash",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "granola_bar",
+    "canonical": "granola bar",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "grapefruit",
+    "canonical": "grapefruit",
+    "category": "fruit"
+  },
+  {
+    "id": "grapefruit_juice",
+    "canonical": "grapefruit juice",
+    "category": "drink"
+  },
+  {
+    "id": "grapes",
+    "canonical": "grapes",
+    "category": "fruit"
+  },
+  {
+    "id": "greek_salad",
+    "canonical": "Greek salad",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "greek_yoghurt",
+    "canonical": "greek yoghurt",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "green_beans",
+    "canonical": "green beans",
+    "category": "vegetable"
+  },
+  {
+    "id": "green_lentils",
+    "canonical": "green lentils",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "green_pepper",
+    "canonical": "green pepper",
+    "category": "vegetable"
+  },
+  {
+    "id": "green_tea",
+    "canonical": "green tea",
+    "category": "drink"
+  },
+  {
+    "id": "gruyere",
+    "canonical": "gruyere",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "guacamole",
+    "canonical": "guacamole",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "guava",
+    "canonical": "guava",
+    "category": "fruit"
+  },
+  {
+    "id": "gummy_sweets",
+    "canonical": "gummy sweets",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "gyros",
+    "canonical": "gyros",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "haddock",
+    "canonical": "haddock",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "hake",
+    "canonical": "hake",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "halibut",
+    "canonical": "halibut",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "halloumi",
+    "canonical": "halloumi",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "ham",
+    "canonical": "ham",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "hamburger",
+    "canonical": "hamburger",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "hard_candy",
+    "canonical": "hard candy",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "hazelnuts",
+    "canonical": "hazelnuts",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "hemp_seeds",
+    "canonical": "hemp seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "herbal_tea",
+    "canonical": "herbal tea",
+    "category": "drink"
+  },
+  {
+    "id": "herring",
+    "canonical": "herring",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "horseradish",
+    "canonical": "horseradish",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "hot_dog",
+    "canonical": "hot dog",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "hot_dog_bun",
+    "canonical": "hot dog bun",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "hot_dog_sausage",
+    "canonical": "hot dog sausage",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "hot_sauce",
+    "canonical": "hot sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "hummus",
+    "canonical": "hummus",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "ice_cream",
+    "canonical": "ice cream",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "iceberg_lettuce",
+    "canonical": "iceberg lettuce",
+    "category": "vegetable"
+  },
+  {
+    "id": "instant_coffee",
+    "canonical": "instant coffee",
+    "category": "drink"
+  },
+  {
+    "id": "ipa",
+    "canonical": "IPA",
+    "category": "drink"
+  },
+  {
+    "id": "isotonic_drink",
+    "canonical": "isotonic drink",
+    "category": "drink"
+  },
+  {
+    "id": "jasmine_rice",
+    "canonical": "jasmine rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "kabanos_sausage",
+    "canonical": "kabanos sausage",
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "kale",
+    "canonical": "kale",
+    "category": "vegetable"
+  },
+  {
+    "id": "kebab",
+    "canonical": "kebab",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "kefir",
+    "canonical": "kefir",
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "ketchup",
+    "canonical": "ketchup",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "king_prawn",
+    "canonical": "king prawn",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "kiwi_fruit",
+    "canonical": "kiwi fruit",
+    "category": "fruit"
+  },
+  {
+    "id": "lactose_free_milk",
+    "canonical": "lactose-free milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "lager",
+    "canonical": "lager",
+    "category": "drink"
+  },
+  {
+    "id": "lamb_chop",
+    "canonical": "lamb chop",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb_leg",
+    "canonical": "lamb leg",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb_shoulder",
+    "canonical": "lamb shoulder",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lasagne",
+    "canonical": "lasagne",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "lasagne_sheets",
+    "canonical": "lasagne sheets",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "latte",
+    "canonical": "latte",
+    "category": "drink"
+  },
+  {
+    "id": "leek",
+    "canonical": "leek",
+    "category": "vegetable"
+  },
+  {
+    "id": "lemon",
+    "canonical": "lemon",
+    "category": "fruit"
+  },
+  {
+    "id": "lemon_lime_soda",
+    "canonical": "lemon-lime soda",
+    "category": "drink"
+  },
+  {
+    "id": "lemonade",
+    "canonical": "lemonade",
+    "category": "drink"
+  },
+  {
+    "id": "lettuce",
+    "canonical": "lettuce",
+    "category": "vegetable"
+  },
+  {
+    "id": "light_mayonnaise",
+    "canonical": "light mayonnaise",
+    "category": "sauce_condiment_fat",
+    "base_food": "mayonnaise",
+    "modifiers": [
+      "light"
+    ]
+  },
+  {
+    "id": "lime",
+    "canonical": "lime",
+    "category": "fruit"
+  },
+  {
+    "id": "linseed",
+    "canonical": "linseed",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "liqueur",
+    "canonical": "liqueur",
+    "category": "drink"
+  },
+  {
+    "id": "liver_sausage",
+    "canonical": "liver sausage",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lobster",
+    "canonical": "lobster",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "lychee",
+    "canonical": "lychee",
+    "category": "fruit"
+  },
+  {
+    "id": "macadamia_nuts",
+    "canonical": "macadamia nuts",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "macaroni",
+    "canonical": "macaroni",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "mackerel",
+    "canonical": "mackerel",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "malt_vinegar",
+    "canonical": "malt vinegar",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "mandarin",
+    "canonical": "mandarin",
+    "category": "fruit"
+  },
+  {
+    "id": "mango",
+    "canonical": "mango",
+    "category": "fruit"
+  },
+  {
+    "id": "margarine",
+    "canonical": "margarine",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "marshmallow",
+    "canonical": "marshmallow",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "mascarpone",
+    "canonical": "mascarpone",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "mayonnaise",
+    "canonical": "mayonnaise",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "meal_replacement_shake",
+    "canonical": "meal replacement shake",
+    "category": "drink"
+  },
+  {
+    "id": "meatballs",
+    "canonical": "meatballs",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "melon",
+    "canonical": "melon",
+    "category": "fruit"
+  },
+  {
+    "id": "milk",
+    "canonical": "milk",
+    "category": "dairy"
+  },
+  {
+    "id": "milk_chocolate",
+    "canonical": "milk chocolate",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "milkshake",
+    "canonical": "milkshake",
+    "category": "drink"
+  },
+  {
+    "id": "millet_groats",
+    "canonical": "millet groats",
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "minced_beef",
+    "canonical": "minced beef",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_chicken",
+    "canonical": "minced chicken",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_lamb",
+    "canonical": "minced lamb",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_meat_cutlet",
+    "canonical": "minced meat cutlet",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "minced_pork",
+    "canonical": "minced pork",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "minced_turkey",
+    "canonical": "minced turkey",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "mineral_water",
+    "canonical": "mineral water",
+    "category": "drink"
+  },
+  {
+    "id": "mizeria",
+    "canonical": "mizeria",
+    "category": "salad",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "mocha",
+    "canonical": "mocha",
+    "category": "drink"
+  },
+  {
+    "id": "mortadella",
+    "canonical": "mortadella",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "mozzarella",
+    "canonical": "mozzarella",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "muffin",
+    "canonical": "muffin",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "mulberry",
+    "canonical": "mulberry",
+    "category": "fruit"
+  },
+  {
+    "id": "multigrain_bread",
+    "canonical": "multigrain bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "multivitamin_juice",
+    "canonical": "multivitamin juice",
+    "category": "drink"
+  },
+  {
+    "id": "mushroom",
+    "canonical": "mushroom",
+    "category": "vegetable"
+  },
+  {
+    "id": "mussel",
+    "canonical": "mussel",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "mustard",
+    "canonical": "mustard",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "naan_bread",
+    "canonical": "naan bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "nectarine",
+    "canonical": "nectarine",
+    "category": "fruit"
+  },
+  {
+    "id": "oat_bran",
+    "canonical": "oat bran",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "oat_milk",
+    "canonical": "oat milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "oat_yoghurt",
+    "canonical": "oat yoghurt",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "oats",
+    "canonical": "oats",
+    "category": "grain"
+  },
+  {
+    "id": "octopus",
+    "canonical": "octopus",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "okra",
+    "canonical": "okra",
+    "category": "vegetable"
+  },
+  {
+    "id": "olive_oil",
+    "canonical": "olive oil",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "omelette",
+    "canonical": "omelette",
+    "category": "egg"
+  },
+  {
+    "id": "onion",
+    "canonical": "onion",
+    "category": "vegetable"
+  },
+  {
+    "id": "orange",
+    "canonical": "orange",
+    "category": "fruit"
+  },
+  {
+    "id": "orange_juice",
+    "canonical": "orange juice",
+    "category": "drink"
+  },
+  {
+    "id": "orange_soda",
+    "canonical": "orange soda",
+    "category": "drink"
+  },
+  {
+    "id": "oyster",
+    "canonical": "oyster",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "p_t",
+    "canonical": "pâté",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "paella",
+    "canonical": "paella",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "pak_choi",
+    "canonical": "pak choi",
+    "category": "vegetable"
+  },
+  {
+    "id": "pancake",
+    "canonical": "pancake",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "papaya",
+    "canonical": "papaya",
+    "category": "fruit"
+  },
+  {
+    "id": "parmesan",
+    "canonical": "parmesan",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "parsnip",
+    "canonical": "parsnip",
+    "category": "vegetable"
+  },
+  {
+    "id": "passion_fruit",
+    "canonical": "passion fruit",
+    "category": "fruit"
+  },
+  {
+    "id": "pasta",
+    "canonical": "pasta",
+    "category": "grain"
+  },
+  {
+    "id": "pea",
+    "canonical": "pea",
+    "category": "vegetable"
+  },
+  {
+    "id": "peach",
+    "canonical": "peach",
+    "category": "fruit"
+  },
+  {
+    "id": "peanuts",
+    "canonical": "peanuts",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pear",
+    "canonical": "pear",
+    "category": "fruit"
+  },
+  {
+    "id": "pecans",
+    "canonical": "pecans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pecorino",
+    "canonical": "pecorino",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "penne",
+    "canonical": "penne",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "pepperoni",
+    "canonical": "pepperoni",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "perch",
+    "canonical": "perch",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "persimmon",
+    "canonical": "persimmon",
+    "category": "fruit"
+  },
+  {
+    "id": "pesto",
+    "canonical": "pesto",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "pho",
+    "canonical": "pho",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "pickled_beetroot",
+    "canonical": "pickled beetroot",
+    "category": "vegetable"
+  },
+  {
+    "id": "pickled_herring",
+    "canonical": "pickled herring",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pierogi",
+    "canonical": "pierogi",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "pike",
+    "canonical": "pike",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pineapple",
+    "canonical": "pineapple",
+    "category": "fruit"
+  },
+  {
+    "id": "pistachios",
+    "canonical": "pistachios",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pita_bread",
+    "canonical": "pita bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "pizza",
+    "canonical": "pizza",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "plaice",
+    "canonical": "plaice",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "plain_yoghurt",
+    "canonical": "plain yoghurt",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "plum",
+    "canonical": "plum",
+    "category": "fruit"
+  },
+  {
+    "id": "poached_egg",
+    "canonical": "poached egg",
+    "category": "egg"
+  },
+  {
+    "id": "poke_bowl",
+    "canonical": "poke bowl",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "polenta",
+    "canonical": "polenta",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "polish_sausage",
+    "canonical": "Polish sausage",
+    "category": "processed_meat",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "pollock",
+    "canonical": "pollock",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "pomegranate",
+    "canonical": "pomegranate",
+    "category": "fruit"
+  },
+  {
+    "id": "popcorn",
+    "canonical": "popcorn",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "poppy_seeds",
+    "canonical": "poppy seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "pork_belly",
+    "canonical": "pork belly",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_chop",
+    "canonical": "pork chop",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_loin",
+    "canonical": "pork loin",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_ribs",
+    "canonical": "pork ribs",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork_tenderloin",
+    "canonical": "pork tenderloin",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "porter",
+    "canonical": "porter",
+    "category": "drink"
+  },
+  {
+    "id": "portobello_mushroom",
+    "canonical": "portobello mushroom",
+    "category": "vegetable"
+  },
+  {
+    "id": "potato",
+    "canonical": "potato",
+    "category": "vegetable"
+  },
+  {
+    "id": "potato_pancakes",
+    "canonical": "potato pancakes",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "potato_starch",
+    "canonical": "potato starch",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "pretzel",
+    "canonical": "pretzel",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "processed_cheese",
+    "canonical": "processed cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "prosciutto",
+    "canonical": "prosciutto",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "prosecco",
+    "canonical": "prosecco",
+    "category": "drink"
+  },
+  {
+    "id": "protein_bar",
+    "canonical": "protein bar",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "protein_shake",
+    "canonical": "protein shake",
+    "category": "drink"
+  },
+  {
+    "id": "pudding",
+    "canonical": "pudding",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "pumpkin",
+    "canonical": "pumpkin",
+    "category": "vegetable"
+  },
+  {
+    "id": "pumpkin_seeds",
+    "canonical": "pumpkin seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "quail_egg",
+    "canonical": "quail egg",
+    "category": "egg"
+  },
+  {
+    "id": "quark",
+    "canonical": "quark",
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "quince",
+    "canonical": "quince",
+    "category": "fruit"
+  },
+  {
+    "id": "quinoa",
+    "canonical": "quinoa",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rabbit",
+    "canonical": "rabbit",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "radish",
+    "canonical": "radish",
+    "category": "vegetable"
+  },
+  {
+    "id": "ramen",
+    "canonical": "ramen",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "rapeseed_oil",
+    "canonical": "rapeseed oil",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "raspberry",
+    "canonical": "raspberry",
+    "category": "fruit"
+  },
+  {
+    "id": "red_cabbage",
+    "canonical": "red cabbage",
+    "category": "vegetable"
+  },
+  {
+    "id": "red_kidney_beans",
+    "canonical": "red kidney beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "red_lentils",
+    "canonical": "red lentils",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "red_onion",
+    "canonical": "red onion",
+    "category": "vegetable"
+  },
+  {
+    "id": "red_pepper",
+    "canonical": "red pepper",
+    "category": "vegetable"
+  },
+  {
+    "id": "red_wine",
+    "canonical": "red wine",
+    "category": "drink"
+  },
+  {
+    "id": "redcurrant",
+    "canonical": "redcurrant",
+    "category": "fruit"
+  },
+  {
+    "id": "rhubarb",
+    "canonical": "rhubarb",
+    "category": "fruit"
+  },
+  {
+    "id": "rice",
+    "canonical": "rice",
+    "category": "grain"
+  },
+  {
+    "id": "rice_cake",
+    "canonical": "rice cake",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rice_milk",
+    "canonical": "rice milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "rice_noodles",
+    "canonical": "rice noodles",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "ricotta",
+    "canonical": "ricotta",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "risotto",
+    "canonical": "risotto",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "risotto_rice",
+    "canonical": "risotto rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rocket",
+    "canonical": "rocket",
+    "category": "vegetable"
+  },
+  {
+    "id": "rolled_oats",
+    "canonical": "rolled oats",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "romaine_lettuce",
+    "canonical": "romaine lettuce",
+    "category": "vegetable"
+  },
+  {
+    "id": "ros",
+    "canonical": "rosół",
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "ros_wine",
+    "canonical": "rosé wine",
+    "category": "drink"
+  },
+  {
+    "id": "rum",
+    "canonical": "rum",
+    "category": "drink"
+  },
+  {
+    "id": "rye_bread",
+    "canonical": "rye bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "rye_flour",
+    "canonical": "rye flour",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "salami",
+    "canonical": "salami",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "salmon",
+    "canonical": "salmon",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "salsa",
+    "canonical": "salsa",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "salted_nuts",
+    "canonical": "salted nuts",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "sardine",
+    "canonical": "sardine",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sauerkraut",
+    "canonical": "sauerkraut",
+    "category": "vegetable"
+  },
+  {
+    "id": "savoy_cabbage",
+    "canonical": "savoy cabbage",
+    "category": "vegetable"
+  },
+  {
+    "id": "scallop",
+    "canonical": "scallop",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "scrambled_egg",
+    "canonical": "scrambled egg",
+    "category": "egg"
+  },
+  {
+    "id": "sea_bass",
+    "canonical": "sea bass",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sea_bream",
+    "canonical": "sea bream",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "semi_skimmed_milk",
+    "canonical": "semi-skimmed milk",
+    "category": "dairy_alternative",
+    "base_food": "milk",
+    "modifiers": [
+      "reduced-fat"
+    ]
+  },
+  {
+    "id": "semolina",
+    "canonical": "semolina",
+    "category": "grain",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "sesame_oil",
+    "canonical": "sesame oil",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "sesame_seeds",
+    "canonical": "sesame seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "shawarma",
+    "canonical": "shawarma",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "sheep_cheese",
+    "canonical": "sheep cheese",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "shrimp",
+    "canonical": "shrimp",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "skimmed_milk",
+    "canonical": "skimmed milk",
+    "category": "dairy_alternative",
+    "base_food": "milk",
+    "modifiers": [
+      "low-fat"
+    ]
+  },
+  {
+    "id": "skyr",
+    "canonical": "skyr",
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "smoked_ham",
+    "canonical": "smoked ham",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "smoked_mackerel",
+    "canonical": "smoked mackerel",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoked_salmon",
+    "canonical": "smoked salmon",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoked_trout",
+    "canonical": "smoked trout",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "smoothie",
+    "canonical": "smoothie",
+    "category": "drink"
+  },
+  {
+    "id": "sole",
+    "canonical": "sole",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sorbet",
+    "canonical": "sorbet",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "sour_cream",
+    "canonical": "sour cream",
+    "category": "dairy",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "sourdough_bread",
+    "canonical": "sourdough bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "soy_milk",
+    "canonical": "soy milk",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "soy_sauce",
+    "canonical": "soy sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "soy_yoghurt",
+    "canonical": "soy yoghurt",
+    "category": "dairy_alternative"
+  },
+  {
+    "id": "spaghetti",
+    "canonical": "spaghetti",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "spaghetti_bolognese",
+    "canonical": "spaghetti bolognese",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "sparkling_water",
+    "canonical": "sparkling water",
+    "category": "drink"
+  },
+  {
+    "id": "sparkling_wine",
+    "canonical": "sparkling wine",
+    "category": "drink"
+  },
+  {
+    "id": "spinach",
+    "canonical": "spinach",
+    "category": "vegetable"
+  },
+  {
+    "id": "split_peas",
+    "canonical": "split peas",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "sponge_cake",
+    "canonical": "sponge cake",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "sports_drink",
+    "canonical": "sports drink",
+    "category": "drink"
+  },
+  {
+    "id": "spring_onion",
+    "canonical": "spring onion",
+    "category": "vegetable"
+  },
+  {
+    "id": "squid",
+    "canonical": "squid",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "stew",
+    "canonical": "stew",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "stir_fry",
+    "canonical": "stir fry",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "stout",
+    "canonical": "stout",
+    "category": "drink"
+  },
+  {
+    "id": "strawberry",
+    "canonical": "strawberry",
+    "category": "fruit"
+  },
+  {
+    "id": "streaky_bacon",
+    "canonical": "streaky bacon",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "sunflower_oil",
+    "canonical": "sunflower oil",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "sunflower_seeds",
+    "canonical": "sunflower seeds",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "surimi",
+    "canonical": "surimi",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "sushi",
+    "canonical": "sushi",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "swede",
+    "canonical": "swede",
+    "category": "vegetable"
+  },
+  {
+    "id": "sweet_potato",
+    "canonical": "sweet potato",
+    "category": "vegetable"
+  },
+  {
+    "id": "sweetcorn",
+    "canonical": "sweetcorn",
+    "category": "vegetable"
+  },
+  {
+    "id": "swordfish",
+    "canonical": "swordfish",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tartar_sauce",
+    "canonical": "tartar sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tea",
+    "canonical": "tea",
+    "category": "drink"
+  },
+  {
+    "id": "tempeh",
+    "canonical": "tempeh",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "tequila",
+    "canonical": "tequila",
+    "category": "drink"
+  },
+  {
+    "id": "thousand_island_dressing",
+    "canonical": "thousand island dressing",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "toffee",
+    "canonical": "toffee",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "tofu",
+    "canonical": "tofu",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "tomato",
+    "canonical": "tomato",
+    "category": "vegetable"
+  },
+  {
+    "id": "tomato_juice",
+    "canonical": "tomato juice",
+    "category": "drink"
+  },
+  {
+    "id": "tomato_paste",
+    "canonical": "tomato paste",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tomato_sauce",
+    "canonical": "tomato sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "tomato_soup",
+    "canonical": "tomato soup",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "tonic_water",
+    "canonical": "tonic water",
+    "category": "drink"
+  },
+  {
+    "id": "tortilla_chips",
+    "canonical": "tortilla chips",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "trout",
+    "canonical": "trout",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna",
+    "canonical": "tuna",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_in_brine",
+    "canonical": "tuna in brine",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_in_oil",
+    "canonical": "tuna in oil",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "tuna_salad",
+    "canonical": "tuna salad",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "tuna_steak",
+    "canonical": "tuna steak",
+    "category": "fish_seafood"
+  },
+  {
+    "id": "turkey_breast",
+    "canonical": "turkey breast",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "turkey_thigh",
+    "canonical": "turkey thigh",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "turnip",
+    "canonical": "turnip",
+    "category": "vegetable"
+  },
+  {
+    "id": "urek",
+    "canonical": "żurek",
+    "category": "soup",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "veal_cutlet",
+    "canonical": "veal cutlet",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "veal_steak",
+    "canonical": "veal steak",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "vegetable_soup",
+    "canonical": "vegetable soup",
+    "category": "prepared_meal"
+  },
+  {
+    "id": "venison",
+    "canonical": "venison",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "vinaigrette",
+    "canonical": "vinaigrette",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "vinegar",
+    "canonical": "vinegar",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "vodka",
+    "canonical": "vodka",
+    "category": "drink"
+  },
+  {
+    "id": "waffle",
+    "canonical": "waffle",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "walnuts",
+    "canonical": "walnuts",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "water",
+    "canonical": "water",
+    "category": "drink"
+  },
+  {
+    "id": "watercress",
+    "canonical": "watercress",
+    "category": "vegetable"
+  },
+  {
+    "id": "watermelon",
+    "canonical": "watermelon",
+    "category": "fruit"
+  },
+  {
+    "id": "wheat_flour",
+    "canonical": "wheat flour",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wheat_pasta",
+    "canonical": "wheat pasta",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "whisky",
+    "canonical": "whisky",
+    "category": "drink"
+  },
+  {
+    "id": "white_beans",
+    "canonical": "white beans",
+    "category": "legume_nut_seed"
+  },
+  {
+    "id": "white_bread",
+    "canonical": "white bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "white_cabbage",
+    "canonical": "white cabbage",
+    "category": "vegetable"
+  },
+  {
+    "id": "white_chocolate",
+    "canonical": "white chocolate",
+    "category": "snack_dessert"
+  },
+  {
+    "id": "white_rice",
+    "canonical": "white rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "white_wine",
+    "canonical": "white wine",
+    "category": "drink"
+  },
+  {
+    "id": "whole_chicken",
+    "canonical": "whole chicken",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "whole_milk",
+    "canonical": "whole milk",
+    "category": "dairy_alternative",
+    "base_food": "milk",
+    "modifiers": [
+      "full-fat"
+    ]
+  },
+  {
+    "id": "wholegrain_mustard",
+    "canonical": "wholegrain mustard",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "wholemeal_bread",
+    "canonical": "wholemeal bread",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wholemeal_flour",
+    "canonical": "wholemeal flour",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wholewheat_pasta",
+    "canonical": "wholewheat pasta",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "wild_boar",
+    "canonical": "wild boar",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "wild_rice",
+    "canonical": "wild rice",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "worcestershire_sauce",
+    "canonical": "Worcestershire sauce",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "wrap",
+    "canonical": "wrap",
+    "category": "grain_bakery"
+  },
+  {
+    "id": "yellow_pepper",
+    "canonical": "yellow pepper",
+    "category": "vegetable"
+  },
+  {
+    "id": "yoghurt",
+    "canonical": "yoghurt",
+    "category": "dairy"
+  }
+]

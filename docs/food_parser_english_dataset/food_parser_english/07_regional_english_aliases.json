@@ -1,0 +1,83 @@
+{
+  "uk_us_global_aliases": [
+    [
+      "aubergine",
+      "eggplant"
+    ],
+    [
+      "courgette",
+      "zucchini"
+    ],
+    [
+      "coriander",
+      "cilantro"
+    ],
+    [
+      "rocket",
+      "arugula"
+    ],
+    [
+      "beetroot",
+      "beet"
+    ],
+    [
+      "spring onion",
+      "green onion",
+      "scallion"
+    ],
+    [
+      "bell pepper",
+      "capsicum",
+      "sweet pepper"
+    ],
+    [
+      "minced beef",
+      "ground beef",
+      "beef mince"
+    ],
+    [
+      "prawns",
+      "shrimp"
+    ],
+    [
+      "crisps",
+      "potato chips"
+    ],
+    [
+      "fries",
+      "french fries",
+      "chips"
+    ],
+    [
+      "icing sugar",
+      "powdered sugar",
+      "confectioner's sugar"
+    ],
+    [
+      "wholemeal",
+      "whole wheat"
+    ],
+    [
+      "skimmed milk",
+      "skim milk"
+    ],
+    [
+      "semi-skimmed milk",
+      "reduced-fat milk"
+    ]
+  ],
+  "ambiguous_terms": [
+    {
+      "term": "chips",
+      "note": "UK often fries; US often crisps/potato chips. Resolve using locale/context."
+    },
+    {
+      "term": "biscuit",
+      "note": "UK biscuit usually sweet/savoury baked snack; US biscuit is a bread product. Resolve by locale/context."
+    },
+    {
+      "term": "pepper",
+      "note": "Can mean bell pepper/capsicum or black pepper spice. Resolve by context."
+    }
+  ]
+}

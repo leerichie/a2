@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'l10n.dart';
+import 'parser/exercise_parser.dart';
 
 void main() => runApp(const A2App());
 
@@ -442,6 +443,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int waterMl = 0;
   int waterTargetMl = 2000;
   bool entrySyncAvailable = false;
+  String accountName = '';
   final entries = <FoodEntry>[];
   List<HistoryRecord> history = [];
   int get calories => entries
@@ -454,9 +456,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       .fold(0, (sum, entry) => sum + entry.calories);
   List<HistoryRecord> get combinedHistory {
     final today = dayOnly(DateTime.now());
-    final withoutToday = history
-        .where((r) => dayOnly(r.at) != today)
-        .toList();
+    final withoutToday = history.where((r) => dayOnly(r.at) != today).toList();
     final todayRecords = entries
         .map((e) => HistoryRecord.fromFoodEntry(e, today))
         .toList();
@@ -491,11 +491,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       _loadPlan(),
       _loadWater(),
       _loadEntrySyncAvailability(),
+      _loadAccountName(),
     ]);
     try {
       final enabled = await const AccountService().refreshAccount(
         defaultServerUrl,
       );
+      await _loadAccountName();
       if (!enabled) return;
       await const AccountService().synchronise(defaultServerUrl);
       await Future.wait([
@@ -515,12 +517,18 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     if (mounted) setState(() => entrySyncAvailable = available);
   }
 
-  Future<void> _shareEntry(FoodEntry entry) =>
-      const EntrySyncService().shareEntry(
-        defaultServerUrl,
-        entry,
-        DateTime.now(),
-      );
+  Future<void> _loadAccountName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('account_user');
+    final user = raw == null
+        ? const <String, dynamic>{}
+        : jsonDecode(raw) as Map<String, dynamic>;
+    final name = (user['name'] as String? ?? '').trim();
+    if (mounted) setState(() => accountName = name);
+  }
+
+  Future<void> _shareEntry(FoodEntry entry) => const EntrySyncService()
+      .shareEntry(defaultServerUrl, entry, DateTime.now());
 
   Future<void> _loadTodayEntries() async {
     final restored = await const DailyEntryRepository().load(DateTime.now());
@@ -561,19 +569,37 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     final planRaw = prefs.getString('active_diet_plan');
     final bodyRaw = prefs.getString('body_profile');
+    final loadedBody = bodyRaw == null
+        ? const BodyProfile()
+        : BodyProfile.fromJson(jsonDecode(bodyRaw) as Map<String, dynamic>);
+    final storedTarget = prefs.getInt('daily_target') ?? 2100;
+    final loadedTarget = resolvedDailyTarget(
+      loadedBody,
+      storedTarget: storedTarget,
+      customized: prefs.getBool('daily_target_custom') == true,
+    );
+    if (loadedTarget != storedTarget) {
+      await prefs.setInt('daily_target', loadedTarget);
+      if (planRaw != null) {
+        final loadedPlan = DietPlan.fromJson(
+          jsonDecode(planRaw) as Map<String, dynamic>,
+        );
+        await prefs.setString(
+          'active_diet_plan',
+          jsonEncode(loadedPlan.copyWith(target: loadedTarget).toJson()),
+        );
+      }
+    }
     if (mounted) {
       setState(() {
-        dailyTarget = prefs.getInt('daily_target') ?? 2100;
+        dailyTarget = loadedTarget;
         if (planRaw != null) {
-          dietStyle = DietPlan.fromJson(
+          final loadedPlan = DietPlan.fromJson(
             jsonDecode(planRaw) as Map<String, dynamic>,
-          ).style;
+          );
+          dietStyle = loadedPlan.style;
         }
-        if (bodyRaw != null) {
-          bodyWeightKg = BodyProfile.fromJson(
-            jsonDecode(bodyRaw) as Map<String, dynamic>,
-          ).weightKg;
-        }
+        bodyWeightKg = loadedBody.weightKg;
       });
     }
   }
@@ -581,9 +607,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString('personal_history_cache');
-    final raw = jsonDecode(
-      stored ?? await rootBundle.loadString('assets/data/ashley_history.json'),
-    ) as Map<String, dynamic>;
+    final raw = jsonDecode(stored ?? '{"records":[]}') as Map<String, dynamic>;
     final loaded =
         (raw['records'] as List)
             .map((e) => HistoryRecord.fromJson(e as Map<String, dynamic>))
@@ -618,6 +642,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     );
     final pages = [
       TodayPage(
+        accountName: accountName,
         entries: entries,
         calories: calories,
         protein: protein,
@@ -630,6 +655,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         entrySyncAvailable: entrySyncAvailable,
         onSyncEntry: _shareEntry,
         onDelete: (entry) async {
+          await const AccountService().recordDeletedEntry(
+            entry,
+            DateTime.now(),
+          );
           setState(() => entries.remove(entry));
           await _saveTodayEntries();
         },
@@ -694,7 +723,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (_) => AddItemSheet(onAddWater: _addWater),
+                  builder: (_) => AddItemSheet(
+                    onAddWater: _addWater,
+                    bodyWeightKg: bodyWeightKg,
+                  ),
                 );
                 if (e != null) {
                   setState(() => entries.add(e));
@@ -825,6 +857,7 @@ class NutritionTargets {
 class TodayPage extends StatelessWidget {
   const TodayPage({
     super.key,
+    required this.accountName,
     required this.entries,
     required this.calories,
     required this.protein,
@@ -838,6 +871,7 @@ class TodayPage extends StatelessWidget {
     this.entrySyncAvailable = false,
     this.onSyncEntry,
   });
+  final String accountName;
   final List<FoodEntry> entries;
   final int calories, protein, carbs, exerciseCalories;
   final NutritionTargets targets;
@@ -871,9 +905,7 @@ class TodayPage extends StatelessWidget {
             (entry) => FoodTile(
               entry,
               onDelete: () => _confirmDelete(context, entry),
-              onSync: entrySyncAvailable
-                  ? () => onSyncEntry!(entry)
-                  : null,
+              onSync: entrySyncAvailable ? () => onSyncEntry!(entry) : null,
             ),
           ),
         ],
@@ -932,7 +964,7 @@ class TodayPage extends StatelessWidget {
           sliver: SliverList.list(
             children: [
               TopBar(
-                '${greetingFor(DateTime.now())}, Ashley',
+                '${greetingFor(DateTime.now())}${accountName.isEmpty ? '' : ', $accountName'}',
                 fullDate(DateTime.now()),
               ),
               const SizedBox(height: 22),
@@ -1424,10 +1456,7 @@ class MetricCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (trailing != null) ...[
-                  const SizedBox(width: 6),
-                  trailing!,
-                ],
+                if (trailing != null) ...[const SizedBox(width: 6), trailing!],
               ],
             ),
             const SizedBox(height: 13),
@@ -1520,6 +1549,13 @@ class FoodEntry {
     this.isExercise = false,
     this.category,
     this.carbs = 0,
+    this.sharedFrom,
+    this.sharedEntryId,
+    this.exerciseActivityId,
+    this.exerciseDurationMinutes,
+    this.exerciseMet,
+    this.exerciseBodyWeightKg,
+    this.exerciseApproximate = false,
   });
   final String name, time;
   final int calories, protein;
@@ -1527,6 +1563,16 @@ class FoodEntry {
   final bool isExercise;
   final String? category;
   final int carbs;
+  final String? sharedFrom, sharedEntryId;
+  // Calculation evidence for a parser-estimated exercise entry (MET x body
+  // weight x duration) -- null when the entry predates this, was AI-derived,
+  // or isn't exercise at all. Kept separate from `calories` so the number
+  // used for daily totals never depends on this being present.
+  final String? exerciseActivityId;
+  final double? exerciseDurationMinutes;
+  final double? exerciseMet;
+  final double? exerciseBodyWeightKg;
+  final bool exerciseApproximate;
 
   String get dayCategory => category ?? MealCategory.detect(name, isExercise);
 
@@ -1538,6 +1584,13 @@ class FoodEntry {
     'isExercise': isExercise,
     'category': dayCategory,
     'carbs': carbs,
+    'sharedFrom': ?sharedFrom,
+    'sharedEntryId': ?sharedEntryId,
+    'exerciseActivityId': ?exerciseActivityId,
+    'exerciseDurationMinutes': ?exerciseDurationMinutes,
+    'exerciseMet': ?exerciseMet,
+    'exerciseBodyWeightKg': ?exerciseBodyWeightKg,
+    'exerciseApproximate': exerciseApproximate,
   };
 
   factory FoodEntry.fromJson(Map<String, dynamic> json) {
@@ -1550,11 +1603,20 @@ class FoodEntry {
       isExercise ? Icons.directions_run : Icons.restaurant,
       isExercise: isExercise,
       category: json['category'] as String?,
+      sharedFrom: json['sharedFrom'] as String?,
+      sharedEntryId: json['sharedEntryId'] as String?,
       carbs:
           json['carbs'] as int? ??
           (isExercise
               ? 0
               : FoodEstimator.estimate(json['name'] as String).carbs),
+      exerciseActivityId: json['exerciseActivityId'] as String?,
+      exerciseDurationMinutes: (json['exerciseDurationMinutes'] as num?)
+          ?.toDouble(),
+      exerciseMet: (json['exerciseMet'] as num?)?.toDouble(),
+      exerciseBodyWeightKg: (json['exerciseBodyWeightKg'] as num?)
+          ?.toDouble(),
+      exerciseApproximate: json['exerciseApproximate'] as bool? ?? false,
     );
   }
 }
@@ -1621,6 +1683,12 @@ class MealCategory {
         'vodka',
         'gin',
         'rum',
+        'coffee',
+        'tea',
+        'juice',
+        'cola',
+        'lemonade',
+        'smoothie',
       ],
     };
     for (final entry in terms.entries) {
@@ -1686,6 +1754,70 @@ class WaterRepository {
   }
 }
 
+class WaterIntake {
+  const WaterIntake(this.millilitres);
+  final int millilitres;
+}
+
+class WaterIntakeParser {
+  static WaterIntake? parse(String description) {
+    final text = description
+        .toLowerCase()
+        .replaceAll(',', '.')
+        .replaceAll(RegExp("[’']"), ' ')
+        .replaceAll('pół', 'pol')
+        .replaceAll('poł', 'pol')
+        .replaceAll('moitié', 'moitie');
+    if (!RegExp(r'\b(water|wod(?:a|y|ę)|wasser|eau|agua|acqua)\b')
+        .hasMatch(text)) {
+      return null;
+    }
+    final remainder = text
+        .replaceAll(
+          RegExp(r'\b(water|wod(?:a|y|ę)|wasser|eau|agua|acqua)\b'),
+          ' ',
+        )
+        .replaceAll(
+          RegExp(
+            r'\b\d+(?:\.\d+)?\s*(?:ml|millilit(?:er|re)s?|l|lit(?:er|re)s?)\b',
+          ),
+          ' ',
+        )
+        .replaceAll(
+          RegExp(
+            r'\b(?:a|an|one|two|three|four|five|six|half|full|of|d|de|du|le|la|un|une|demi|moitie|der|das|ein|eine|halb\w*|di|del|della|una|medio|media|mezzo|mezza|pol\w*|glass(?:es)?|bottle(?:s)?|sparkling|still|szklank\w*|butelk\w*|glas(?:es|s)?|flasche\w*|verre\w*|bouteille\w*|vaso\w*|botella\w*|bicchier\w*|bottiglia\w*)\b',
+          ),
+          ' ',
+        )
+        .replaceAll(RegExp(r'[^a-zà-ż]+'), ' ')
+        .trim();
+    if (remainder.isNotEmpty) return null;
+    final measured = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(ml|millilit(?:er|re)s?|l|lit(?:er|re)s?)\b',
+    ).firstMatch(text);
+    if (measured != null) {
+      final amount = double.parse(measured.group(1)!);
+      final unit = measured.group(2)!;
+      return WaterIntake(
+        (unit == 'l' || unit.startsWith('lit') ? amount * 1000 : amount)
+            .round(),
+      );
+    }
+    final numericCount = double.tryParse(
+      RegExp(r'\b(\d+(?:\.\d+)?)\s+').firstMatch(text)?.group(1) ?? '',
+    );
+    final isHalf = RegExp(
+      r'\b(half|demi|moitie|halb\w*|medio|media|mezzo|mezza|pol\w*)\b',
+    ).hasMatch(text);
+    final count = numericCount ?? (isHalf ? 0.5 : 1.0);
+    if (RegExp(r'\b(bottle|butelk|flasche|bouteille|botella|bottiglia)')
+        .hasMatch(text)) {
+      return WaterIntake((500 * count).round());
+    }
+    return WaterIntake((250 * count).round());
+  }
+}
+
 class FoodTile extends StatelessWidget {
   const FoodTile(this.entry, {super.key, required this.onDelete, this.onSync});
   final FoodEntry entry;
@@ -1696,9 +1828,8 @@ class FoodTile extends StatelessWidget {
     try {
       await onSync!();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: LText('Synced "${entry.name}"')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: LText('Synced "${entry.name}"')));
       }
     } catch (error) {
       if (context.mounted) {
@@ -1846,6 +1977,15 @@ class FoodEstimator {
       'coke': (170, 0, 46),
       'cola': (170, 0, 46),
       'milkshake': (350, 8, 60),
+      'fruit smoothie': (170, 3, 35),
+      'orange juice': (110, 2, 24),
+      'apple juice': (115, 0, 28),
+      'fruit juice': (115, 1, 27),
+      'juice': (115, 1, 27),
+      'coffee': (3, 0, 0),
+      'tea': (2, 0, 0),
+      'lemonade': (100, 0, 25),
+      'soda': (140, 0, 35),
       'apple pie': (240, 2, 33),
       'side salad': (25, 1, 4),
     };
@@ -1880,6 +2020,7 @@ class FoodEstimator {
       'chocolate raisin': (400, 5, 72, 30),
       'raisin': (300, 3.1, 79, 30),
       'cottage cheese': (98, 11, 3.4, 60),
+      'coleslaw': (150, 1.5, 12, 70),
       'ham': (145, 21, 1.5, 60),
       'bacon': (450, 37, 1.3, 40),
       'sausage': (300, 13, 3, 100),
@@ -1902,6 +2043,9 @@ class FoodEstimator {
       'tomato': (18, .9, 3.9, 100),
       'onion': (40, 1.1, 9.3, 50),
       'carrot': (41, .9, 10, 80),
+      'bell pepper': (31, 1, 6, 60),
+      'capsicum': (31, 1, 6, 60),
+      'pickle': (12, .5, 2.4, 50),
       'cabbage': (25, 1.3, 5.8, 100),
       'lettuce': (15, 1.4, 2.9, 60),
       'salad': (60, 2, 5, 100),
@@ -1953,10 +2097,7 @@ class FoodEstimator {
         math.min(text.length, match.end + 40),
       );
       final mlMatch = RegExp(r'(\d+(?:\.\d+)?)\s*ml').firstMatch(around);
-      final before = text.substring(
-        math.max(0, match.start - 20),
-        match.start,
-      );
+      final before = text.substring(math.max(0, match.start - 20), match.start);
       final millilitres = mlMatch != null
           ? double.parse(mlMatch.group(1)!)
           : 25.0 * _countBefore(before);
@@ -2042,8 +2183,13 @@ class LabelParser {
 }
 
 class AddItemSheet extends StatelessWidget {
-  const AddItemSheet({super.key, required this.onAddWater});
+  const AddItemSheet({
+    super.key,
+    required this.onAddWater,
+    this.bodyWeightKg,
+  });
   final ValueChanged<int> onAddWater;
+  final double? bodyWeightKg;
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.fromLTRB(20, 12, 20, sheetBottomInset(context, 28)),
@@ -2072,20 +2218,24 @@ class AddItemSheet extends StatelessWidget {
               child: Icon(Icons.restaurant, color: forest),
             ),
             title: const LText(
-              'Food or drink · counts towards your day',
+              'Food or drink',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             subtitle: const LText('Describe it, photograph it or scan a label'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
-              final result = await showModalBottomSheet<FoodEntry>(
+              final result = await showModalBottomSheet<Object>(
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (_) => const AddMealSheet(),
               );
-              if (context.mounted && result != null) {
-                Navigator.pop(context, result);
+              if (!context.mounted || result == null) return;
+              if (result case final WaterIntake water) {
+                onAddWater(water.millilitres);
+                Navigator.pop(context);
+              } else if (result case final FoodEntry entry) {
+                Navigator.pop(context, entry);
               }
             },
           ),
@@ -2106,32 +2256,11 @@ class AddItemSheet extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (_) => const AddExerciseSheet(),
+                builder: (_) => AddExerciseSheet(bodyWeightKg: bodyWeightKg),
               );
               if (context.mounted && result != null) {
                 Navigator.pop(context, result);
               }
-            },
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFDDF0F9),
-              child: Icon(Icons.water_drop_outlined, color: aqua),
-            ),
-            title: const LText(
-              'Water',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-            subtitle: const LText('Log a glass, bottle or custom amount'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              await showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => WaterQuickAddSheet(onAdd: onAddWater),
-              );
-              if (context.mounted) Navigator.pop(context);
             },
           ),
         ],
@@ -2140,97 +2269,9 @@ class AddItemSheet extends StatelessWidget {
   );
 }
 
-class WaterQuickAddSheet extends StatefulWidget {
-  const WaterQuickAddSheet({super.key, required this.onAdd});
-  final ValueChanged<int> onAdd;
-  @override
-  State<WaterQuickAddSheet> createState() => _WaterQuickAddSheetState();
-}
-
-class _WaterQuickAddSheetState extends State<WaterQuickAddSheet> {
-  final custom = TextEditingController();
-
-  @override
-  void dispose() {
-    custom.dispose();
-    super.dispose();
-  }
-
-  void _add(int ml) {
-    widget.onAdd(ml);
-    Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.fromLTRB(20, 20, 20, sheetBottomInset(context, 24)),
-    decoration: const BoxDecoration(
-      color: cream,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Center(
-          child: Container(
-            width: 42,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.black12,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        const LText(
-          'Add water',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [100, 200, 250, 330, 500, 750]
-              .map(
-                (ml) => OutlinedButton(
-                  onPressed: () => _add(ml),
-                  child: LText('+$ml ml'),
-                ),
-              )
-              .toList(),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: custom,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: ui(context, 'Custom amount (ml)'),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: ink),
-              onPressed: () {
-                final ml = int.tryParse(custom.text);
-                if (ml != null && ml > 0) _add(ml);
-              },
-              child: const LText('Add'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
 class AddExerciseSheet extends StatefulWidget {
-  const AddExerciseSheet({super.key});
+  const AddExerciseSheet({super.key, this.bodyWeightKg});
+  final double? bodyWeightKg;
   @override
   State<AddExerciseSheet> createState() => _AddExerciseSheetState();
 }
@@ -2240,12 +2281,17 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
   final minutes = TextEditingController(text: '30');
   bool aiAvailable = false;
   bool busy = false;
+  String? notice;
+  ExerciseParser? parser;
 
   @override
   void initState() {
     super.initState();
     const AiService().isAvailable().then((value) {
       if (mounted) setState(() => aiAvailable = value);
+    });
+    ExerciseParser.load().then((value) {
+      if (mounted) setState(() => parser = value);
     });
   }
 
@@ -2260,40 +2306,70 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
     final name = activity.text.trim();
     final mins = int.tryParse(minutes.text) ?? 0;
     if (name.isEmpty || mins <= 0) return;
+    setState(() => notice = null);
+
+    // Local-first: run the offline MET parser before ever considering AI.
+    final localParser = parser ?? await ExerciseParser.load();
+    final result = localParser.parse(
+      '$mins min $name',
+      bodyWeightKg: widget.bodyWeightKg,
+    );
+
+    // Only reach for AI when the local parser couldn't recognize the
+    // activity at all -- a recognized activity with no body weight on file
+    // stays blocked rather than spending a network call whose answer would
+    // just be discarded (canonical MET math is authoritative below).
     int? aiCalories;
-    if (aiAvailable) {
+    if (result.activityId == null && aiAvailable) {
       setState(() => busy = true);
       try {
-        final result = await const AiService().describe(
+        final aiResult = await const AiService().describe(
           serverUrl: defaultServerUrl,
           kind: 'exercise',
           text: '$name for $mins minutes',
         );
-        aiCalories = result.calories;
+        aiCalories = aiResult.calories;
       } catch (_) {
-        // Falls through to the local heuristic below.
+        // Falls through to the "unresolved" notice below.
       } finally {
         if (mounted) setState(() => busy = false);
       }
       if (!mounted) return;
     }
-    final lower = name.toLowerCase();
-    final perMinute = lower.contains('run')
-        ? 10
-        : lower.contains('cycl') || lower.contains('swim')
-        ? 8
-        : lower.contains('gym') || lower.contains('weight')
-        ? 6
-        : 4;
+    // Canonical MET math always wins once the activity is recognized -- AI
+    // only ever supplies the number when there's no canonical activity at
+    // all, so a saved entry never carries MET/activity evidence that
+    // mathematically contradicts its own calorie total.
+    final calories = result.activityId != null
+        ? result.calorieEstimateKcal?.round()
+        : aiCalories;
+
+    if (calories == null) {
+      setState(() {
+        notice = result.activityId == null
+            ? (result.suggestions.isNotEmpty
+                  ? 'We don\'t recognize "$name" yet. Did you mean "${result.suggestions.first}"?'
+                  : 'We don\'t recognize "$name" yet, so we can\'t estimate calories for it.')
+            : 'Add your weight in your profile to estimate calories for this activity.';
+      });
+      return;
+    }
+    if (!mounted) return;
+
     Navigator.pop(
       context,
       FoodEntry(
         name,
         '${_clockTime()} · $mins min',
-        aiCalories ?? mins * perMinute,
+        calories,
         0,
         Icons.directions_run,
         isExercise: true,
+        exerciseActivityId: result.activityId,
+        exerciseDurationMinutes: result.durationMinutes,
+        exerciseMet: result.met,
+        exerciseBodyWeightKg: widget.bodyWeightKg,
+        exerciseApproximate: result.approximate,
       ),
     );
   }
@@ -2330,6 +2406,13 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
             suffixText: 'minutes',
           ),
         ),
+        const Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: LText(
+            'Calories are an estimate based on your weight, activity and duration.',
+            style: TextStyle(fontSize: 11, color: Colors.black54),
+          ),
+        ),
         if (busy)
           const Padding(
             padding: EdgeInsets.only(top: 12),
@@ -2344,6 +2427,28 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
                 LText(
                   'Estimating with AI…',
                   style: TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+        if (notice != null)
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE5DD),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.error_outline, color: coral, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LText(
+                    notice!,
+                    style: const TextStyle(fontSize: 12, color: ink),
+                  ),
                 ),
               ],
             ),
@@ -2517,6 +2622,11 @@ class _AddMealSheetState extends State<AddMealSheet> {
       );
       return;
     }
+    final water = WaterIntakeParser.parse(text);
+    if (water != null) {
+      Navigator.pop(context, water);
+      return;
+    }
     if (mode == 2 && text.isEmpty && aiEstimate != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -2552,8 +2662,12 @@ class _AddMealSheetState extends State<AddMealSheet> {
       );
       return;
     }
-    FoodEstimate? estimate;
-    if (aiAvailable && text.isNotEmpty) {
+    // Local-first: only reach for AI when the offline estimator comes back
+    // completely empty. FoodEstimator has no ambiguity signal today (just
+    // calories == 0 vs. > 0) -- that's the one confidence check available
+    // until the Phase 4 nutrient/portion catalogue replaces it.
+    var estimate = FoodEstimator.estimate(text);
+    if (estimate.calories == 0 && aiAvailable && text.isNotEmpty) {
       setState(() => busy = true);
       try {
         final result = await const AiService().describe(
@@ -2561,20 +2675,23 @@ class _AddMealSheetState extends State<AddMealSheet> {
           kind: 'food',
           text: text,
         );
-        estimate = FoodEstimate(result.calories, result.protein, result.carbs);
+        // If AI's own (possibly normalized) name resolves locally, our
+        // deterministic numbers stay authoritative over AI's -- AI only
+        // supplies the total when there's truly no local match for it.
+        final reResolved = FoodEstimator.estimate(result.name);
+        estimate = reResolved.calories > 0
+            ? reResolved
+            : FoodEstimate(result.calories, result.protein, result.carbs);
       } catch (_) {
-        // Falls through to the local estimator below.
+        // Falls through to the (still empty) local estimate below.
       } finally {
         if (mounted) setState(() => busy = false);
       }
       if (!mounted) return;
     }
-    estimate ??= FoodEstimator.estimate(text);
     if (estimate.calories == 0) {
       setState(
-        () => notice = RegExp(r'\bwater\b').hasMatch(text.toLowerCase())
-            ? 'Water has no calories to log here—use the Water card on your dashboard instead.'
-            : 'Not enough nutrition information. Add quantities or scan the product label.',
+        () => notice = 'Not enough nutrition information. Add quantities or scan the product label.',
       );
       return;
     }
@@ -3201,17 +3318,14 @@ class HistoryBars extends StatelessWidget {
               count,
               (i) => Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: count > 10 ? 1 : 4,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: count > 10 ? 1 : 4),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Expanded(
                         child: LayoutBuilder(
                           builder: (_, box) {
-                            final total =
-                                food[i] + drink[i] + exercise[i];
+                            final total = food[i] + drink[i] + exercise[i];
                             if (total == 0) {
                               return Align(
                                 alignment: Alignment.bottomCenter,
@@ -3228,11 +3342,10 @@ class HistoryBars extends StatelessWidget {
                                 box.maxHeight *
                                 (total / 2800).clamp(0.05, 1) /
                                 total;
-                            Widget segment(double v, Color color) =>
-                                Container(
-                                  height: math.max(0, v * scale),
-                                  color: color,
-                                );
+                            Widget segment(double v, Color color) => Container(
+                              height: math.max(0, v * scale),
+                              color: color,
+                            );
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Column(
@@ -3824,6 +3937,14 @@ class BodyProfile {
   );
 }
 
+int resolvedDailyTarget(
+  BodyProfile body, {
+  required int storedTarget,
+  required bool customized,
+}) => customized
+    ? storedTarget
+    : body.maintenanceCalories?.round() ?? storedTarget;
+
 class DietPlan {
   const DietPlan({
     required this.name,
@@ -3832,6 +3953,8 @@ class DietPlan {
   });
   final String name, style;
   final int target;
+  DietPlan copyWith({int? target}) =>
+      DietPlan(name: name, style: style, target: target ?? this.target);
   Map<String, Object> toJson() => {
     'name': name,
     'style': style,
@@ -3876,6 +3999,25 @@ const defaultServerUrl = 'http://aa-cloud-wp30:8094';
 
 class AccountService {
   const AccountService();
+
+  Future<void> recordDeletedEntry(FoodEntry entry, DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    final tombstone = jsonEncode({
+      'dateKey': 'daily_entries_${date.year}-$month-$day',
+      'entry': entry.toJson(),
+    });
+    final existing = prefs.getStringList('deleted_daily_entries') ?? [];
+    await prefs.setStringList(
+      'deleted_daily_entries',
+      [
+        ...existing.where((item) => item != tombstone),
+        tombstone,
+      ].reversed.take(500).toList().reversed.toList(),
+    );
+  }
+
   Future<Map<String, dynamic>> authenticate({
     required String serverUrl,
     required String email,
@@ -3955,16 +4097,20 @@ class AccountService {
       dailyWater[key] = prefs.getInt(key);
     }
     final historyRaw =
-        prefs.getString('personal_history_cache') ??
-        await rootBundle.loadString('assets/data/ashley_history.json');
+        prefs.getString('personal_history_cache') ?? '{"records":[]}';
     return {
       'history': jsonDecode(historyRaw),
       'dailyEntries': daily,
       'dailyWater': dailyWater,
+      'deletedDailyEntries':
+          (prefs.getStringList('deleted_daily_entries') ?? const [])
+              .map((raw) => jsonDecode(raw))
+              .toList(),
       'settings': {
         'bodyProfile': prefs.getString('body_profile'),
         'activeDietPlan': prefs.getString('active_diet_plan'),
         'dailyTarget': prefs.getInt('daily_target'),
+        'dailyTargetCustom': prefs.getBool('daily_target_custom'),
         'savedDietPlans': prefs.getStringList('saved_diet_plans'),
         'importedRecordIds': prefs.getStringList('imported_record_ids'),
         'importedRecords': prefs.getStringList('imported_records'),
@@ -4042,6 +4188,12 @@ class AccountService {
         await prefs.setInt(entry.key, ml);
       }
     }
+    if (payload['deletedDailyEntries'] case final List value) {
+      await prefs.setStringList(
+        'deleted_daily_entries',
+        value.map((item) => jsonEncode(item)).toList(),
+      );
+    }
     final settings = payload['settings'] as Map<String, dynamic>? ?? const {};
     if (settings['bodyProfile'] case final String value) {
       await prefs.setString('body_profile', value);
@@ -4051,6 +4203,9 @@ class AccountService {
     }
     if (settings['dailyTarget'] case final int value) {
       await prefs.setInt('daily_target', value);
+    }
+    if (settings['dailyTargetCustom'] case final bool value) {
+      await prefs.setBool('daily_target_custom', value);
     }
     if (settings['savedDietPlans'] case final List value) {
       await prefs.setStringList(
@@ -4168,8 +4323,8 @@ class EntrySyncService {
             'authorization': 'Bearer $token',
           },
           body: jsonEncode({
-            if (linkedUserIds != null) 'linkedUserIds': linkedUserIds,
-            if (entrySyncEnabled != null) 'entrySyncEnabled': entrySyncEnabled,
+            'linkedUserIds': ?linkedUserIds,
+            'entrySyncEnabled': ?entrySyncEnabled,
           }),
         )
         .timeout(const Duration(seconds: 10));
@@ -4318,7 +4473,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool ai = true, sync = false, nudges = true;
+  bool ai = false, sync = false, nudges = true;
   BodyProfile body = const BodyProfile();
   late DietPlan plan = DietPlan(
     name: 'Current plan',
@@ -4424,15 +4579,16 @@ class _ProfilePageState extends State<ProfilePage> {
           (jsonDecode(accountRaw) as Map<String, dynamic>)['role'] == 'admin';
       entrySyncEnabled =
           accountRaw != null &&
-          (jsonDecode(accountRaw) as Map<String, dynamic>)['entrySyncEnabled'] ==
+          (jsonDecode(accountRaw)
+                  as Map<String, dynamic>)['entrySyncEnabled'] ==
               true;
       linkedUserIds = accountRaw == null
           ? []
           : (((jsonDecode(accountRaw) as Map<String, dynamic>)['linkedUserIds']
-                      as List?) ??
-                  const [])
-              .cast<String>();
-      ai = prefs.getBool('ai_enabled') ?? true;
+                        as List?) ??
+                    const [])
+                .cast<String>();
+      ai = prefs.getBool('ai_enabled') ?? false;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
       if (cached != null) {
@@ -4443,6 +4599,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 .length;
       }
     });
+    if (prefs.getBool('daily_target_custom') != true &&
+        body.maintenanceCalories != null) {
+      final calculated = body.maintenanceCalories!.round();
+      final alignedPlan = plan.copyWith(target: calculated);
+      await prefs.setInt('daily_target', calculated);
+      await prefs.setString(
+        'active_diet_plan',
+        jsonEncode(alignedPlan.toJson()),
+      );
+      widget.onPlanChanged(alignedPlan);
+      if (mounted) setState(() => plan = alignedPlan);
+    }
     if (accountEmail != null) _loadSyncPartners();
   }
 
@@ -4606,8 +4774,24 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('body_profile', jsonEncode(value.toJson()));
     widget.onBodyChanged(value);
+    var updatedPlan = plan;
+    if (prefs.getBool('daily_target_custom') != true &&
+        value.maintenanceCalories != null) {
+      updatedPlan = plan.copyWith(target: value.maintenanceCalories!.round());
+      await prefs.setInt('daily_target', updatedPlan.target);
+      await prefs.setString(
+        'active_diet_plan',
+        jsonEncode(updatedPlan.toJson()),
+      );
+      widget.onPlanChanged(updatedPlan);
+    }
     await const AccountService().uploadLocalData(contentServerUrl);
-    if (mounted) setState(() => body = value);
+    if (mounted) {
+      setState(() {
+        body = value;
+        plan = updatedPlan;
+      });
+    }
   }
 
   Future<void> _editWaterTarget() async {
@@ -4667,6 +4851,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('active_diet_plan', jsonEncode(value.toJson()));
     await prefs.setInt('daily_target', value.target);
+    await prefs.setBool('daily_target_custom', true);
     final updated = [...savedPlans];
     final existing = updated.indexWhere((item) => item.name == value.name);
     if (existing < 0) {
@@ -4692,6 +4877,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('active_diet_plan', jsonEncode(value.toJson()));
     await prefs.setInt('daily_target', value.target);
+    await prefs.setBool('daily_target_custom', true);
     widget.onPlanChanged(value);
     await const AccountService().uploadLocalData(contentServerUrl);
     if (mounted) setState(() => plan = value);
@@ -4926,7 +5112,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     title: LText(partner.label),
-                    subtitle: partner.email.isNotEmpty && partner.name.isNotEmpty
+                    subtitle:
+                        partner.email.isNotEmpty && partner.name.isNotEmpty
                         ? LText(partner.email)
                         : null,
                   ),

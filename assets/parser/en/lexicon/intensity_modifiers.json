@@ -1,0 +1,34 @@
+{
+  "light": [
+    "light",
+    "easy",
+    "gentle",
+    "slow",
+    "low intensity",
+    "low-intensity",
+    "relaxed"
+  ],
+  "moderate": [
+    "moderate",
+    "normal",
+    "steady",
+    "medium intensity",
+    "medium-intensity"
+  ],
+  "vigorous": [
+    "vigorous",
+    "hard",
+    "fast",
+    "intense",
+    "high intensity",
+    "high-intensity",
+    "very hard"
+  ],
+  "very_vigorous": [
+    "all out",
+    "all-out",
+    "maximum effort",
+    "max effort",
+    "sprint"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "suggested_output": {
+    "activity_id": "string",
+    "canonical_activity": "string",
+    "duration_minutes": "number",
+    "intensity": "light|moderate|vigorous|very_vigorous|null",
+    "met": "number|null",
+    "distance_km": "number|null",
+    "steps": "number|null",
+    "sets": "number|null",
+    "reps": "number|null",
+    "rounds": "number|null",
+    "approximate": "boolean",
+    "calorie_estimate_kcal": "number|null",
+    "confidence": "high|medium|low"
+  },
+  "calorie_formula_note": "Common estimate: kcal = MET × body_weight_kg × duration_hours. Treat as an estimate, not an exact measurement."
+}

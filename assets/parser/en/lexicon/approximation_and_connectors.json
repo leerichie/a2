@@ -1,0 +1,35 @@
+{
+  "approximation_words": [
+    "about",
+    "around",
+    "approximately",
+    "approx",
+    "roughly",
+    "nearly",
+    "almost",
+    "just under",
+    "just over",
+    "a little",
+    "a little bit",
+    "a bit",
+    "some",
+    "few",
+    "a few",
+    "several"
+  ],
+  "amount_descriptors": [
+    "tiny amount",
+    "small amount",
+    "medium amount",
+    "large amount",
+    "generous amount",
+    "plenty",
+    "lots",
+    "a lot"
+  ],
+  "connector_words": [
+    "a",
+    "an",
+    "of"
+  ]
+}

@@ -1506,6 +1506,14 @@ const _rows = <List<String>>[
     'Sincronizar entrada con las personas vinculadas',
     'Sincronizza la voce con le persone collegate',
   ],
+  [
+    'Calories are an estimate based on your weight, activity and duration.',
+    'Kalorie są szacunkowe, na podstawie Twojej wagi, aktywności i czasu trwania.',
+    'Kalorien sind eine Schätzung basierend auf deinem Gewicht, deiner Aktivität und Dauer.',
+    'Les calories sont une estimation basée sur votre poids, votre activité et la durée.',
+    'Las calorías son una estimación basada en tu peso, actividad y duración.',
+    'Le calorie sono una stima basata su peso, attività e durata.',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
