@@ -174,7 +174,8 @@
   ],
   "bread": [
     "bread",
-    "loaf bread"
+    "loaf bread",
+    "toast"
   ],
   "bread_roll": [
     "bread roll",
@@ -471,6 +472,7 @@
     "rye crispbread"
   ],
   "crisps": [
+    "crisp",
     "crisps",
     "potato chips",
     "potato crisps"
@@ -1020,8 +1022,10 @@
     "oat yoghurt"
   ],
   "oats": [
+    "oat",
     "oatmeal",
     "oats",
+    "porridge",
     "porridge oats"
   ],
   "octopus": [
@@ -1213,6 +1217,10 @@
     "portobello mushroom"
   ],
   "potato": [
+    "baby potato",
+    "baby potatoes",
+    "new potato",
+    "new potatoes",
     "potato",
     "potatoes"
   ],
@@ -1446,6 +1454,7 @@
     "smoked trout"
   ],
   "smoothie": [
+    "fruit smoothie",
     "smoothie"
   ],
   "sole": [
@@ -1750,5 +1759,50 @@
   "yoghurt": [
     "yoghurt",
     "yogurt"
+  ],
+  "chicken": [
+    "chicken"
+  ],
+  "cheese": [
+    "cheese"
+  ],
+  "sausage": [
+    "sausage",
+    "sausages"
+  ],
+  "salad": [
+    "salad"
+  ],
+  "soup": [
+    "soup"
+  ],
+  "beans": [
+    "beans"
+  ],
+  "wine": [
+    "wine"
+  ],
+  "raisins": [
+    "raisin",
+    "raisins"
+  ],
+  "beef": [
+    "beef"
+  ],
+  "pork": [
+    "pork"
+  ],
+  "turkey": [
+    "turkey"
+  ],
+  "lamb": [
+    "lamb"
+  ],
+  "duck": [
+    "duck"
+  ],
+  "sandwich": [
+    "sandwich",
+    "tuna sandwich"
   ]
 }

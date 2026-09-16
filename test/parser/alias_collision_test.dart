@@ -7,8 +7,80 @@ import 'package:flutter_test/flutter_test.dart';
 Map<String, dynamic> _readAliases(String path) =>
     json.decode(File(path).readAsStringSync()) as Map<String, dynamic>;
 
+List<dynamic> _readCatalogue() => json.decode(
+      File('assets/parser/shared/food_catalogue.json').readAsStringSync(),
+    ) as List<dynamic>;
+
 void main() {
   const path = 'assets/parser/en/food_aliases.json';
+
+  test('generic foods without a natural subtype are valid canonical entries', () {
+    final catalogue = _readCatalogue();
+    final byId = {for (final e in catalogue) (e as Map<String, dynamic>)['id']: e};
+    const generics = {
+      'chicken': 'meat_poultry',
+      'cheese': 'dairy_alternative',
+      'sausage': 'meat_poultry',
+      'salad': 'prepared_meal',
+      'soup': 'prepared_meal',
+      'beans': 'legume_nut_seed',
+      'wine': 'drink',
+      'raisins': 'fruit',
+    };
+    final taxonomy = (json.decode(
+      File('assets/parser/shared/taxonomy_categories.json').readAsStringSync(),
+    ) as Map<String, dynamic>)['categories'] as List<dynamic>;
+    generics.forEach((id, category) {
+      expect(byId.containsKey(id), true, reason: '$id should exist in the catalogue');
+      expect(byId[id]!['category'], category);
+      expect(taxonomy, contains(category));
+      // Deliberately generic: never silently narrowed to a specific subtype.
+      expect(byId[id]!['base_food'], null);
+    });
+  });
+
+  test('generic entries resolve without inventing a subtype-specific id', () {
+    final aliases = _readAliases(path);
+    expect((aliases['chicken'] as List<dynamic>).cast<String>(), ['chicken']);
+    expect((aliases['cheese'] as List<dynamic>).cast<String>(), ['cheese']);
+    expect(
+      (aliases['sausage'] as List<dynamic>).cast<String>(),
+      containsAll(['sausage', 'sausages']),
+    );
+  });
+
+  test('raisin(s) is a new generic entry, not folded into an existing one', () {
+    final aliases = _readAliases(path);
+    expect(
+      (aliases['raisins'] as List<dynamic>).cast<String>(),
+      containsAll(['raisin', 'raisins']),
+    );
+  });
+
+  test('porridge/oat resolve to the existing oats entry, not a new one', () {
+    final aliases = _readAliases(path);
+    final oatsAliases = (aliases['oats'] as List<dynamic>).cast<String>();
+    expect(oatsAliases, containsAll(['oat', 'oats', 'oatmeal', 'porridge', 'porridge oats']));
+    expect(aliases.containsKey('porridge'), false);
+    expect(aliases.containsKey('oat'), false);
+  });
+
+  test('crisp (singular) resolves to the existing crisps entry', () {
+    final aliases = _readAliases(path);
+    final crispsAliases = (aliases['crisps'] as List<dynamic>).cast<String>();
+    expect(crispsAliases, containsAll(['crisp', 'crisps', 'potato crisps']));
+  });
+
+  test('English regional terms: chips means fries, crisps means potato crisps', () {
+    final aliases = _readAliases(path);
+    final index = AliasIndex.build(
+      aliases.map((k, v) => MapEntry(k, (v as List<dynamic>).cast<String>())),
+    );
+    expect(index.resolve('chips'), 'fries');
+    expect(index.resolve('crisps'), 'crisps');
+    final crispsAliases = (aliases['crisps'] as List<dynamic>).cast<String>();
+    expect(crispsAliases, contains('potato crisps'));
+  });
 
   test('zero alias collisions in the shipped food catalogue', () {
     final aliases = _readAliases(path);

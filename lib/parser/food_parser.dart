@@ -3,11 +3,11 @@ import 'catalogue/alias_index.dart';
 import 'catalogue/asset_reader.dart';
 import 'catalogue/food_catalogue.dart';
 import 'catalogue/lexicon.dart';
+import 'catalogue/local_overlay.dart';
 import 'catalogue/nutrition_catalogue.dart';
 import 'catalogue/portion_catalogue.dart';
 import 'models/food_parse_item.dart';
 import 'models/nutrient_totals.dart';
-import 'models/parse_confidence.dart';
 import 'models/unresolved_span.dart';
 import 'pipeline/confidence_engine.dart';
 import 'pipeline/food_resolver.dart';
@@ -17,7 +17,14 @@ import 'pipeline/modifier_preparation_parser.dart';
 import 'pipeline/quantity_parser.dart';
 import 'pipeline/segmenter.dart';
 import 'pipeline/size_fullness_parser.dart';
+import 'pipeline/spell_correction.dart';
 import 'pipeline/text_normalizer.dart';
+
+/// Categories liquid enough that a household container word (glass/mug/
+/// cup/bottle/carton) should fall back to a standard volume conversion
+/// rather than staying incomplete: drinks proper, plus dairy (milk,
+/// drinking yoghurt) which is routinely poured the same way.
+const pourableCategories = {'drink', 'dairy'};
 
 class FoodParser {
   const FoodParser({
@@ -26,6 +33,9 @@ class FoodParser {
     required this.lexicon,
     required this.nutrition,
     required this.portions,
+    required this.drinkContainers,
+    required this.genericVolume,
+    required this.vocabulary,
     this.personalAliases,
     this.locale = 'en',
   });
@@ -35,6 +45,13 @@ class FoodParser {
   final Lexicon lexicon;
   final NutritionCatalogue nutrition;
   final PortionCatalogue portions;
+  final DrinkContainerCatalogue drinkContainers;
+  final GenericVolumeCatalogue genericVolume;
+  // Every known word (catalogue aliases/canonical names + lexicon units/
+  // sizes/modifiers/preparations/...), diacritic-folded, for this locale --
+  // what typo correction is allowed to land on. Built once at load time,
+  // not per parse() call.
+  final Set<String> vocabulary;
   final PersonalAliasRepository? personalAliases;
   final String locale;
 
@@ -43,22 +60,87 @@ class FoodParser {
     AssetReader reader = defaultAssetReader,
     PersonalAliasRepository? personalAliases,
   }) async {
-    final catalogue = await FoodCatalogue.load(locale: locale, reader: reader);
+    final bundledCatalogue = await FoodCatalogue.load(locale: locale, reader: reader);
     final lexicon = await Lexicon.load(locale: locale, reader: reader);
-    final nutrition = await NutritionCatalogue.load(reader: reader);
-    final portions = await PortionCatalogue.load(reader: reader);
+    final bundledNutrition = await NutritionCatalogue.load(reader: reader);
+    final bundledPortions = await PortionCatalogue.load(reader: reader);
+    final drinkContainers = await DrinkContainerCatalogue.load(reader: reader);
+    final genericVolume = await GenericVolumeCatalogue.load(reader: reader);
+
+    // The local overlay (foods the user added, plus anything synced down
+    // from the backend's global catalogue -- see CatalogueSyncService) is
+    // merged in ADDITIVELY here: it can only fill a gap (an id the bundled
+    // catalogue doesn't already have), never override bundled/trusted data,
+    // mirroring the exact same precedence rule the backend enforces.
+    final overlay = await LocalCatalogueOverlay.load();
+    final bundledIds = bundledCatalogue.entries.map((e) => e.id).toSet();
+    final newOverlayEntries = overlay.entries.where((e) => !bundledIds.contains(e.id));
+    final catalogue = FoodCatalogue([
+      ...bundledCatalogue.entries,
+      for (final o in newOverlayEntries)
+        FoodCatalogueEntry(
+          id: o.id,
+          canonical: o.canonical,
+          category: o.category ?? 'other',
+          aliases: [...o.aliasesEn, ...o.aliasesPl],
+        ),
+    ]);
+    final nutrition = NutritionCatalogue({
+      for (final e in bundledCatalogue.entries)
+        if (bundledNutrition.forFoodId(e.id) != null) e.id: bundledNutrition.forFoodId(e.id)!,
+      for (final o in newOverlayEntries)
+        o.id: NutrientRecord(
+          foodId: o.id,
+          kcalPer100g: o.kcalPer100g,
+          proteinPer100g: o.proteinPer100g ?? 0,
+          carbsPer100g: o.carbsPer100g ?? 0,
+          fatPer100g: o.fatPer100g,
+          fibrePer100g: o.fibrePer100g,
+          source: o.source,
+        ),
+    });
+    final portions = PortionCatalogue([
+      ...bundledPortions.rules,
+      for (final o in newOverlayEntries)
+        if (o.servingAmount != null)
+          PortionRule(
+            foodId: o.id,
+            foodNameAsGiven: o.canonical,
+            unit: null,
+            size: null,
+            grams: o.servingAmount!,
+            confidence: 'medium',
+          ),
+    ]);
     final aliasIndex = AliasIndex.build({
       for (final e in catalogue.entries) e.id: [...e.aliases, e.canonical],
     });
     if (aliasIndex.collisions.isNotEmpty) {
       throw StateError('Food alias collisions: ${aliasIndex.collisions}');
     }
+    final vocabulary = buildVocabulary([
+      for (final e in catalogue.entries) ...[...e.aliases, e.canonical],
+      ...lexicon.unitByAlias.keys,
+      ...lexicon.sizeByAlias.keys,
+      ...lexicon.fullnessByAlias.keys,
+      ...lexicon.preparations,
+      ...lexicon.modifiers,
+      ...lexicon.approximationWords,
+      ...lexicon.amountDescriptors,
+      ...lexicon.connectorWords,
+      ...lexicon.cardinals.keys,
+      ...lexicon.multipliers.keys,
+      ...lexicon.fractions.keys,
+    ]);
     return FoodParser(
       catalogue: catalogue,
       aliasIndex: aliasIndex,
       lexicon: lexicon,
       nutrition: nutrition,
       portions: portions,
+      drinkContainers: drinkContainers,
+      genericVolume: genericVolume,
+      vocabulary: vocabulary,
       personalAliases: personalAliases,
       locale: locale,
     );
@@ -66,7 +148,7 @@ class FoodParser {
 
   FoodParseResult parse(String input) {
     final normalized = normalizeParserText(input);
-    final segments = segmentPhrases(normalized);
+    final segments = segmentPhrases(normalized, lexicon, aliasIndex);
     final items = <FoodParseItem>[];
     final unresolved = <UnresolvedSpan>[];
     var cursor = 0;
@@ -90,6 +172,15 @@ class FoodParser {
     final measurement = parseMeasurement(remaining);
     remaining = measurement.remainder;
 
+    // Typo/fuzzy correction runs once, here -- after quantities and any
+    // exact "500ml"/"2x25g" measurement have already been extracted from
+    // the untouched text (so a fuzzy match can never change a quantity),
+    // and before every remaining exact-match stage (size/unit/modifier/
+    // preparation/food) that follows, so a near-miss spelling of any of
+    // those word kinds gets fixed generically in one place rather than
+    // patched per phrase.
+    remaining = correctSpelling(remaining, vocabulary);
+
     // Size/fullness before the unit: a size word routinely precedes the
     // unit word ("small splash milk", "a large bowl of coleslaw"), and
     // each stage only looks at the *start* of the remaining text, so the
@@ -102,14 +193,50 @@ class FoodParser {
       final portion = parseHouseholdPortion(remaining, lexicon);
       unit = portion.unit;
       remaining = portion.remainder;
+      // Some household-portion units are self-referential meat-cut words
+      // ("sausage", "steak", "fillet", ...) that are *also* valid food
+      // names in their own right. If consuming it as a unit left nothing
+      // else to resolve as food ("sausage", "3 sausages"), it was actually
+      // the food -- try resolving the unit word itself before giving up.
+      if (unit != null && remaining.trim().isEmpty) {
+        final asFood = resolveFood(unit, catalogue, aliasIndex,
+            personalAliases: personalAliases, locale: locale);
+        if (asFood.entry != null) {
+          remaining = unit;
+          unit = null;
+        }
+      }
     }
 
-    final modPrep = parseModifiersAndPreparations(remaining, lexicon);
-    remaining = modPrep.remainder;
+    // Modifiers (fat-content/attribute words: "light", "low fat", ...) are
+    // always stripped unconditionally -- the dataset's own fixtures require
+    // "light mayo" to resolve to generic mayonnaise + modifier, even though
+    // a dedicated "light_mayonnaise" catalogue entry also exists.
+    final modifierResult = stripModifiers(remaining, lexicon);
+    remaining = modifierResult.remainder;
+
+    var preparations = const <String>[];
+    var resolution = const FoodResolution();
+    if (remaining.trim().isNotEmpty) {
+      // Try the whole phrase first, preparation word(s) still attached
+      // ("smoked salmon", "boiled egg") -- some catalogue entries are
+      // deliberately compound because the cooking method materially
+      // changes nutrition, and must win over generically stripping the
+      // word and losing that more specific identity.
+      resolution = resolveFood(remaining, catalogue, aliasIndex,
+          personalAliases: personalAliases, locale: locale);
+      if (resolution.entry == null) {
+        final prepResult = stripPreparations(remaining, lexicon);
+        preparations = prepResult.preparations;
+        remaining = prepResult.remainder;
+        if (remaining.trim().isNotEmpty) {
+          resolution = resolveFood(remaining, catalogue, aliasIndex,
+              personalAliases: personalAliases, locale: locale);
+        }
+      }
+    }
 
     if (remaining.trim().isNotEmpty) {
-      final resolution = resolveFood(remaining, catalogue, aliasIndex,
-          personalAliases: personalAliases, locale: locale);
       if (resolution.entry == null) return null;
 
       final entry = resolution.entry!;
@@ -120,7 +247,12 @@ class FoodParser {
             )
           : entry;
       final nutrientLookupId = baseEntry.id;
-      final record = nutrition.forFoodId(nutrientLookupId);
+      var record = nutrition.forFoodId(nutrientLookupId);
+      var usedGenericParentFallback = false;
+      if (record == null && baseEntry.genericParent != null) {
+        record = nutrition.forFoodId(baseEntry.genericParent!);
+        if (record != null) usedGenericParentFallback = true;
+      }
 
       double? gramsPerUnit;
       bool exactMeasurement = false;
@@ -131,11 +263,37 @@ class FoodParser {
       } else if (measurement.millilitres != null) {
         gramsPerUnit = measurement.millilitres; // density-neutral: ml treated 1:1 for now
         exactMeasurement = true;
-      } else if (unit != null) {
+      } else {
+        // `unit == null` here looks up the bare-mention default portion
+        // ("egg", "banana" with no unit at all) -- food-specific, not a
+        // global assumption (see PortionCatalogue.lookup).
         final rule = portions.lookup(foodId: nutrientLookupId, unit: unit, size: sizeFullness.size);
         if (rule != null) {
           gramsPerUnit = rule.grams;
           portionRuleConfidence = rule.confidence;
+        } else if (unit != null && pourableCategories.contains(baseEntry.category)) {
+          // No food-specific rule for this drink+unit -- fall back to the
+          // standard container volume (glass/mug/cup/bottle/carton) shared
+          // with WaterIntakeParser. Covers both `drink` (beer, wine, ...)
+          // and `dairy` (milk, drinking yoghurt) since both are routinely
+          // poured into a glass/mug -- never applies to a bare mention
+          // with no unit at all (the old universal "25ml" default is gone).
+          final containerMl = drinkContainers.millilitresFor(unit);
+          if (containerMl != null) {
+            gramsPerUnit = containerMl;
+            portionRuleConfidence = 'medium';
+          }
+        }
+        if (gramsPerUnit == null && unit != null) {
+          // Standard-volume unit (teaspoon/tablespoon/dessertspoon/cup/
+          // fluid_ounce/spoonful) applicable to ANY food, not just drinks --
+          // e.g. "spoon light cottage cheese". Density-neutral ml-as-grams,
+          // same simplification as the drink-container fallback above.
+          final generic = genericVolume.lookup(unit);
+          if (generic != null) {
+            gramsPerUnit = generic.ml;
+            portionRuleConfidence = generic.confidence;
+          }
         }
       }
 
@@ -162,6 +320,7 @@ class FoodParser {
         exactMeasurementGiven: exactMeasurement,
         approximate: quantityResult.approximate,
         portionRuleConfidence: portionRuleConfidence,
+        nutrientDataIsFallback: usedGenericParentFallback,
       );
 
       return FoodParseItem(
@@ -172,9 +331,10 @@ class FoodParser {
         fullness: sizeFullness.fullness,
         canonicalId: baseEntry.id,
         canonicalName: baseEntry.canonical,
+        category: baseEntry.category,
         matchedAlias: resolution.matchedAlias,
-        modifiers: modPrep.modifiers,
-        preparations: modPrep.preparations,
+        modifiers: modifierResult.modifiers,
+        preparations: preparations,
         grams: totalGrams,
         nutrition: nutritionTotals,
         confidence: confidence,
@@ -182,6 +342,9 @@ class FoodParser {
       );
     }
 
-    return const FoodParseItem(quantity: 1, confidence: ParseConfidence.incomplete);
+    // Grammar words consumed the whole segment (a bare number, a lone
+    // approximation word, ...) with no food identity left at all -- that's
+    // genuinely unresolved, not a placeholder item with no canonical id.
+    return null;
   }
 }

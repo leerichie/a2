@@ -47,3 +47,7 @@ Generate a display thumbnail plus an analysis-sized image on-device and avoid re
 `Flutter app → authenticated aa-cloud-wp30 endpoint → AI provider → structured nutrition estimate`
 
 The backend should remove image metadata, enforce size/rate limits, validate structured output, return estimate ranges and confidence, and delete original analysis uploads according to a published retention setting. Public users can keep AI disabled unless they choose a hosted plan or connect a compatible server.
+
+### brwoser testing
+
+flutter run -d chrome --web-browser-flag="--disable-web-security"

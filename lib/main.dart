@@ -1,10 +1,16 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,7 +18,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'l10n.dart';
+import 'parser/catalogue/activity_catalogue.dart';
+import 'parser/catalogue/local_overlay.dart';
 import 'parser/exercise_parser.dart';
+import 'parser/food_parser.dart';
+import 'parser/models/food_parse_item.dart';
+import 'parser/models/nutrient_totals.dart';
+import 'parser/models/parse_confidence.dart';
+import 'parser/models/unresolved_span.dart';
+import 'parser/pipeline/text_folding.dart';
 
 void main() => runApp(const A2App());
 
@@ -26,7 +40,8 @@ const ink = Color(0xFF17231E),
     cream = Color(0xFFF6F4EE),
     coral = Color(0xFFFF826D),
     gold = Color(0xFFF3C66E),
-    aqua = Color(0xFF4FA8D8);
+    aqua = Color(0xFF4FA8D8),
+    success = Color(0xFF2E9E5B);
 
 class A2App extends StatefulWidget {
   const A2App({super.key, this.startOnboarding = true});
@@ -444,7 +459,11 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int waterTargetMl = 2000;
   bool entrySyncAvailable = false;
   String accountName = '';
+  // Real MET for a brisk walk, read once from the shared activity catalogue
+  // (never invented) for the daily nudge's exercise-duration suggestion.
+  double walkMet = 4.8;
   final entries = <FoodEntry>[];
+  List<DayPhoto> photos = [];
   List<HistoryRecord> history = [];
   int get calories => entries
       .where((entry) => !entry.isExercise)
@@ -465,27 +484,106 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   }
 
   DateTime dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+  // Foreground-only, bounded-interval re-check for anything shared into
+  // this account while the app is already open -- deliberately NOT a
+  // 1-second poll (see corrective-pass notes): the actual delay users hit
+  // is "nothing re-checks at all while Today is already open", not the
+  // backend write itself, which is near-instant. 20s keeps the wait to
+  // "seconds, not minutes" without hammering the server.
+  Timer? _syncTimer;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _restoreAndSync();
+    _loadWalkMet();
+    _syncTimer = Timer.periodic(const Duration(seconds: 20), (_) => _restoreAndSync());
+  }
+
+  Future<void> _loadWalkMet() async {
+    final catalogue = await ActivityCatalogue.load();
+    for (final entry in catalogue.entries) {
+      if (entry.id == 'brisk_walking') {
+        if (mounted) setState(() => walkMet = entry.met);
+        return;
+      }
+    }
+  }
+
+  // Fires a brief, tasteful celebration the first time a daily target is
+  // crossed—never for going over the calorie target—persisting a per-day
+  // flag so it never repeats on rebuild/navigation.
+  Future<void> _checkAchievements() async {
+    final targets = NutritionTargets.forPlan(
+      calories: dailyTarget,
+      style: dietStyle,
+      weightKg: bodyWeightKg,
+    );
+    final netCalories = math.max(0, calories - exerciseCalories);
+    final hasExercise = entries.any((e) => e.isExercise);
+    final waterDone = waterTargetMl > 0 && waterMl >= waterTargetMl;
+    final proteinDone = targets.protein > 0 && protein >= targets.protein;
+    final achievements = <String, bool>{
+      'protein': proteinDone,
+      'water': waterDone,
+      'activity': hasExercise,
+      'strong_day':
+          targets.calories > 0 &&
+          netCalories <= targets.calories &&
+          netCalories >= targets.calories * 0.85 &&
+          proteinDone &&
+          (waterDone || hasExercise),
+    };
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final dateKey = '${now.year}-${now.month}-${now.day}';
+    for (final achievement in achievements.entries) {
+      if (!achievement.value) continue;
+      final flagKey = 'celebrated_${achievement.key}_$dateKey';
+      if (prefs.getBool(flagKey) == true) continue;
+      await prefs.setBool(flagKey, true);
+      if (mounted) _celebrate(achievement.key);
+    }
+  }
+
+  void _celebrate(String achievementId) {
+    final icon = switch (achievementId) {
+      'water' => Icons.water_drop,
+      'activity' => Icons.local_fire_department,
+      'strong_day' => Icons.emoji_events,
+      _ => Icons.check_circle,
+    };
+    final overlay = Overlay.of(context, rootOverlay: true);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _CelebrationBadge(icon: icon, onDone: () => entry.remove()),
+    );
+    overlay.insert(entry);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _syncTimer?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _restoreAndSync();
+    if (state == AppLifecycleState.resumed) {
+      _restoreAndSync();
+      _syncTimer?.cancel();
+      _syncTimer = Timer.periodic(const Duration(seconds: 20), (_) => _restoreAndSync());
+    } else {
+      // Never poll while backgrounded -- resume picks up immediately above.
+      _syncTimer?.cancel();
+    }
   }
 
   Future<void> _restoreAndSync() async {
     await Future.wait([
       _loadTodayEntries(),
+      _loadTodayPhotos(),
       _loadImports(),
       _loadHistory(),
       _loadPlan(),
@@ -493,6 +591,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       _loadEntrySyncAvailability(),
       _loadAccountName(),
     ]);
+    // Fire-and-forget: the app already has a working local catalogue, this
+    // just quietly picks up whatever's new since last time.
+    unawaited(const CatalogueSyncService().sync(defaultServerUrl));
     try {
       final enabled = await const AccountService().refreshAccount(
         defaultServerUrl,
@@ -527,8 +628,24 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     if (mounted) setState(() => accountName = name);
   }
 
-  Future<void> _shareEntry(FoodEntry entry) => const EntrySyncService()
-      .shareEntry(defaultServerUrl, entry, DateTime.now());
+  // Any attached photo must reach the backend BEFORE the entry itself is
+  // shared -- a local filesystem path is meaningless on the recipient's
+  // device (see MediaService/FoodEntry.forSharing). A failed upload throws
+  // here and surfaces as an error to the sender (see FoodTile._handleSync)
+  // rather than silently sharing an entry with a dangling photo reference.
+  Future<void> _shareEntry(FoodEntry entry) async {
+    var toShare = entry;
+    if (entry.photoPaths.isNotEmpty) {
+      final mediaIds = <String>[];
+      for (final path in entry.photoPaths) {
+        final file = File(path);
+        if (!await file.exists()) continue;
+        mediaIds.add(await const MediaService().upload(defaultServerUrl, file));
+      }
+      toShare = entry.forSharing(mediaIds: mediaIds);
+    }
+    await const EntrySyncService().shareEntry(defaultServerUrl, toShare, DateTime.now());
+  }
 
   Future<void> _loadTodayEntries() async {
     final restored = await const DailyEntryRepository().load(DateTime.now());
@@ -544,6 +661,11 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Future<void> _saveTodayEntries() async {
     await const DailyEntryRepository().save(DateTime.now(), entries);
     await const AccountService().uploadLocalData(defaultServerUrl);
+  }
+
+  Future<void> _loadTodayPhotos() async {
+    final restored = await const DayPhotoRepository().load(DateTime.now());
+    if (mounted) setState(() => photos = restored);
   }
 
   Future<void> _loadWater() async {
@@ -563,6 +685,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     setState(() => waterMl = updated);
     await const WaterRepository().save(DateTime.now(), updated);
     await const AccountService().uploadLocalData(defaultServerUrl);
+    _checkAchievements();
   }
 
   Future<void> _loadPlan() async {
@@ -644,6 +767,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       TodayPage(
         accountName: accountName,
         entries: entries,
+        photos: photos,
         calories: calories,
         protein: protein,
         carbs: carbs,
@@ -652,8 +776,12 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         waterMl: waterMl,
         waterTargetMl: waterTargetMl,
         onAddWater: _addWater,
+        bodyWeightKg: bodyWeightKg,
+        locale: widget.locale.languageCode,
         entrySyncAvailable: entrySyncAvailable,
         onSyncEntry: _shareEntry,
+        onRefresh: _restoreAndSync,
+        walkMet: walkMet,
         onDelete: (entry) async {
           await const AccountService().recordDeletedEntry(
             entry,
@@ -661,6 +789,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           );
           setState(() => entries.remove(entry));
           await _saveTodayEntries();
+        },
+        onEditEntry: (oldEntry, newEntry) {
+          final index = entries.indexOf(oldEntry);
+          if (index == -1) return;
+          setState(() => entries[index] = newEntry);
+          _saveTodayEntries();
+          _checkAchievements();
         },
       ),
       ProgressPage(importedCount: importedCount, history: combinedHistory),
@@ -670,6 +805,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         onLocale: widget.onLocale,
         onImported: _loadImports,
         dailyTarget: dailyTarget,
+        dietStyle: dietStyle,
         onPlanChanged: (value) => setState(() {
           dailyTarget = value.target;
           dietStyle = value.style;
@@ -686,7 +822,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
-        onDestinationSelected: (v) => setState(() => index = v),
+        onDestinationSelected: (v) {
+          setState(() => index = v);
+          if (v == 0) _restoreAndSync();
+        },
         indicatorColor: mint,
         backgroundColor: Colors.white,
         destinations: [
@@ -719,24 +858,137 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
               icon: const Icon(Icons.add),
               label: const LText('Add'),
               onPressed: () async {
-                final e = await showModalBottomSheet<FoodEntry>(
+                final result = await showModalBottomSheet<Object>(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   builder: (_) => AddItemSheet(
                     onAddWater: _addWater,
+                    entries: entries,
                     bodyWeightKg: bodyWeightKg,
+                    locale: widget.locale.languageCode,
                   ),
                 );
-                if (e != null) {
+                if (result case final PhotoAttachOutcome outcome) {
+                  final index = entries.indexOf(outcome.original);
+                  if (index != -1) {
+                    setState(() => entries[index] = outcome.updated);
+                    await _saveTodayEntries();
+                  }
+                } else if (result case final FoodEntry e) {
                   setState(() => entries.add(e));
                   await _saveTodayEntries();
+                  _checkAchievements();
+                } else if (result is DayPhotoSaved) {
+                  await _loadTodayPhotos();
                 }
               },
             )
           : null,
     );
   }
+}
+
+// A brief, tasteful "achievement" pop shown once when a daily target is
+// first crossed—scales and fades in, holds, then fades out and removes
+// itself. Deliberately dependency-free (no confetti package) to keep this
+// small.
+class _CelebrationBadge extends StatefulWidget {
+  const _CelebrationBadge({required this.icon, required this.onDone});
+  final IconData icon;
+  final VoidCallback onDone;
+  @override
+  State<_CelebrationBadge> createState() => _CelebrationBadgeState();
+}
+
+class _CelebrationBadgeState extends State<_CelebrationBadge>
+    with SingleTickerProviderStateMixin {
+  late final controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1300),
+  )..forward();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) widget.onDone();
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.4, end: 1.1), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.8), weight: 20),
+    ]).animate(controller);
+    final opacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 60),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
+    ]).animate(controller);
+    return Positioned(
+      top: 90,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: Center(
+          child: FadeTransition(
+            opacity: opacity,
+            child: ScaleTransition(
+              scale: scale,
+              child: Container(
+                width: 84,
+                height: 84,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [success, gold],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Icon(widget.icon, color: Colors.white, size: 40),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Picks a stable index into [variants] for the given day, so the coaching
+// message reads differently from day to day but never changes mid-day on a
+// rebuild/navigation (no real randomness, no per-frame flicker).
+int _dailyVariant(DateTime day, int variantCount) =>
+    (day.year * 10000 + day.month * 100 + day.day) % variantCount;
+
+// MET-based walk suggestion (calories = MET × bodyWeightKg × hours, the same
+// formula the exercise parser already uses), rounded to a natural-sounding
+// 5-minute figure. Returns null rather than a fixed number whenever body
+// weight isn't known or the result would fall outside a sensible, non-extreme
+// range — never invents a calorie burn and never nudges toward over-exercising.
+int? _suggestedWalkMinutes(int overKcal, double? bodyWeightKg, double walkMet) {
+  if (bodyWeightKg == null || bodyWeightKg <= 0 || overKcal <= 0) return null;
+  final minutes = (overKcal / (walkMet * bodyWeightKg) * 60).round();
+  if (minutes < 10 || minutes > 75) return null;
+  return (minutes / 5).round() * 5;
 }
 
 class DailyNudge {
@@ -751,74 +1003,295 @@ class DailyNudge {
     required int targetCalories,
     required int protein,
     required int targetProtein,
+    int exerciseCalories = 0,
+    int waterMl = 0,
+    int waterTargetMl = 0,
+    double? bodyWeightKg,
+    double walkMet = 4.8,
+    String locale = 'en',
     DateTime? now,
   }) {
-    final hour = (now ?? DateTime.now()).hour;
+    final today = now ?? DateTime.now();
+    final hour = today.hour;
+    final pl = locale == 'pl';
     final hasFood = entries.any((e) => !e.isExercise);
     final hasExercise = entries.any((e) => e.isExercise);
 
+    String pick(List<String> en, List<String> plVariants) {
+      final variants = pl ? plVariants : en;
+      return variants[_dailyVariant(today, variants.length)];
+    }
+
     if (!hasFood) {
       if (hour < 11) {
-        return const DailyNudge(
-          'Good time for breakfast',
-          'Nothing logged yet—add your first meal whenever you’re ready.',
+        return DailyNudge(
+          pl ? 'Dobra pora na śniadanie' : 'Good time for breakfast',
+          pick(
+            [
+              'Nothing logged yet—add your first meal whenever you’re ready.',
+              'A fresh day ahead—log breakfast whenever suits you.',
+            ],
+            [
+              'Nic jeszcze nie dodano — dodaj pierwszy posiłek, kiedy będziesz gotowy(a).',
+              'Nowy dzień przed Tobą — dodaj śniadanie, kiedy Ci pasuje.',
+            ],
+          ),
           Icons.wb_sunny_outlined,
         );
       }
       if (hour < 15) {
-        return const DailyNudge(
-          'Nothing logged yet',
-          'Add lunch to keep today on track.',
+        return DailyNudge(
+          pl ? 'Nic jeszcze nie dodano' : 'Nothing logged yet',
+          pick(
+            [
+              'Add lunch to keep today on track.',
+              'Nothing logged so far—lunch is a good place to start.',
+            ],
+            [
+              'Dodaj obiad, aby utrzymać dzisiejszy plan.',
+              'Jak dotąd nic nie dodano — obiad to dobry początek.',
+            ],
+          ),
           Icons.restaurant_outlined,
         );
       }
-      return const DailyNudge(
-        'Quiet day so far',
-        'No meals logged today—that’s okay, add one whenever suits you.',
+      return DailyNudge(
+        pl ? 'Spokojny dzień jak dotąd' : 'Quiet day so far',
+        pick(
+          [
+            'No meals logged today—that’s okay, add one whenever suits you.',
+            'Still nothing logged—no pressure, add your first meal when ready.',
+          ],
+          [
+            'Brak posiłków dzisiaj — to nic, dodaj jeden, kiedy Ci pasuje.',
+            'Wciąż nic nie dodano — bez presji, dodaj pierwszy posiłek, kiedy będziesz gotowy(a).',
+          ],
+        ),
         Icons.nightlight_outlined,
       );
     }
 
-    final calorieRatio = targetCalories == 0 ? 0.0 : calories / targetCalories;
-    if (calorieRatio >= 1.15) {
-      return const DailyNudge(
-        'A little over today',
-        'You’ve gone over today’s calorie target—tomorrow’s a fresh start.',
+    final netCalories = math.max(0, calories - exerciseCalories);
+    final netRatio = targetCalories == 0 ? 0.0 : netCalories / targetCalories;
+    final grossRatio = targetCalories == 0 ? 0.0 : calories / targetCalories;
+    final proteinRatio = targetProtein == 0 ? 1.0 : protein / targetProtein;
+    final proteinDone = targetProtein > 0 && protein >= targetProtein;
+    final waterDone = waterTargetMl > 0 && waterMl >= waterTargetMl;
+    final overKcal = netCalories - targetCalories;
+
+    // A "strong overall day": calories comfortably in range plus another
+    // target already met—surfaced ahead of the single-metric states below.
+    if (netRatio >= 0.85 &&
+        netRatio <= 1.05 &&
+        proteinDone &&
+        (waterDone || hasExercise)) {
+      return DailyNudge(
+        pl ? 'Świetny dzień' : 'Strong overall day',
+        pick(
+          [
+            'Calories, protein and today’s activity are all lining up nicely.',
+            'A well-rounded day so far—keep this up tomorrow.',
+          ],
+          [
+            'Kalorie, białko i dzisiejsza aktywność świetnie się układają.',
+            'Bardzo dobrze zbalansowany dzień jak dotąd — tak trzymaj jutro.',
+          ],
+        ),
+        Icons.emoji_events,
+      );
+    }
+
+    // Ate more than target but exercise brought net calories back in
+    // range—celebrate the save instead of flagging the raw intake number.
+    if (hasExercise &&
+        exerciseCalories > 0 &&
+        calories > targetCalories &&
+        netRatio <= 1.05) {
+      return DailyNudge(
+        pl ? 'Powrót do celu po ćwiczeniach' : 'Back near target after exercise',
+        pick(
+          [
+            'You ate above target, but exercise brought your net calories back in range.',
+            'Today’s activity balanced out a bigger-than-usual intake—nice recovery.',
+          ],
+          [
+            'Zjadłeś więcej niż cel, ale ćwiczenia przywróciły kalorie netto do normy.',
+            'Dzisiejsza aktywność zrównoważyła większe niż zwykle spożycie — dobra korekta.',
+          ],
+        ),
+        Icons.directions_run,
+      );
+    }
+
+    if (netRatio >= 1.15) {
+      final minutes = _suggestedWalkMinutes(overKcal, bodyWeightKg, walkMet);
+      final suggestion = minutes != null
+          ? pick(
+              [
+                'A brisk walk (about $minutes min) could help close some of the gap.',
+              ],
+              ['Szybki marsz (ok. $minutes min) mógłby zmniejszyć różnicę.'],
+            )
+          : pick(
+              [
+                'Keep your next meal lighter and you’re still in control.',
+                'No need to react—just ease off a little at your next meal.',
+              ],
+              [
+                'Zrób następny posiłek lżejszym — wciąż masz kontrolę.',
+                'Nie musisz nic nadrabiać — po prostu zjedz nieco mniej przy następnym posiłku.',
+              ],
+            );
+      return DailyNudge(
+        pl ? 'Znacznie powyżej celu' : 'Substantially over target',
+        pl
+            ? 'Jesteś dziś $overKcal kcal powyżej celu. $suggestion'
+            : 'You’re $overKcal kcal over today. $suggestion',
         Icons.info_outline,
       );
     }
-    if (calorieRatio >= 0.9) {
-      return const DailyNudge(
-        'Right on target',
-        'You’re within reach of today’s calorie goal. Nice work.',
+    if (netRatio > 1.0) {
+      final suggestion = pick(
+        [
+          'Keep your next meal lighter and you’re still in control.',
+          'A short walk or a lighter next meal can even this out.',
+        ],
+        [
+          'Zrób następny posiłek lżejszym — wciąż masz kontrolę.',
+          'Krótki spacer lub lżejszy posiłek wyrówna dzisiejszy bilans.',
+        ],
+      );
+      return DailyNudge(
+        pl ? 'Nieco powyżej celu' : 'Slightly over target',
+        pl
+            ? 'Jesteś dziś $overKcal kcal powyżej celu. $suggestion'
+            : 'You’re $overKcal kcal over today. $suggestion',
+        Icons.info_outline,
+      );
+    }
+
+    if (proteinDone && netRatio < 1.0) {
+      return DailyNudge(
+        pl ? 'Cel białkowy osiągnięty' : 'Protein target reached',
+        pick(
+          [
+            'Nice work—today’s protein target is done.',
+            'Protein goal reached for today. Keep it up.',
+          ],
+          [
+            'Świetnie — dzisiejszy cel białkowy jest zrealizowany.',
+            'Cel białkowy na dziś osiągnięty. Tak trzymaj.',
+          ],
+        ),
+        Icons.check_circle,
+      );
+    }
+    if (waterDone) {
+      return DailyNudge(
+        pl ? 'Cel nawodnienia osiągnięty' : 'Water target reached',
+        pick(
+          [
+            'You’ve hit today’s water target already.',
+            'Hydration goal reached for today—nice consistency.',
+          ],
+          [
+            'Osiągnąłeś już dzisiejszy cel nawodnienia.',
+            'Cel nawodnienia na dziś zrealizowany — świetna regularność.',
+          ],
+        ),
+        Icons.water_drop,
+      );
+    }
+
+    if (netRatio >= 0.85) {
+      return DailyNudge(
+        pl ? 'Dobrze na kursie' : 'Comfortably on track',
+        pick(
+          [
+            'You’re within reach of today’s calorie goal. Nice work.',
+            'Right where you want to be today—keep going.',
+          ],
+          [
+            'Jesteś blisko dzisiejszego celu kalorycznego. Świetna robota.',
+            'Jesteś dokładnie tam, gdzie chcesz być — tak dalej.',
+          ],
+        ),
         Icons.check_circle_outline,
       );
     }
-    if (hour >= 18 && calorieRatio < 0.5) {
-      return const DailyNudge(
-        'Light day so far',
-        'You’re well under target this evening—make sure you’re eating enough.',
+    if (netRatio >= 0.6) {
+      return DailyNudge(
+        pl ? 'Blisko celu' : 'Getting close to target',
+        pick(
+          ['Getting closer to today’s calorie goal—keep logging as you go.', 'You’re making steady progress toward today’s target.'],
+          [
+            'Coraz bliżej dzisiejszego celu kalorycznego — dodawaj posiłki dalej.',
+            'Robisz stały postęp w kierunku dzisiejszego celu.',
+          ],
+        ),
+        Icons.trending_up,
+      );
+    }
+    if (hour >= 18 && netRatio < 0.5) {
+      return DailyNudge(
+        pl ? 'Lekki dzień jak dotąd' : 'Light day so far',
+        pick(
+          [
+            'You’re well under target this evening—make sure you’re eating enough.',
+            'Quite light today so far—don’t skip a proper meal tonight.',
+          ],
+          [
+            'Jesteś dziś wyraźnie poniżej celu — upewnij się, że jesz wystarczająco dużo.',
+            'Dziś dość lekko jak dotąd — nie pomijaj dziś porządnego posiłku.',
+          ],
+        ),
         Icons.eco_outlined,
       );
     }
     if (hasExercise) {
-      return const DailyNudge(
-        'Nice balance today',
-        'You’ve logged food and exercise—keep it up.',
+      return DailyNudge(
+        pl ? 'Dobry balans dzisiaj' : 'Nice balance today',
+        pick(
+          [
+            'You’ve logged food and exercise—keep it up.',
+            'Food and activity both logged today—good balance.',
+          ],
+          [
+            'Dodano posiłki i aktywność — tak trzymaj.',
+            'Zarówno posiłki, jak i aktywność są dziś zapisane — dobry balans.',
+          ],
+        ),
         Icons.directions_run,
       );
     }
-    final proteinRatio = targetProtein == 0 ? 1.0 : protein / targetProtein;
-    if (proteinRatio < 0.5 && calorieRatio > 0.3) {
-      return const DailyNudge(
-        'Protein could use a boost',
-        'Add a protein-rich snack to help hit your target.',
+    if (proteinRatio < 0.5 && grossRatio > 0.3) {
+      return DailyNudge(
+        pl ? 'Białko mogłoby być wyższe' : 'Protein could use a boost',
+        pick(
+          [
+            'Add a protein-rich snack to help hit your target.',
+            'A bit more protein today would help you reach your goal.',
+          ],
+          [
+            'Dodaj przekąskę bogatą w białko, aby osiągnąć cel.',
+            'Odrobina więcej białka pomoże Ci dziś osiągnąć cel.',
+          ],
+        ),
         Icons.fitness_center,
       );
     }
-    return const DailyNudge(
-      'You’re on track',
-      'Keep logging meals to stay on top of today’s goals.',
+    return DailyNudge(
+      pl ? 'Jesteś na dobrej drodze' : 'You’re on track',
+      pick(
+        [
+          'Keep logging meals to stay on top of today’s goals.',
+          'Steady so far—keep logging to stay on top of today.',
+        ],
+        [
+          'Kontynuuj dodawanie posiłków, aby realizować dzisiejsze cele.',
+          'Stabilnie jak dotąd — dalej dodawaj posiłki, by kontrolować dzisiejszy dzień.',
+        ],
+      ),
       Icons.trending_up,
     );
   }
@@ -859,32 +1332,52 @@ class TodayPage extends StatelessWidget {
     super.key,
     required this.accountName,
     required this.entries,
+    this.photos = const [],
     required this.calories,
     required this.protein,
     required this.carbs,
     required this.exerciseCalories,
     required this.targets,
     required this.onDelete,
+    required this.onEditEntry,
     required this.waterMl,
     required this.waterTargetMl,
     required this.onAddWater,
+    this.bodyWeightKg,
+    this.locale = 'en',
     this.entrySyncAvailable = false,
     this.onSyncEntry,
+    this.walkMet = 4.8,
+    this.onRefresh,
   });
+  // Manual fallback for anything shared into this account -- normal sync
+  // is the periodic/tab-switch/resume checks in _AppShellState, not this.
+  final Future<void> Function()? onRefresh;
   final String accountName;
   final List<FoodEntry> entries;
+  final List<DayPhoto> photos;
   final int calories, protein, carbs, exerciseCalories;
   final NutritionTargets targets;
   final ValueChanged<FoodEntry> onDelete;
+  final void Function(FoodEntry oldEntry, FoodEntry newEntry) onEditEntry;
   final int waterMl, waterTargetMl;
   final ValueChanged<int> onAddWater;
+  final double? bodyWeightKg;
+  final String locale;
   final bool entrySyncAvailable;
   final Future<void> Function(FoodEntry entry)? onSyncEntry;
+  // MET for a brisk walk, sourced from the shared activity catalogue at app
+  // startup (see _AppShellState._loadWalkMet) — 4.8 is that same catalogue
+  // value, kept here only as the default before the async load completes.
+  final double walkMet;
 
   List<Widget> _timeline(BuildContext context) {
     final grouped = <String, List<FoodEntry>>{};
     for (final entry in entries) {
       (grouped[entry.dayCategory] ??= []).add(entry);
+    }
+    for (final list in grouped.values) {
+      list.sort((a, b) => _entryMinutesOfDay(a).compareTo(_entryMinutesOfDay(b)));
     }
     return [
       for (final category in MealCategory.order)
@@ -905,11 +1398,33 @@ class TodayPage extends StatelessWidget {
             (entry) => FoodTile(
               entry,
               onDelete: () => _confirmDelete(context, entry),
+              onEdit: () => _editEntry(context, entry),
               onSync: entrySyncAvailable ? () => onSyncEntry!(entry) : null,
             ),
           ),
         ],
     ];
+  }
+
+  Future<void> _editEntry(BuildContext context, FoodEntry entry) async {
+    final result = await showModalBottomSheet<EditEntryResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => EditEntrySheet(entry: entry, bodyWeightKg: bodyWeightKg, locale: locale),
+    );
+    if (!context.mounted || result == null) return;
+    // Water is the one field not derivable by simply replacing the entry
+    // (the day's food/exercise totals are computed live from `entries`,
+    // but the water total is its own separately-persisted running
+    // counter) -- reconcile it by the amount this edit actually changed,
+    // never by re-adding the new total on top of the old one.
+    if (result.waterDeltaMl != 0) onAddWater(result.waterDeltaMl);
+    if (result.delete) {
+      onDelete(entry);
+    } else if (result.entry != null) {
+      onEditEntry(entry, result.entry!);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, FoodEntry entry) async {
@@ -956,8 +1471,15 @@ class TodayPage extends StatelessWidget {
       targetCalories: targets.calories,
       protein: protein,
       targetProtein: targets.protein,
+      exerciseCalories: exerciseCalories,
+      waterMl: waterMl,
+      waterTargetMl: waterTargetMl,
+      bodyWeightKg: bodyWeightKg,
+      walkMet: walkMet,
+      locale: locale,
     );
-    return CustomScrollView(
+    final proteinComplete = targets.protein > 0 && protein >= targets.protein;
+    final scrollView = CustomScrollView(
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
@@ -1007,12 +1529,17 @@ class TodayPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 const SectionHeader('Today’s timeline', '0 ITEMS'),
+                if (photos.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _StandalonePhotoStrip(photos: photos),
+                ],
               ] else ...[
                 HeroCard(
                   foodCalories: calories,
                   exerciseCalories: exerciseCalories,
                   target: targets.calories,
                   headline: nudge.title,
+                  subtitle: nudge.body,
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -1025,6 +1552,7 @@ class TodayPage extends StatelessWidget {
                         '',
                         protein / targets.protein,
                         coral,
+                        complete: proteinComplete,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -1097,6 +1625,10 @@ class TodayPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 SectionHeader('Today’s timeline', '${entries.length} ITEMS'),
                 const SizedBox(height: 8),
+                if (photos.isNotEmpty) ...[
+                  _StandalonePhotoStrip(photos: photos),
+                  const SizedBox(height: 8),
+                ],
                 ..._timeline(context),
               ],
             ],
@@ -1104,7 +1636,24 @@ class TodayPage extends StatelessWidget {
         ),
       ],
     );
+    return onRefresh == null ? scrollView : RefreshIndicator(onRefresh: onRefresh!, child: scrollView);
   }
+}
+
+// Parses the leading "HH:MM" off an entry's display time (exercise
+// entries append " · 30 min"/" · 2 hr" after it) so the timeline can sort
+// by when something actually happened, not the order it was typed in.
+int _entryMinutesOfDay(FoodEntry entry) {
+  final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(entry.time);
+  if (match == null) return 0;
+  return int.parse(match.group(1)!) * 60 + int.parse(match.group(2)!);
+}
+
+class EditEntryResult {
+  const EditEntryResult({this.entry, this.delete = false, this.waterDeltaMl = 0});
+  final FoodEntry? entry;
+  final bool delete;
+  final int waterDeltaMl;
 }
 
 class TopBar extends StatelessWidget {
@@ -1157,12 +1706,15 @@ class HeroCard extends StatelessWidget {
     required this.exerciseCalories,
     required this.target,
     required this.headline,
+    this.subtitle,
   });
   final int foodCalories, exerciseCalories, target;
   final String headline;
+  final String? subtitle;
   @override
   Widget build(BuildContext context) {
     final netCalories = math.max(0, foodCalories - exerciseCalories);
+    final over = netCalories > target;
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
@@ -1242,10 +1794,28 @@ class HeroCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  LText(
+                    subtitle!,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 6),
                 LText(
-                  '${math.max(0, target - netCalories)} kcal left for today',
-                  style: const TextStyle(color: Colors.white70, height: 1.35),
+                  over
+                      ? '${netCalories - target} kcal over today'
+                      : '${target - netCalories} kcal left for today',
+                  style: TextStyle(
+                    color: over ? const Color(0xFFFFB3A0) : Colors.white70,
+                    height: 1.35,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 if (exerciseCalories > 0) ...[
@@ -1298,6 +1868,7 @@ class WaterCard extends StatelessWidget {
       0.0,
       1.0,
     );
+    final complete = waterTargetMl > 0 && waterMl >= waterTargetMl;
     return MetricCard(
       'Water',
       '$waterMl',
@@ -1306,6 +1877,7 @@ class WaterCard extends StatelessWidget {
       progress,
       aqua,
       trailing: WaterGlass(progress: progress, width: 14, height: 20),
+      complete: complete,
     );
   }
 }
@@ -1375,12 +1947,14 @@ class MetricCard extends StatelessWidget {
     super.key,
     this.trailing,
     this.onTap,
+    this.complete = false,
   });
   final String label, value, unit, detail;
   final double progress;
   final Color color;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final bool complete;
   @override
   Widget build(BuildContext context) => Card(
     child: InkWell(
@@ -1391,15 +1965,25 @@ class MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LText(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                if (complete) ...[
+                  const Icon(Icons.check_circle, color: success, size: 14),
+                  const SizedBox(width: 4),
+                ],
+                Expanded(
+                  child: LText(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 5),
             Row(
@@ -1439,18 +2023,19 @@ class MetricCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (detail.isNotEmpty) ...[
+                if (complete || detail.isNotEmpty) ...[
                   const SizedBox(width: 5),
                   Flexible(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: LText(
-                        detail,
+                        complete ? 'Complete' : detail,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Colors.black45,
+                          fontWeight: complete ? FontWeight.w700 : null,
+                          color: complete ? success : Colors.black45,
                         ),
                       ),
                     ),
@@ -1462,8 +2047,8 @@ class MetricCard extends StatelessWidget {
             const SizedBox(height: 13),
             LinearProgressIndicator(
               value: progress.clamp(0, 1),
-              color: color,
-              backgroundColor: color.withValues(alpha: .16),
+              color: complete ? success : color,
+              backgroundColor: (complete ? success : color).withValues(alpha: .16),
               borderRadius: BorderRadius.circular(8),
               minHeight: 7,
             ),
@@ -1556,6 +2141,9 @@ class FoodEntry {
     this.exerciseMet,
     this.exerciseBodyWeightKg,
     this.exerciseApproximate = false,
+    this.waterMl = 0,
+    this.photoPaths = const [],
+    this.photoMediaIds = const [],
   });
   final String name, time;
   final int calories, protein;
@@ -1564,6 +2152,26 @@ class FoodEntry {
   final String? category;
   final int carbs;
   final String? sharedFrom, sharedEntryId;
+  // Local filesystem paths under the app's own documents directory (see
+  // PhotoStore) -- never image bytes embedded in the entry itself, and
+  // NEVER meaningful on any device other than the one that wrote them (a
+  // path from another device must never be dereferenced -- see FoodTile).
+  final List<String> photoPaths;
+  // Backend media ids (see MediaService/`/api/v1/media`) for photos that
+  // have crossed -- or are about to cross -- a device boundary (an
+  // entry synced to a linked account). The wire representation of a
+  // shared entry carries only these small ids, never photoPaths or image
+  // bytes; each receiving device downloads and caches the bytes once.
+  final List<String> photoMediaIds;
+  int get photoCount => math.max(photoPaths.length, photoMediaIds.length);
+  String? photoPathAt(int index) => index < photoPaths.length ? photoPaths[index] : null;
+  String? photoMediaIdAt(int index) => index < photoMediaIds.length ? photoMediaIds[index] : null;
+  // Water contribution recognized as part of a wider food/drink entry
+  // (e.g. "glass water" inside a longer meal sentence) -- consumed once,
+  // immediately, to top up the day's water total; not persisted on the
+  // entry itself since that total already lives durably in
+  // WaterRepository, and the entry's own text still shows what was said.
+  final int waterMl;
   // Calculation evidence for a parser-estimated exercise entry (MET x body
   // weight x duration) -- null when the entry predates this, was AI-derived,
   // or isn't exercise at all. Kept separate from `calories` so the number
@@ -1575,6 +2183,11 @@ class FoodEntry {
   final bool exerciseApproximate;
 
   String get dayCategory => category ?? MealCategory.detect(name, isExercise);
+  // `icon` is fixed at construction (exercise vs. food) and stays that way
+  // for other callers; the timeline itself should show a drink glass for
+  // anything detected as Drinks rather than a knife and fork.
+  IconData get displayIcon =>
+      isExercise ? icon : (dayCategory == 'Drinks' ? Icons.local_drink : icon);
 
   Map<String, Object> toJson() => {
     'name': name,
@@ -1591,34 +2204,88 @@ class FoodEntry {
     'exerciseMet': ?exerciseMet,
     'exerciseBodyWeightKg': ?exerciseBodyWeightKg,
     'exerciseApproximate': exerciseApproximate,
+    'photoPaths': ?(photoPaths.isEmpty ? null : photoPaths),
+    'photoMediaIds': ?(photoMediaIds.isEmpty ? null : photoMediaIds),
   };
 
+  // Deliberately tolerant of a malformed/old-schema/partially-synced entry:
+  // a missing optional field gets a safe default rather than throwing, so
+  // one odd entry degrades (e.g. blank name) instead of taking the whole
+  // day's timeline down with it. Only a fundamentally undecodable row
+  // (e.g. `json` itself not even a map) still throws, and the caller
+  // (DailyEntryRepository.load) already quarantines that one row.
   factory FoodEntry.fromJson(Map<String, dynamic> json) {
     final isExercise = json['isExercise'] as bool? ?? false;
+    final name = json['name'] as String? ?? 'Untitled entry';
     return FoodEntry(
-      json['name'] as String,
-      json['time'] as String,
-      json['calories'] as int,
-      json['protein'] as int,
+      name,
+      json['time'] as String? ?? '',
+      (json['calories'] as num?)?.round() ?? 0,
+      (json['protein'] as num?)?.round() ?? 0,
       isExercise ? Icons.directions_run : Icons.restaurant,
       isExercise: isExercise,
       category: json['category'] as String?,
       sharedFrom: json['sharedFrom'] as String?,
       sharedEntryId: json['sharedEntryId'] as String?,
       carbs:
-          json['carbs'] as int? ??
-          (isExercise
-              ? 0
-              : FoodEstimator.estimate(json['name'] as String).carbs),
+          (json['carbs'] as num?)?.round() ??
+          (isExercise ? 0 : FoodEstimator.estimate(name).carbs),
       exerciseActivityId: json['exerciseActivityId'] as String?,
       exerciseDurationMinutes: (json['exerciseDurationMinutes'] as num?)
           ?.toDouble(),
       exerciseMet: (json['exerciseMet'] as num?)?.toDouble(),
-      exerciseBodyWeightKg: (json['exerciseBodyWeightKg'] as num?)
-          ?.toDouble(),
+      exerciseBodyWeightKg: (json['exerciseBodyWeightKg'] as num?)?.toDouble(),
       exerciseApproximate: json['exerciseApproximate'] as bool? ?? false,
+      // photoPaths from another device is never usable here (see FoodTile) --
+      // kept only so THIS device's own writes still round-trip; a foreign
+      // path just fails the existsSync() check at render time.
+      photoPaths: (json['photoPaths'] as List?)?.whereType<String>().toList() ?? const [],
+      photoMediaIds: (json['photoMediaIds'] as List?)?.whereType<String>().toList() ?? const [],
     );
   }
+
+  FoodEntry copyWithPhoto(String photoPath) => FoodEntry(
+    name,
+    time,
+    calories,
+    protein,
+    icon,
+    isExercise: isExercise,
+    category: category,
+    carbs: carbs,
+    sharedFrom: sharedFrom,
+    sharedEntryId: sharedEntryId,
+    exerciseActivityId: exerciseActivityId,
+    exerciseDurationMinutes: exerciseDurationMinutes,
+    exerciseMet: exerciseMet,
+    exerciseBodyWeightKg: exerciseBodyWeightKg,
+    exerciseApproximate: exerciseApproximate,
+    photoPaths: [...photoPaths, photoPath],
+    photoMediaIds: photoMediaIds,
+  );
+
+  // The wire form of an entry that's about to cross a device boundary
+  // (see EntrySyncService.shareEntry) -- local photoPaths are dropped
+  // (meaningless on another device) once each has been uploaded to backend
+  // media storage and replaced with its media id.
+  FoodEntry forSharing({required List<String> mediaIds}) => FoodEntry(
+    name,
+    time,
+    calories,
+    protein,
+    icon,
+    isExercise: isExercise,
+    category: category,
+    carbs: carbs,
+    sharedFrom: sharedFrom,
+    sharedEntryId: sharedEntryId,
+    exerciseActivityId: exerciseActivityId,
+    exerciseDurationMinutes: exerciseDurationMinutes,
+    exerciseMet: exerciseMet,
+    exerciseBodyWeightKg: exerciseBodyWeightKg,
+    exerciseApproximate: exerciseApproximate,
+    photoMediaIds: mediaIds,
+  );
 }
 
 class MealCategory {
@@ -1629,10 +2296,66 @@ class MealCategory {
     'Snack',
     'Dinner',
     'Supper',
+    'Meal',
     'Drinks',
     'Other',
     'Exercise',
   ];
+
+  // True meal-NAME words only (unlike the broader heuristic word lists in
+  // `detect` below, which also lean on incidental food-type hints like
+  // "porridge" or "crisps") -- these are the words `extractExplicitCategory`
+  // treats as an explicit, authoritative category choice that overrides
+  // whatever the food composition looks like, and strips out of the text
+  // before it ever reaches the food parser (a category word is not a food
+  // fragment). Locale-aware: includes the diacritic and no-diacritic forms
+  // for languages that need it (e.g. Polish "przekąska"/"przekaska"),
+  // reusing the same fold-based tolerance the parser itself uses.
+  static const explicitMealWords = <String, List<String>>{
+    'Breakfast': [
+      'breakfast', 'śniadanie', 'sniadanie',
+      'frühstück', 'petit-déjeuner', 'desayuno', 'colazione',
+    ],
+    'Brunch': [
+      'brunch', 'drugie śniadanie', 'drugie sniadanie', 'zweites frühstück',
+    ],
+    'Lunch': [
+      'lunch', 'obiad',
+      'mittagessen', 'déjeuner', 'almuerzo', 'pranzo',
+    ],
+    'Snack': [
+      'snack', 'przekąska', 'przekaska',
+      'imbiss', 'goûter', 'tentempié', 'spuntino',
+    ],
+    'Dinner': ['dinner', 'kolacja', 'abendessen', 'dîner', 'cena'],
+    'Supper': ['supper', 'wieczerza', 'abendbrot', 'souper'],
+  };
+
+  /// If [description] names an explicit meal (breakfast/lunch/dinner/...,
+  /// in any supported language, with or without diacritics), returns that
+  /// category plus the description with the meal word -- and a leading
+  /// "for "/trailing ":" it was joined to -- removed, so it never reaches
+  /// the food parser as an unresolved fragment. Returns null when no
+  /// explicit meal word is present, leaving [description] untouched.
+  static (String category, String cleaned)? extractExplicitCategory(String description) {
+    final folded = foldDiacritics(description.toLowerCase());
+    for (final entry in explicitMealWords.entries) {
+      for (final word in entry.value) {
+        final foldedWord = foldDiacritics(word);
+        final boundary = RegExp('(?<![a-z])${RegExp.escape(foldedWord)}(?![a-z])');
+        if (!boundary.hasMatch(folded)) continue;
+        var cleaned = folded.replaceFirst(
+          RegExp('for\\s+${RegExp.escape(foldedWord)}(?![a-z])'),
+          '',
+        );
+        cleaned = cleaned.replaceFirst(boundary, '');
+        cleaned = cleaned.replaceFirst(RegExp(r'^\s*:\s*'), '');
+        cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+        return (entry.key, cleaned);
+      }
+    }
+    return null;
+  }
 
   static String detect(String description, bool isExercise) {
     if (isExercise) return 'Exercise';
@@ -1694,8 +2417,75 @@ class MealCategory {
     for (final entry in terms.entries) {
       if (entry.value.any(text.contains)) return entry.key;
     }
-    return 'Other';
+    return 'Meal';
   }
+}
+
+class ExtractedTime {
+  const ExtractedTime(this.hour, this.minute);
+  final int hour;
+  final int minute;
+}
+
+// Optional "10am"/"13:30"/"o 14" (Polish "at 14") anywhere in a free-text
+// description -- a time word is a category choice like a meal word, not
+// food content, so it's found and removed the same way
+// `MealCategory.extractExplicitCategory` handles meal words. Digits and
+// am/pm/at/o are plain ASCII, so matching against the lowercased text and
+// slicing the *original* string at the same offsets is safe here (no
+// diacritics involved).
+final _hhmmTime = RegExp(r'(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)\s*(am|pm)?(?![\d:])');
+final _hourAmPm = RegExp(r'(?<![\d.:])\b([01]?\d)\s*(am|pm)\b');
+final _atHour = RegExp(
+  r'(?<![a-z\d])(?:at|o)\s+([01]?\d|2[0-3])(?::([0-5]\d))?(?!\s*(?:am|pm))\b',
+);
+
+(ExtractedTime, String)? extractExplicitTime(String description) {
+  final lower = description.toLowerCase();
+  for (final pattern in [_hhmmTime, _hourAmPm, _atHour]) {
+    final match = pattern.firstMatch(lower);
+    if (match == null) continue;
+    int hour;
+    int minute = 0;
+    String? ampm;
+    if (pattern == _hhmmTime) {
+      hour = int.parse(match.group(1)!);
+      minute = int.parse(match.group(2)!);
+      ampm = match.group(3);
+    } else if (pattern == _hourAmPm) {
+      hour = int.parse(match.group(1)!);
+      ampm = match.group(2);
+    } else {
+      hour = int.parse(match.group(1)!);
+      minute = match.group(2) != null ? int.parse(match.group(2)!) : 0;
+    }
+    if (ampm == 'pm' && hour < 12) hour += 12;
+    if (ampm == 'am' && hour == 12) hour = 0;
+    if (hour > 23 || minute > 59) continue;
+    final cleaned = '${description.substring(0, match.start)} ${description.substring(match.end)}'
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return (ExtractedTime(hour, minute), cleaned);
+  }
+  return null;
+}
+
+/// Runs both the meal-category and explicit-time extraction (in either
+/// order they don't interfere -- each only removes its own matched
+/// span) and returns the text left over for actual food/exercise
+/// parsing, with stray leading/trailing punctuation from the removals
+/// cleaned up.
+(String? category, ExtractedTime? time, String cleaned) extractMealContext(String text) {
+  final categoryResult = MealCategory.extractExplicitCategory(text);
+  var working = categoryResult?.$2 ?? text;
+  final timeResult = extractExplicitTime(working);
+  if (timeResult != null) working = timeResult.$2;
+  working = working
+      .replaceFirst(RegExp(r'^[\s,:.;]+'), '')
+      .replaceFirst(RegExp(r'[\s,:.;]+$'), '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+  return (categoryResult?.$1, timeResult?.$1, working);
 }
 
 class DailyEntryRepository {
@@ -1751,6 +2541,50 @@ class WaterRepository {
   Future<int> load(DateTime date) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(keyFor(date)) ?? 0;
+  }
+}
+
+// A standalone photo is MEDIA, not a FoodEntry -- it never has calories,
+// macros, a meal category or a food icon, so it gets its own small,
+// separate day-keyed store rather than being shoehorned into the entries
+// list as a fake zero-kcal item.
+class DayPhoto {
+  const DayPhoto({required this.path, this.caption, required this.time});
+  final String path;
+  final String? caption;
+  final String time;
+
+  Map<String, Object?> toJson() => {'path': path, 'caption': caption, 'time': time};
+
+  factory DayPhoto.fromJson(Map<String, dynamic> json) => DayPhoto(
+    path: json['path'] as String,
+    caption: json['caption'] as String?,
+    time: json['time'] as String? ?? '',
+  );
+}
+
+class DayPhotoRepository {
+  const DayPhotoRepository();
+
+  String keyFor(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return 'daily_photos_${date.year}-$month-$day';
+  }
+
+  Future<List<DayPhoto>> load(DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(keyFor(date)) ?? const [];
+    return raw
+        .map((s) => DayPhoto.fromJson(jsonDecode(s) as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> add(DateTime date, DayPhoto photo) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = keyFor(date);
+    final existing = prefs.getStringList(key) ?? const [];
+    await prefs.setStringList(key, [...existing, jsonEncode(photo.toJson())]);
   }
 }
 
@@ -1819,88 +2653,387 @@ class WaterIntakeParser {
 }
 
 class FoodTile extends StatelessWidget {
-  const FoodTile(this.entry, {super.key, required this.onDelete, this.onSync});
+  const FoodTile(this.entry, {super.key, required this.onDelete, this.onEdit, this.onSync});
   final FoodEntry entry;
   final VoidCallback onDelete;
+  final VoidCallback? onEdit;
   final Future<void> Function()? onSync;
 
-  Future<void> _handleSync(BuildContext context) async {
-    try {
-      await onSync!();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: LText('Synced "${entry.name}"')));
-      }
-    } catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: LText(error.toString().replaceFirst('Exception: ', '')),
-          ),
-        );
-      }
-    }
+  void _openPhoto(BuildContext context, String path) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PhotoViewerScreen(path: path)),
+    );
   }
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
     child: Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: mint,
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onEdit,
+            onLongPress: onEdit,
             borderRadius: BorderRadius.circular(15),
-          ),
-          child: Icon(entry.icon, color: forest),
-        ),
-        title: LText(
-          entry.name,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        subtitle: LText(entry.time, style: const TextStyle(fontSize: 12)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                LText(
-                  '${entry.isExercise ? '−' : ''}${entry.calories}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _EntryThumbnail(
+                    localPath: entry.photoPathAt(0),
+                    mediaId: entry.photoMediaIdAt(0),
+                    size: 48,
+                    icon: entry.displayIcon,
+                    onTapPath: entry.photoCount == 0 ? null : (path) => _openPhoto(context, path),
                   ),
-                ),
-                const LText(
-                  'kcal',
-                  style: TextStyle(fontSize: 10, color: Colors.black45),
-                ),
-              ],
-            ),
-            if (onSync != null) ...[
-              const SizedBox(width: 1),
-              IconButton(
-                onPressed: () => _handleSync(context),
-                tooltip: ui(context, 'Sync entry with linked people'),
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.sync, color: aqua, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LText(
+                          entry.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 2),
+                        LText(
+                          entry.time,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      LText(
+                        '${entry.isExercise ? '−' : ''}${entry.calories}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const LText(
+                        'kcal',
+                        style: TextStyle(fontSize: 10, color: Colors.black45),
+                      ),
+                    ],
+                  ),
+                  if (onSync != null) _SyncButton(onSync: onSync!, entryName: entry.name),
+                  IconButton(
+                    onPressed: onDelete,
+                    tooltip: ui(context, 'Delete entry'),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.delete_outline, color: coral, size: 20),
+                  ),
+                ],
               ),
-            ],
-            const SizedBox(width: 3),
-            IconButton(
-              onPressed: onDelete,
-              tooltip: ui(context, 'Delete entry'),
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.delete_outline, color: coral, size: 20),
             ),
-          ],
-        ),
+          ),
+          if (entry.photoCount > 1)
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 10),
+                scrollDirection: Axis.horizontal,
+                itemCount: entry.photoCount,
+                separatorBuilder: (_, _) => const SizedBox(width: 6),
+                itemBuilder: (context, index) => _EntryThumbnail(
+                  localPath: entry.photoPathAt(index),
+                  mediaId: entry.photoMediaIdAt(index),
+                  size: 44,
+                  icon: entry.displayIcon,
+                  onTapPath: (path) => _openPhoto(context, path),
+                ),
+              ),
+            ),
+        ],
       ),
+    ),
+  );
+}
+
+// Sender-side sync state: shows a spinner while the request is in flight
+// (previously there was no feedback at all between tap and the
+// success/error snackbar) and disables itself meanwhile so a slow request
+// can't be retapped into a duplicate share.
+class _SyncButton extends StatefulWidget {
+  const _SyncButton({required this.onSync, required this.entryName});
+  final Future<void> Function() onSync;
+  final String entryName;
+  @override
+  State<_SyncButton> createState() => _SyncButtonState();
+}
+
+class _SyncButtonState extends State<_SyncButton> {
+  bool _busy = false;
+
+  Future<void> _handleTap() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onSync();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: LText('Synced "${widget.entryName}"')));
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: LText(error.toString().replaceFirst('Exception: ', ''))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    onPressed: _busy ? null : _handleTap,
+    tooltip: ui(context, 'Sync entry with linked people'),
+    visualDensity: VisualDensity.compact,
+    icon: _busy
+        ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2, color: aqua))
+        : const Icon(Icons.sync, color: aqua, size: 20),
+  );
+}
+
+// The single choke point every FoodTile/standalone-photo thumbnail goes
+// through. A local filesystem path is only ever meaningful on the device
+// that wrote it -- one arriving from another device via sync (or an old/
+// partially-synced entry) must never be handed to Image.file as-is, so
+// this checks existence first. When there's no usable local file but a
+// backend media id is present (a received/synced photo), it downloads and
+// caches the bytes once via MediaService and shows a brief loading state
+// meanwhile; a failed/offline download just leaves the harmless
+// placeholder in place -- rebuilding (reopening Today, pull-to-refresh)
+// retries automatically since nothing gets cached on failure.
+class _EntryThumbnail extends StatefulWidget {
+  const _EntryThumbnail({
+    required this.localPath,
+    required this.mediaId,
+    required this.size,
+    this.icon = Icons.restaurant,
+    this.onTapPath,
+  });
+  final String? localPath;
+  final String? mediaId;
+  final double size;
+  final IconData icon;
+  final ValueChanged<String>? onTapPath;
+
+  @override
+  State<_EntryThumbnail> createState() => _EntryThumbnailState();
+}
+
+class _EntryThumbnailState extends State<_EntryThumbnail> {
+  String? _resolvedPath;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(_EntryThumbnail old) {
+    super.didUpdateWidget(old);
+    if (old.localPath != widget.localPath || old.mediaId != widget.mediaId) _resolve();
+  }
+
+  void _resolve() {
+    final local = widget.localPath;
+    if (local != null && File(local).existsSync()) {
+      setState(() {
+        _resolvedPath = local;
+        _loading = false;
+      });
+      return;
+    }
+    final mediaId = widget.mediaId;
+    if (mediaId == null) {
+      setState(() {
+        _resolvedPath = null;
+        _loading = false;
+      });
+      return;
+    }
+    setState(() => _loading = true);
+    const MediaService().download(defaultServerUrl, mediaId).then((path) {
+      if (!mounted) return;
+      setState(() {
+        _resolvedPath = path;
+        _loading = false;
+      });
+    });
+  }
+
+  Widget _placeholder() => Container(
+    width: widget.size,
+    height: widget.size,
+    decoration: BoxDecoration(color: mint, borderRadius: BorderRadius.circular(widget.size >= 48 ? 15 : 10)),
+    child: Icon(widget.icon, color: forest, size: widget.size * 0.5),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(widget.size >= 48 ? 15 : 10);
+    final resolved = _resolvedPath;
+    final Widget child;
+    if (resolved != null) {
+      child = Image.file(
+        File(resolved),
+        width: widget.size,
+        height: widget.size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _placeholder(),
+      );
+    } else if (_loading) {
+      child = Container(
+        width: widget.size,
+        height: widget.size,
+        color: mint,
+        child: Center(
+          child: SizedBox.square(
+            dimension: widget.size * 0.35,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    } else {
+      child = _placeholder();
+    }
+    final clipped = ClipRRect(borderRadius: radius, child: child);
+    if (resolved == null || widget.onTapPath == null) return clipped;
+    return InkWell(
+      borderRadius: radius,
+      onTap: () => widget.onTapPath!(resolved),
+      child: clipped,
+    );
+  }
+}
+
+// Item 9: tap a thumbnail -> full image; back/close -> return to the
+// timeline. Deliberately minimal (no zoom/gallery library) to keep this
+// small.
+class PhotoViewerScreen extends StatelessWidget {
+  const PhotoViewerScreen({super.key, required this.path, this.caption});
+  final String path;
+  final String? caption;
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      iconTheme: const IconThemeData(color: Colors.white),
+    ),
+    body: Stack(
+      children: [
+        Center(
+          child: File(path).existsSync()
+              ? InteractiveViewer(
+                  child: Image.file(
+                    File(path),
+                    errorBuilder: (_, _, _) => const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white38,
+                      size: 64,
+                    ),
+                  ),
+                )
+              : const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white38,
+                  size: 64,
+                ),
+        ),
+        if ((caption ?? '').trim().isNotEmpty)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 24,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  caption!.trim(),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+// Item 3: a thin horizontal strip of standalone-photo thumbnails, shown
+// directly under "Today's timeline" and above the grouped meal categories.
+// Deliberately bare (no caption/calories/time/category) -- these are media,
+// not FoodEntry rows.
+class _StandalonePhotoStrip extends StatelessWidget {
+  const _StandalonePhotoStrip({required this.photos});
+  final List<DayPhoto> photos;
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 56,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: photos.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 8),
+      itemBuilder: (context, index) {
+        final photo = photos[index];
+        final exists = File(photo.path).existsSync();
+        return InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PhotoViewerScreen(path: photo.path, caption: photo.caption),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: exists
+                ? Image.file(
+                    File(photo.path),
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      width: 56,
+                      height: 56,
+                      color: mint,
+                      child: const Icon(Icons.broken_image_outlined, color: forest),
+                    ),
+                  )
+                : Container(
+                    width: 56,
+                    height: 56,
+                    color: mint,
+                    child: const Icon(Icons.broken_image_outlined, color: forest),
+                  ),
+          ),
+        );
+      },
     ),
   );
 }
@@ -2111,48 +3244,141 @@ class FoodEstimator {
   }
 }
 
+// Structured nutrition-label extraction (item 4) -- separate from
+// FoodParser's sentence grammar entirely. This reads a nutrition TABLE
+// (product packaging), not a natural-language description, and every
+// value is either a real recognized number or left null; nothing here
+// ever invents a figure to fill a gap.
 class LabelReading {
   const LabelReading({
+    this.productName,
     this.caloriesPer100,
     this.proteinPer100,
     this.carbsPer100,
+    this.sugarsPer100,
+    this.fatPer100,
+    this.saturatedFatPer100,
+    this.fibrePer100,
+    this.saltPer100,
+    this.basis,
+    this.servingSizeGrams,
     this.totalGrams,
   });
+  final String? productName;
   final double? caloriesPer100;
   final double? proteinPer100;
   final double? carbsPer100;
+  final double? sugarsPer100;
+  final double? fatPer100;
+  final double? saturatedFatPer100;
+  final double? fibrePer100;
+  final double? saltPer100;
+  // 'per100g' | 'per100ml' | 'perServing' -- which basis the numbers above
+  // were actually printed under, when it could be told apart.
+  final String? basis;
+  final double? servingSizeGrams;
   final double? totalGrams;
   bool get hasNutrition => caloriesPer100 != null;
   bool get isConfident => caloriesPer100 != null && totalGrams != null;
+  bool get isEmpty =>
+      productName == null &&
+      caloriesPer100 == null &&
+      proteinPer100 == null &&
+      carbsPer100 == null &&
+      fatPer100 == null;
 }
 
 class LabelParser {
   static double? _parseNumber(String raw) =>
       double.tryParse(raw.replaceAll(',', '.'));
 
-  static double? _firstNumberNear(
-    String text,
-    String keywordPattern,
+  // Tries each EN/PL keyword alternative in turn against the SAME
+  // diacritic-folded text every alternative was folded against, so
+  // "Białko"/"BIALKO"/"bialka" all still match "białko".
+  static double? _firstNumberNearAny(
+    String foldedText,
+    List<String> keywordPatterns,
     String unitPattern,
   ) {
-    final match = RegExp(
-      '$keywordPattern.{0,40}?(\\d+(?:[.,]\\d+)?)\\s*$unitPattern',
-      caseSensitive: false,
-    ).firstMatch(text);
-    return match == null ? null : _parseNumber(match.group(1)!);
+    for (final keyword in keywordPatterns) {
+      final match = RegExp(
+        '$keyword.{0,40}?(\\d+(?:[.,]\\d+)?)\\s*$unitPattern',
+        caseSensitive: false,
+      ).firstMatch(foldedText);
+      if (match != null) return _parseNumber(match.group(1)!);
+    }
+    return null;
+  }
+
+  // A plain, honest guess at a product name from raw OCR text: the first
+  // non-empty line that isn't itself a number/measurement -- no rigid
+  // phrase or word-count requirement.
+  static String? guessProductName(String rawText) {
+    for (final line in rawText.split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) continue;
+      if (RegExp(r'^[\d.,%\s]+[a-zA-Z]{0,4}$').hasMatch(trimmed)) continue;
+      return trimmed;
+    }
+    return null;
   }
 
   static LabelReading parse(String rawText) {
-    final text = rawText.replaceAll(RegExp(r'\s+'), ' ');
-    final calories = _firstNumberNear(text, '(?:energy|calories)', 'kcal');
-    final protein = _firstNumberNear(text, 'protein', 'g');
-    final carbs = _firstNumberNear(text, 'carbohydrate', 'g');
+    final collapsed = rawText.replaceAll(RegExp(r'\s+'), ' ');
+    // Folded for keyword matching only -- diacritics must not matter for
+    // recognizing "Energia"/"Tłuszcz"/"Węglowodany"/etc, but the raw text
+    // (for the product-name guess) keeps its real spelling.
+    final folded = foldDiacritics(collapsed);
+    const g = 'g';
+
+    final calories = _firstNumberNearAny(
+      folded,
+      ['(?:energy|calories|energia|wartosc energetyczna)'],
+      'kcal',
+    );
+    final protein = _firstNumberNearAny(folded, ['(?:protein|bialko)'], g);
+    final carbs = _firstNumberNearAny(
+      folded,
+      ['(?:carbohydrate|carbs|weglowodany)'],
+      g,
+    );
+    final sugars = _firstNumberNearAny(
+      folded,
+      ['(?:of which sugars|sugars|w tym cukry|cukry)'],
+      g,
+    );
+    final fat = _firstNumberNearAny(folded, ['(?:total fat|fat|tluszcz)'], g);
+    final saturatedFat = _firstNumberNearAny(
+      folded,
+      ['(?:of which saturates|saturates|saturated fat|w tym nasycone|nasycone)'],
+      g,
+    );
+    final fibre = _firstNumberNearAny(folded, ['(?:fibre|fiber|blonnik)'], g);
+    final salt = _firstNumberNearAny(folded, ['(?:salt|sol)'], g);
+
+    String? basis;
+    if (RegExp(r'(?:per|na|w)\s*100\s*ml', caseSensitive: false)
+        .hasMatch(folded)) {
+      basis = 'per100ml';
+    } else if (RegExp(r'(?:per|na|w)\s*100\s*g', caseSensitive: false)
+        .hasMatch(folded)) {
+      basis = 'per100g';
+    } else if (RegExp(r'(?:per serving|na porcje|porcja)', caseSensitive: false)
+        .hasMatch(folded)) {
+      basis = 'perServing';
+    }
+
+    final servingSize = _firstNumberNearAny(
+      folded,
+      ['(?:serving size|wielkosc porcji)'],
+      g,
+    );
 
     double? totalGrams;
     final netWeight = RegExp(
-      r'(?:℮|net\s*(?:weight|wt)\.?:?)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b',
+      r'(?:℮|net\s*(?:weight|wt)\.?:?|masa\s*netto|zawartosc\s*netto)\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b',
       caseSensitive: false,
-    ).firstMatch(text);
+    ).firstMatch(folded);
     if (netWeight != null) {
       final value = _parseNumber(netWeight.group(1)!);
       final unit = netWeight.group(2)!.toLowerCase();
@@ -2160,36 +3386,63 @@ class LabelParser {
         totalGrams = (unit == 'kg' || unit == 'l') ? value * 1000 : value;
       }
     } else {
-      final servingSize = _firstNumberNear(text, 'serving\\s*size', 'g');
       final servingsMatch = RegExp(
         r'servings?\s*per\s*container[^0-9]{0,10}(\d+(?:[.,]\d+)?)',
         caseSensitive: false,
-      ).firstMatch(text);
-      final servings = servingsMatch == null
-          ? null
-          : _parseNumber(servingsMatch.group(1)!);
+      ).firstMatch(folded);
+      final servings =
+          servingsMatch == null ? null : _parseNumber(servingsMatch.group(1)!);
       if (servingSize != null && servings != null) {
         totalGrams = servingSize * servings;
       }
     }
 
     return LabelReading(
+      productName: guessProductName(rawText),
       caloriesPer100: calories,
       proteinPer100: protein,
       carbsPer100: carbs,
+      sugarsPer100: sugars,
+      fatPer100: fat,
+      saturatedFatPer100: saturatedFat,
+      fibrePer100: fibre,
+      saltPer100: salt,
+      basis: basis,
+      servingSizeGrams: servingSize,
       totalGrams: totalGrams,
     );
   }
+}
+
+// Returned from AddItemSheet when a photo was attached to an EXISTING
+// entry rather than saved as a new one -- the caller looks the entry up by
+// identity and replaces it with `updated` (see FoodEntry.copyWithPhoto).
+class PhotoAttachOutcome {
+  const PhotoAttachOutcome({required this.original, required this.updated});
+  final FoodEntry original;
+  final FoodEntry updated;
+}
+
+// Returned when a standalone photo (see DayPhotoRepository) was saved
+// directly from inside AddMealSheet's "Take photo" flow -- the caller has
+// nothing to merge into `entries` (it isn't a FoodEntry at all), it just
+// needs to reload today's photo strip.
+class DayPhotoSaved {
+  const DayPhotoSaved();
 }
 
 class AddItemSheet extends StatelessWidget {
   const AddItemSheet({
     super.key,
     required this.onAddWater,
+    required this.entries,
     this.bodyWeightKg,
+    this.locale = 'en',
   });
   final ValueChanged<int> onAddWater;
+  final List<FoodEntry> entries;
   final double? bodyWeightKg;
+  final String locale;
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.fromLTRB(20, 12, 20, sheetBottomInset(context, 28)),
@@ -2228,14 +3481,19 @@ class AddItemSheet extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (_) => const AddMealSheet(),
+                builder: (_) => AddMealSheet(locale: locale, entries: entries),
               );
               if (!context.mounted || result == null) return;
               if (result case final WaterIntake water) {
                 onAddWater(water.millilitres);
                 Navigator.pop(context);
               } else if (result case final FoodEntry entry) {
+                if (entry.waterMl > 0) onAddWater(entry.waterMl);
                 Navigator.pop(context, entry);
+              } else if (result case final PhotoAttachOutcome outcome) {
+                Navigator.pop(context, outcome);
+              } else if (result is DayPhotoSaved) {
+                Navigator.pop(context, result);
               }
             },
           ),
@@ -2256,7 +3514,7 @@ class AddItemSheet extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (_) => AddExerciseSheet(bodyWeightKg: bodyWeightKg),
+                builder: (_) => AddExerciseSheet(bodyWeightKg: bodyWeightKg, locale: locale),
               );
               if (context.mounted && result != null) {
                 Navigator.pop(context, result);
@@ -2270,19 +3528,41 @@ class AddItemSheet extends StatelessWidget {
 }
 
 class AddExerciseSheet extends StatefulWidget {
-  const AddExerciseSheet({super.key, this.bodyWeightKg});
+  const AddExerciseSheet({super.key, this.bodyWeightKg, this.locale = 'en'});
   final double? bodyWeightKg;
+  final String locale;
   @override
   State<AddExerciseSheet> createState() => _AddExerciseSheetState();
 }
 
 class _AddExerciseSheetState extends State<AddExerciseSheet> {
-  final activity = TextEditingController();
-  final minutes = TextEditingController(text: '30');
+  // A few natural phrasings the field actually understands, rotated in
+  // the hint text so users see they can type freely instead of filling
+  // in separate activity/duration boxes.
+  static const _hintExamplesEn = [
+    '30 min jogging',
+    '1hr cycling',
+    'squash for 45 min',
+    '1000 steps',
+    'walked 5km for 40 min',
+  ];
+  static const _hintExamplesPl = [
+    '30 min spacer',
+    '20 min jazda konna',
+    '10 min tenis stołowy',
+    '1000 kroków',
+  ];
+
+  final description = TextEditingController();
   bool aiAvailable = false;
   bool busy = false;
   String? notice;
   ExerciseParser? parser;
+  int hintIndex = 0;
+  Timer? _hintTimer;
+
+  List<String> get _hintExamples =>
+      widget.locale == 'pl' ? _hintExamplesPl : _hintExamplesEn;
 
   @override
   void initState() {
@@ -2290,43 +3570,47 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
     const AiService().isAvailable().then((value) {
       if (mounted) setState(() => aiAvailable = value);
     });
-    ExerciseParser.load().then((value) {
+    ExerciseParser.load(locale: widget.locale).then((value) {
       if (mounted) setState(() => parser = value);
+    });
+    _hintTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (mounted) setState(() => hintIndex = (hintIndex + 1) % _hintExamples.length);
     });
   }
 
   @override
   void dispose() {
-    activity.dispose();
-    minutes.dispose();
+    description.dispose();
+    _hintTimer?.cancel();
     super.dispose();
   }
 
+  String _activityLabel(ExerciseParser p, String id) =>
+      p.catalogue.entries.firstWhere((e) => e.id == id).canonical;
+
   Future<void> _addExercise() async {
-    final name = activity.text.trim();
-    final mins = int.tryParse(minutes.text) ?? 0;
-    if (name.isEmpty || mins <= 0) return;
+    final text = description.text.trim();
+    if (text.isEmpty) return;
     setState(() => notice = null);
 
     // Local-first: run the offline MET parser before ever considering AI.
-    final localParser = parser ?? await ExerciseParser.load();
-    final result = localParser.parse(
-      '$mins min $name',
-      bodyWeightKg: widget.bodyWeightKg,
-    );
+    final localParser = parser ?? await ExerciseParser.load(locale: widget.locale);
+    final result = localParser.parse(text, bodyWeightKg: widget.bodyWeightKg);
 
-    // Only reach for AI when the local parser couldn't recognize the
-    // activity at all -- a recognized activity with no body weight on file
-    // stays blocked rather than spending a network call whose answer would
-    // just be discarded (canonical MET math is authoritative below).
+    // Only reach for AI when the local parser found nothing to suggest at
+    // all -- an ambiguous activity ("tennis", "swimming") always gets the
+    // local clarification instead, never a silent AI guess; and a
+    // recognized activity with no body weight/duration on file stays
+    // blocked rather than spending a network call whose answer would just
+    // be discarded (canonical MET math is authoritative below).
     int? aiCalories;
-    if (result.activityId == null && aiAvailable) {
+    if (result.activityId == null && result.suggestions.isEmpty && aiAvailable) {
       setState(() => busy = true);
       try {
         final aiResult = await const AiService().describe(
           serverUrl: defaultServerUrl,
           kind: 'exercise',
-          text: '$name for $mins minutes',
+          text: text,
         );
         aiCalories = aiResult.calories;
       } catch (_) {
@@ -2348,19 +3632,27 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
       setState(() {
         notice = result.activityId == null
             ? (result.suggestions.isNotEmpty
-                  ? 'We don\'t recognize "$name" yet. Did you mean "${result.suggestions.first}"?'
-                  : 'We don\'t recognize "$name" yet, so we can\'t estimate calories for it.')
+                  ? 'Did you mean "${_activityLabel(localParser, result.suggestions.first)}"?'
+                  : 'We don\'t recognize "$text" yet, so we can\'t estimate calories for it.')
+            : result.durationMinutes == null
+            ? 'How long did you do this for? Try adding something like "30 min" or "2 hours".'
             : 'Add your weight in your profile to estimate calories for this activity.';
       });
       return;
     }
     if (!mounted) return;
 
+    final durationLabel = result.durationMinutes == null
+        ? ''
+        : result.durationMinutes! >= 60 &&
+              result.durationMinutes! % 60 == 0
+        ? ' · ${(result.durationMinutes! / 60).round()} hr'
+        : ' · ${result.durationMinutes!.round()} min';
     Navigator.pop(
       context,
       FoodEntry(
-        name,
-        '${_clockTime()} · $mins min',
+        text,
+        '${_clockTime()}$durationLabel',
         calories,
         0,
         Icons.directions_run,
@@ -2391,19 +3683,12 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
         ),
         const SizedBox(height: 16),
         TextField(
-          controller: activity,
+          controller: description,
+          minLines: 1,
+          maxLines: 3,
           decoration: InputDecoration(
-            labelText: ui(context, 'Activity'),
-            hintText: ui(context, 'Walking, running, cycling…'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: minutes,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: ui(context, 'Duration'),
-            suffixText: 'minutes',
+            labelText: ui(context, 'What did you do?'),
+            hintText: _hintExamples[hintIndex % _hintExamples.length],
           ),
         ),
         const Padding(
@@ -2467,25 +3752,625 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
   );
 }
 
+// Parses the leading "HH:MM" off a saved entry's display time back into
+// an [ExtractedTime] -- used so editing a description that doesn't
+// itself retype a time keeps the entry's existing time instead of
+// silently jumping it to "now".
+ExtractedTime? _parseEntryTime(String time) {
+  final match = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(time);
+  if (match == null) return null;
+  return ExtractedTime(int.parse(match.group(1)!), int.parse(match.group(2)!));
+}
+
+// Item 7: when a food genuinely can't be resolved locally, this offers a
+// simple way to add it instead of just blocking the user. Saved to the
+// SAME local overlay CatalogueSyncService downloads into (see
+// lib/parser/catalogue/local_overlay.dart) -- immediately usable on this
+// device, and contributed to the backend's global catalogue in the
+// background so it can eventually reach other users too, without ever
+// overwriting existing trusted data (see food_catalogue.mjs's merge rules).
+// What AddFoodSheet actually confirms, regardless of who's using it (the
+// "add this unknown food" flow or the scan-label confirmation flow): the
+// nutrition values the user reviewed and approved, plus whether they also
+// chose to keep it as a reusable food. Missing values stay null -- never
+// filled with an invented number.
+class AddFoodResult {
+  const AddFoodResult({
+    required this.name,
+    required this.kcal,
+    this.protein,
+    this.carbs,
+    this.fat,
+    required this.servingAmount,
+    required this.servingUnit,
+    required this.savedToCatalogue,
+  });
+  final String name;
+  final double kcal;
+  final double? protein, carbs, fat;
+  final double servingAmount;
+  final String servingUnit;
+  final bool savedToCatalogue;
+}
+
+class AddFoodSheet extends StatefulWidget {
+  const AddFoodSheet({
+    super.key,
+    required this.suggestedName,
+    this.locale = 'en',
+    this.title = 'Add this food',
+    this.subtitle,
+    this.initialCalories,
+    this.initialProtein,
+    this.initialCarbs,
+    this.initialFat,
+    this.initialServingAmount,
+    this.initialServingUnit,
+    this.defaultSaveToCatalogue = true,
+  });
+  final String suggestedName;
+  final String locale;
+  final String title;
+  final String? subtitle;
+  final double? initialCalories, initialProtein, initialCarbs, initialFat;
+  final double? initialServingAmount;
+  final String? initialServingUnit;
+  // Whether "save to my food list" starts checked -- off by default for a
+  // scanned label (often a specific branded product), on by default for
+  // an unresolved food the user is naming from scratch. Either way it's
+  // just a checkbox the user controls, per "optionally offer".
+  final bool defaultSaveToCatalogue;
+  @override
+  State<AddFoodSheet> createState() => _AddFoodSheetState();
+}
+
+class _AddFoodSheetState extends State<AddFoodSheet> {
+  late final name = TextEditingController(text: widget.suggestedName);
+  late final calories = TextEditingController(
+    text: widget.initialCalories == null ? '' : _formatNum(widget.initialCalories!),
+  );
+  late final servingAmount = TextEditingController(
+    text: _formatNum(widget.initialServingAmount ?? 100),
+  );
+  late final servingUnit = TextEditingController(text: widget.initialServingUnit ?? 'g');
+  late final protein = TextEditingController(
+    text: widget.initialProtein == null ? '' : _formatNum(widget.initialProtein!),
+  );
+  late final carbs = TextEditingController(
+    text: widget.initialCarbs == null ? '' : _formatNum(widget.initialCarbs!),
+  );
+  late final fat = TextEditingController(
+    text: widget.initialFat == null ? '' : _formatNum(widget.initialFat!),
+  );
+  late bool saveToCatalogue = widget.defaultSaveToCatalogue;
+  String? error;
+  bool saving = false;
+
+  static String _formatNum(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toString();
+
+  @override
+  void dispose() {
+    name.dispose();
+    calories.dispose();
+    servingAmount.dispose();
+    servingUnit.dispose();
+    protein.dispose();
+    carbs.dispose();
+    fat.dispose();
+    super.dispose();
+  }
+
+  double? _num(TextEditingController c) => double.tryParse(c.text.trim().replaceAll(',', '.'));
+
+  Future<void> _save() async {
+    final foodName = name.text.trim();
+    final kcal = _num(calories);
+    final amount = _num(servingAmount);
+    if (foodName.isEmpty) {
+      setState(() => error = 'Give the food a name.');
+      return;
+    }
+    if (kcal == null || kcal < 0) {
+      setState(() => error = 'Enter the calories for that portion.');
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      setState(() => error = 'Enter the portion size those calories are for.');
+      return;
+    }
+    setState(() {
+      saving = true;
+      error = null;
+    });
+    final unit = servingUnit.text.trim().isEmpty ? 'g' : servingUnit.text.trim();
+    if (saveToCatalogue) {
+      final entry = OverlayFoodEntry(
+        id: OverlayFoodEntry.idFor(foodName),
+        canonical: foodName,
+        kcalPer100g: kcal * 100 / amount,
+        proteinPer100g: () {
+          final v = _num(protein);
+          return v == null ? null : v * 100 / amount;
+        }(),
+        carbsPer100g: () {
+          final v = _num(carbs);
+          return v == null ? null : v * 100 / amount;
+        }(),
+        fatPer100g: () {
+          final v = _num(fat);
+          return v == null ? null : v * 100 / amount;
+        }(),
+        servingAmount: amount,
+        servingUnit: unit,
+        source: 'user',
+      );
+      final overlay = await LocalCatalogueOverlay.load();
+      await overlay.upsert(entry);
+      unawaited(
+        const CatalogueSyncService().contribute(
+          defaultServerUrl,
+          name: foodName,
+          kcal: kcal,
+          protein: _num(protein),
+          carbs: _num(carbs),
+          fat: _num(fat),
+          servingAmount: amount,
+          servingUnit: unit,
+          locale: widget.locale,
+        ),
+      );
+    }
+    if (mounted) {
+      Navigator.pop(
+        context,
+        AddFoodResult(
+          name: foodName,
+          kcal: kcal,
+          protein: _num(protein),
+          carbs: _num(carbs),
+          fat: _num(fat),
+          servingAmount: amount,
+          servingUnit: unit,
+          savedToCatalogue: saveToCatalogue,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: Container(
+      decoration: const BoxDecoration(
+        color: cream,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(child: SizedBox(width: 42, child: Divider(thickness: 4))),
+            const SizedBox(height: 10),
+            LText(
+              widget.title,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            LText(
+              widget.subtitle ??
+                  'Calories and a portion are enough — the rest is optional. Correct anything that’s wrong before confirming.',
+              style: const TextStyle(color: Colors.black54, height: 1.35),
+            ),
+            const SizedBox(height: 18),
+            TextField(
+              controller: name,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(labelText: ui(context, 'Food name')),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: calories,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: ui(context, 'Calories'), suffixText: 'kcal'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: servingAmount,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: ui(context, 'Portion amount')),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: servingUnit,
+                    decoration: InputDecoration(labelText: ui(context, 'Unit')),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const LText(
+              'e.g. 250 kcal for 100 g, or 180 kcal for 1 slice.',
+              style: TextStyle(fontSize: 11, color: Colors.black45),
+            ),
+            const SizedBox(height: 14),
+            const LText('Optional, if known', style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: protein,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: ui(context, 'Protein'), suffixText: 'g'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: carbs,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: ui(context, 'Carbs'), suffixText: 'g'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: fat,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: ui(context, 'Fat'), suffixText: 'g'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              value: saveToCatalogue,
+              onChanged: (v) => setState(() => saveToCatalogue = v ?? false),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              title: const LText(
+                'Save to my food list for reuse',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const LText(
+                'Also shared so others can benefit',
+                style: TextStyle(fontSize: 11, color: Colors.black54),
+              ),
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: LText(error!, style: const TextStyle(color: coral)),
+              ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: saving ? null : _save,
+                child: saving
+                    ? const SizedBox.square(dimension: 17, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const LText('Confirm'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class EditEntrySheet extends StatefulWidget {
+  const EditEntrySheet({super.key, required this.entry, this.bodyWeightKg, this.locale = 'en'});
+  final FoodEntry entry;
+  final double? bodyWeightKg;
+  final String locale;
+  @override
+  State<EditEntrySheet> createState() => _EditEntrySheetState();
+}
+
+class _EditEntrySheetState extends State<EditEntrySheet> {
+  late final description = TextEditingController(text: widget.entry.name);
+  String? notice;
+  bool busy = false;
+  FoodParser? foodParser;
+  ExerciseParser? exerciseParser;
+  double _oldWaterMl = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.entry.isExercise) {
+      ExerciseParser.load(locale: widget.locale).then((value) {
+        if (mounted) setState(() => exerciseParser = value);
+      });
+    } else {
+      FoodParser.load(locale: widget.locale).then((value) {
+        if (!mounted) return;
+        // Water isn't persisted on the entry itself (its own running
+        // total already lives durably in WaterRepository), so recover
+        // what this entry originally contributed by re-parsing its
+        // saved text the same way it was computed the first time --
+        // needed to reconcile the day's water total by the actual
+        // change, not the edited entry's new total on its own.
+        final oldParsed = value.parse(extractMealContext(widget.entry.name).$3);
+        final oldWater = oldParsed.items
+            .where((item) => item.canonicalId == 'water')
+            .fold(0.0, (sum, item) => sum + (item.grams ?? 0));
+        setState(() {
+          foodParser = value;
+          _oldWaterMl = oldWater;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    description.dispose();
+    super.dispose();
+  }
+
+  String _activityLabel(ExerciseParser p, String id) =>
+      p.catalogue.entries.firstWhere((e) => e.id == id).canonical;
+
+  Future<void> _save() async {
+    final text = description.text.trim();
+    if (text.isEmpty) return;
+    setState(() => notice = null);
+
+    if (widget.entry.isExercise) {
+      final parser = exerciseParser ?? await ExerciseParser.load(locale: widget.locale);
+      final result = parser.parse(text, bodyWeightKg: widget.bodyWeightKg);
+      final calories = result.calorieEstimateKcal?.round();
+      if (calories == null) {
+        setState(() {
+          notice = result.activityId == null
+              ? (result.suggestions.isNotEmpty
+                    ? 'Did you mean "${_activityLabel(parser, result.suggestions.first)}"?'
+                    : 'We don\'t recognize "$text" yet, so we can\'t estimate calories for it.')
+              : result.durationMinutes == null
+              ? 'How long did you do this for? Try adding something like "30 min" or "2 hours".'
+              : 'Add your weight in your profile to estimate calories for this activity.';
+        });
+        return;
+      }
+      if (!mounted) return;
+      final durationLabel = result.durationMinutes == null
+          ? ''
+          : result.durationMinutes! >= 60 && result.durationMinutes! % 60 == 0
+          ? ' · ${(result.durationMinutes! / 60).round()} hr'
+          : ' · ${result.durationMinutes!.round()} min';
+      final existing = _parseEntryTime(widget.entry.time);
+      Navigator.pop(
+        context,
+        EditEntryResult(
+          entry: FoodEntry(
+            text,
+            '${existing == null ? _clockTime() : _clockTime(DateTime(2000, 1, 1, existing.hour, existing.minute))}$durationLabel',
+            calories,
+            0,
+            Icons.directions_run,
+            isExercise: true,
+            exerciseActivityId: result.activityId,
+            exerciseDurationMinutes: result.durationMinutes,
+            exerciseMet: result.met,
+            exerciseBodyWeightKg: widget.bodyWeightKg,
+            exerciseApproximate: result.approximate,
+          ),
+        ),
+      );
+      return;
+    }
+
+    final parser = foodParser ?? await FoodParser.load(locale: widget.locale);
+    final (explicitCategory, explicitTime, textToParse) = extractMealContext(text);
+    final result = parser.parse(textToParse);
+    if (!_isFullyResolvedFood(result)) {
+      setState(() => notice = _describeIncompleteFood(result));
+      return;
+    }
+    if (!mounted) return;
+
+    final estimate = _sumFoodParseResult(result);
+    final newWaterMl = result.items
+        .where((item) => item.canonicalId == 'water')
+        .fold(0.0, (sum, item) => sum + (item.grams ?? 0));
+    final category = explicitCategory ??
+        (result.items.isNotEmpty && result.items.every((item) => item.category == 'drink')
+            ? 'Drinks'
+            : 'Meal');
+    // A retyped explicit time always wins; otherwise this edit keeps the
+    // entry's existing time rather than silently jumping it to now.
+    final effectiveTime = explicitTime ?? _parseEntryTime(widget.entry.time);
+    final entryTime = effectiveTime == null
+        ? DateTime.now()
+        : DateTime(2000, 1, 1, effectiveTime.hour, effectiveTime.minute);
+
+    Navigator.pop(
+      context,
+      EditEntryResult(
+        entry: FoodEntry(
+          text,
+          _clockTime(entryTime),
+          estimate.calories,
+          estimate.protein,
+          Icons.restaurant,
+          carbs: estimate.carbs,
+          waterMl: newWaterMl.round(),
+          category: category,
+        ),
+        waterDeltaMl: (newWaterMl - _oldWaterMl).round(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
+    decoration: const BoxDecoration(
+      color: cream,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const LText(
+          'Edit entry',
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${widget.entry.dayCategory} · ${widget.entry.time}',
+          style: const TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: description,
+          minLines: 1,
+          maxLines: 4,
+          autofocus: true,
+        ),
+        if (notice != null)
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE5DD),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.error_outline, color: coral, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: LText(notice!, style: const TextStyle(fontSize: 12, color: ink)),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 18),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: busy
+                    ? null
+                    : () => Navigator.pop(context, const EditEntryResult(delete: true)),
+                icon: const Icon(Icons.delete_outline, color: coral),
+                label: const LText('Delete', style: TextStyle(color: coral)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: busy ? null : () => _save(),
+                icon: const Icon(Icons.check),
+                label: const LText('Save'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+bool _isFullyResolvedFood(FoodParseResult result) =>
+    result.items.isNotEmpty &&
+    result.unresolved.isEmpty &&
+    result.items.every((item) => item.confidence != ParseConfidence.incomplete);
+
+FoodEstimate _sumFoodParseResult(FoodParseResult result) {
+  var kcal = 0.0, protein = 0.0, carbs = 0.0;
+  for (final item in result.items) {
+    final nutrition = item.nutrition;
+    if (nutrition == null) continue;
+    kcal += nutrition.kcal;
+    protein += nutrition.proteinG;
+    carbs += nutrition.carbsG;
+  }
+  return FoodEstimate(kcal.round(), protein.round(), carbs.round());
+}
+
+// Natural "X, Y and Z" phrasing for a short list of names.
+String _naturalJoin(List<String> items) {
+  if (items.isEmpty) return '';
+  if (items.length == 1) return items.first;
+  if (items.length == 2) return '${items[0]} and ${items[1]}';
+  return '${items.sublist(0, items.length - 1).join(', ')} and ${items.last}';
+}
+
+// User-facing: short and non-technical. Never lists items that were
+// already understood (that's just noise to the user); clearly flags what
+// still needs attention (the exact silent-drop bug this migration started
+// from) without exposing internal terms like canonical id/confidence/
+// parser. Full diagnostics stay in debug logging (see the kDebugMode
+// block in _addToDay) and tests.
+String _describeIncompleteFood(FoodParseResult result) {
+  final noNutrientData = result.items
+      .where((item) => item.confidence == ParseConfidence.incomplete)
+      .map((item) => item.canonicalName ?? item.canonicalId ?? '?')
+      .toList();
+  final notUnderstood = result.unresolved.map((u) => u.text).toList();
+
+  final parts = <String>[];
+  if (noNutrientData.isNotEmpty) {
+    parts.add("I don't have nutrition data for ${_naturalJoin(noNutrientData)} yet.");
+  }
+  if (notUnderstood.isNotEmpty) {
+    parts.add('Please clarify: ${_naturalJoin(notUnderstood)}.');
+  }
+  if (parts.isEmpty) {
+    return 'Not enough nutrition information. Add quantities or scan the product label.';
+  }
+  return parts.join(' ');
+}
+
 class AddMealSheet extends StatefulWidget {
-  const AddMealSheet({super.key});
+  const AddMealSheet({super.key, this.locale = 'en', required this.entries});
+  final String locale;
+  // Today's existing entries, so "Take photo" can offer attaching to one
+  // of them instead of always creating something new.
+  final List<FoodEntry> entries;
   @override
   State<AddMealSheet> createState() => _AddMealSheetState();
 }
 
 class _AddMealSheetState extends State<AddMealSheet> {
   final description = TextEditingController();
+  final photoCaption = TextEditingController();
   int mode = 0;
   bool aiAvailable = false;
   bool busy = false;
-  NutritionEstimate? aiEstimate;
   String? notice;
+  FoodParser? foodParser;
+  // Take-photo state (item 8): a photo was picked but not yet resolved
+  // into either "attach to an existing entry" or "standalone". Never
+  // requires a description, calories or a successful FoodParser result.
+  XFile? takenPhoto;
+  bool choosingAttachEntry = false;
+  bool savingPhoto = false;
 
   @override
   void initState() {
     super.initState();
     const AiService().isAvailable().then((value) {
       if (mounted) setState(() => aiAvailable = value);
+    });
+    FoodParser.load(locale: widget.locale).then((value) {
+      if (mounted) setState(() => foodParser = value);
     });
     description.addListener(() {
       if (notice != null) setState(() => notice = null);
@@ -2495,6 +4380,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
   @override
   void dispose() {
     description.dispose();
+    photoCaption.dispose();
     super.dispose();
   }
 
@@ -2532,6 +4418,11 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
   }
 
+  // "Take photo" (mode 1) never analyses the image at all -- it's just
+  // evidence/memory (item 8/11), resolved below into attach-to-entry or
+  // standalone. "Scan label" (mode 2) is structured nutrition-table
+  // extraction (item 4/10), completely separate from FoodParser, and
+  // ALWAYS ends in an editable confirmation sheet rather than guessing.
   Future<void> _capture(int newMode) async {
     setState(() {
       mode = newMode;
@@ -2543,167 +4434,284 @@ class _AddMealSheetState extends State<AddMealSheet> {
       setState(() => mode = 0);
       return;
     }
-    if (newMode == 2) {
-      setState(() => busy = true);
-      final reading = await _readLabel(photo);
-      if (!mounted) return;
-      setState(() => busy = false);
-      if (reading != null && reading.hasNutrition) {
-        if (reading.isConfident) {
-          final factor = reading.totalGrams! / 100;
-          final estimate = NutritionEstimate(
-            'Scanned label (${reading.totalGrams!.round()}g pack)',
-            (reading.caloriesPer100! * factor).round(),
-            ((reading.proteinPer100 ?? 0) * factor).round(),
-            ((reading.carbsPer100 ?? 0) * factor).round(),
-          );
-          setState(() {
-            aiEstimate = estimate;
-            description.text = estimate.name;
-          });
-          return;
-        }
-        if (!aiAvailable) {
-          final estimate = NutritionEstimate(
-            'Scanned label (per 100g — edit if you had more or less)',
-            reading.caloriesPer100!.round(),
-            (reading.proteinPer100 ?? 0).round(),
-            (reading.carbsPer100 ?? 0).round(),
-          );
-          setState(() {
-            aiEstimate = estimate;
-            description.text = estimate.name;
-          });
-          return;
-        }
-        // Nutrition found but not the pack size — AI can reason about the
-        // photo layout better than the regex reader, so fall through to it.
-      }
-    }
-    if (!aiAvailable) {
-      setState(() => notice = 'Describe what you took a photo of.');
+    if (newMode == 1) {
+      setState(() => takenPhoto = photo);
       return;
     }
+    setState(() => busy = true);
+    final reading = await _readLabel(photo);
+    if (!mounted) return;
     setState(() {
-      busy = true;
-      aiEstimate = null;
+      busy = false;
+      mode = 0;
     });
-    try {
-      final bytes = await photo.readAsBytes();
-      final estimate = await const AiService().analyzeImage(
-        serverUrl: defaultServerUrl,
-        kind: newMode == 2 ? 'label_photo' : 'meal_photo',
-        bytes: bytes,
-        mimeType: 'image/jpeg',
-      );
+    final confirmed = await showModalBottomSheet<AddFoodResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddFoodSheet(
+        title: 'Confirm scanned label',
+        suggestedName: reading?.productName ?? '',
+        initialCalories: reading?.caloriesPer100,
+        initialProtein: reading?.proteinPer100,
+        initialCarbs: reading?.carbsPer100,
+        initialFat: reading?.fatPer100,
+        initialServingAmount: 100,
+        initialServingUnit: reading?.basis == 'per100ml' ? 'ml' : 'g',
+        defaultSaveToCatalogue: false,
+        locale: widget.locale,
+      ),
+    );
+    if (confirmed == null || !mounted) return;
+    Navigator.pop(
+      context,
+      FoodEntry(
+        confirmed.name,
+        _clockTime(),
+        confirmed.kcal.round(),
+        (confirmed.protein ?? 0).round(),
+        Icons.restaurant,
+        carbs: (confirmed.carbs ?? 0).round(),
+      ),
+    );
+  }
+
+  Future<void> _finishStandalonePhoto() async {
+    if (takenPhoto == null || savingPhoto) return;
+    setState(() => savingPhoto = true);
+    final path = await const PhotoStore().save(takenPhoto!);
+    await const DayPhotoRepository().add(
+      DateTime.now(),
+      DayPhoto(
+        path: path,
+        caption: photoCaption.text.trim().isEmpty ? null : photoCaption.text.trim(),
+        time: _clockTime(),
+      ),
+    );
+    if (mounted) Navigator.pop(context, const DayPhotoSaved());
+  }
+
+  Future<void> _finishAttachPhoto(FoodEntry target) async {
+    if (takenPhoto == null || savingPhoto) return;
+    setState(() => savingPhoto = true);
+    final path = await const PhotoStore().save(takenPhoto!);
+    if (!mounted) return;
+    Navigator.pop(
+      context,
+      PhotoAttachOutcome(original: target, updated: target.copyWithPhoto(path)),
+    );
+  }
+
+  // Reconstructs a natural phrase for a locally-recognized-but-incomplete
+  // item (e.g. "4 slice smoked salmon") so a component-level AI fallback
+  // call gets the same context a person typed, not just the bare
+  // canonical name.
+  String _phraseForItem(FoodParseItem item) {
+    final words = <String>[];
+    if (item.quantity != 1) {
+      final q = item.quantity;
+      words.add(q == q.roundToDouble() ? q.toInt().toString() : q.toString());
+    }
+    if (item.unit != null) words.add(item.unit!);
+    words.addAll(item.modifiers);
+    words.addAll(item.preparations);
+    final name = item.canonicalName ?? item.canonicalId;
+    if (name != null) words.add(name);
+    return words.join(' ');
+  }
+
+  // The first food this sheet's own local parser genuinely couldn't find
+  // nutrition data for, or the first stretch of text it couldn't recognize
+  // as food at all -- either way, the thing the "Add this food" offer
+  // should suggest a name for. Recomputed on demand (not cached) so it
+  // always reflects the current description text.
+  String? _unresolvedFoodName() {
+    final parser = foodParser;
+    final text = description.text.trim();
+    if (parser == null || text.isEmpty) return null;
+    final (_, _, textToParse) = extractMealContext(text);
+    final result = parser.parse(textToParse);
+    final incomplete = result.items.firstWhere(
+      (item) => item.confidence == ParseConfidence.incomplete,
+      orElse: () => const FoodParseItem(quantity: 1, confidence: ParseConfidence.incomplete),
+    );
+    if (incomplete.canonicalName != null) return incomplete.canonicalName;
+    if (incomplete.canonicalId != null) return incomplete.canonicalId;
+    if (result.unresolved.isNotEmpty) return result.unresolved.first.text;
+    return null;
+  }
+
+  Future<void> _offerAddFood(String suggestedName) async {
+    final result = await showModalBottomSheet<AddFoodResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddFoodSheet(suggestedName: suggestedName, locale: widget.locale),
+    );
+    if (result != null && mounted) {
+      // Reload so the parser picks up the food just added to the local
+      // overlay (see FoodParser.load), then retry the same description.
+      final reloaded = await FoodParser.load(locale: widget.locale);
       if (!mounted) return;
       setState(() {
-        aiEstimate = estimate;
-        description.text = estimate.name;
+        foodParser = reloaded;
+        notice = null;
       });
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () => notice =
-              'AI could not analyse the photo. Describe it below instead.',
-        );
-      }
-    } finally {
-      if (mounted) setState(() => busy = false);
+      await _addToDay();
     }
   }
 
   Future<void> _addToDay() async {
     final text = description.text.trim();
-    if (mode == 1 && text.isEmpty) {
-      setState(
-        () =>
-            notice = 'Add a description of what’s in the photo before saving.',
-      );
-      return;
-    }
     final water = WaterIntakeParser.parse(text);
     if (water != null) {
       Navigator.pop(context, water);
       return;
     }
-    if (mode == 2 && text.isEmpty && aiEstimate != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: LText(
-            'Without a description, we’ll assume the whole label was consumed.',
-          ),
-        ),
-      );
-      Navigator.pop(
-        context,
-        FoodEntry(
-          aiEstimate!.name,
-          _clockTime(),
-          aiEstimate!.calories,
-          aiEstimate!.protein,
-          Icons.restaurant,
-          carbs: aiEstimate!.carbs,
-        ),
-      );
-      return;
-    }
-    if (aiEstimate != null && text == aiEstimate!.name.trim()) {
-      Navigator.pop(
-        context,
-        FoodEntry(
-          aiEstimate!.name,
-          _clockTime(),
-          aiEstimate!.calories,
-          aiEstimate!.protein,
-          Icons.restaurant,
-          carbs: aiEstimate!.carbs,
-        ),
-      );
-      return;
-    }
-    // Local-first: only reach for AI when the offline estimator comes back
-    // completely empty. FoodEstimator has no ambiguity signal today (just
-    // calories == 0 vs. > 0) -- that's the one confidence check available
-    // until the Phase 4 nutrient/portion catalogue replaces it.
-    var estimate = FoodEstimator.estimate(text);
-    if (estimate.calories == 0 && aiAvailable && text.isNotEmpty) {
-      setState(() => busy = true);
+    // Local-first, component-level: resolve everything possible locally
+    // first, and keep every successfully-resolved local component
+    // untouched. AI is only ever asked about the specific parts local
+    // could NOT resolve (an incomplete item or an unresolved span) --
+    // never the whole sentence -- so a component local already understood
+    // (e.g. local "egg" in "egg and dragonfruit powder") is never at risk
+    // of being silently re-decided by AI just because a sibling component
+    // failed. If AI's own answer for a component resolves locally too,
+    // our deterministic catalogue numbers stay authoritative over AI's.
+    final localParser = foodParser ?? await FoodParser.load(locale: widget.locale);
+    // An explicit meal word ("lunch", "obiad", ...) or time ("10am",
+    // "13:30", "o 14") is a category/time choice, not food content --
+    // pull both out (and whatever "for "/":" joined them to the rest of
+    // the sentence) before parsing, so neither can surface as an
+    // unresolved fragment, and remember what they named.
+    final (explicitCategory, explicitTime, textToParse) = extractMealContext(text);
+    final localResult = localParser.parse(textToParse);
+    final canCallAi = aiAvailable && text.isNotEmpty;
+    final needsAi = canCallAi &&
+        (localResult.items.any(
+              (item) => item.confidence == ParseConfidence.incomplete,
+            ) ||
+            localResult.unresolved.isNotEmpty);
+
+    Future<List<FoodParseItem>?> aiResolveComponent(String phrase) async {
+      if (!canCallAi || phrase.trim().isEmpty) return null;
       try {
-        final result = await const AiService().describe(
+        final aiResult = await const AiService().describe(
           serverUrl: defaultServerUrl,
           kind: 'food',
-          text: text,
+          text: phrase,
         );
-        // If AI's own (possibly normalized) name resolves locally, our
-        // deterministic numbers stay authoritative over AI's -- AI only
-        // supplies the total when there's truly no local match for it.
-        final reResolved = FoodEstimator.estimate(result.name);
-        estimate = reResolved.calories > 0
-            ? reResolved
-            : FoodEstimate(result.calories, result.protein, result.carbs);
+        final reResolved = localParser.parse(aiResult.name);
+        if (_isFullyResolvedFood(reResolved)) return reResolved.items;
+        return [
+          FoodParseItem(
+            quantity: 1,
+            canonicalName: aiResult.name,
+            nutrition: NutrientTotals(
+              kcal: aiResult.calories.toDouble(),
+              proteinG: aiResult.protein.toDouble(),
+              carbsG: aiResult.carbs.toDouble(),
+            ),
+            confidence: ParseConfidence.medium,
+          ),
+        ];
       } catch (_) {
-        // Falls through to the (still empty) local estimate below.
-      } finally {
-        if (mounted) setState(() => busy = false);
+        return null;
       }
-      if (!mounted) return;
     }
-    if (estimate.calories == 0) {
-      setState(
-        () => notice = 'Not enough nutrition information. Add quantities or scan the product label.',
-      );
+
+    if (needsAi) setState(() => busy = true);
+    final items = <FoodParseItem>[];
+    final unresolvedTexts = <String>[];
+    try {
+      for (final item in localResult.items) {
+        if (item.confidence != ParseConfidence.incomplete) {
+          items.add(item);
+          continue;
+        }
+        final resolved = await aiResolveComponent(_phraseForItem(item));
+        if (resolved != null) {
+          items.addAll(resolved);
+        } else {
+          items.add(item);
+        }
+      }
+      for (final span in localResult.unresolved) {
+        final resolved = await aiResolveComponent(span.text);
+        if (resolved != null) {
+          items.addAll(resolved);
+        } else {
+          unresolvedTexts.add(span.text);
+        }
+      }
+    } finally {
+      if (needsAi && mounted) setState(() => busy = false);
+    }
+    if (!mounted) return;
+
+    // Combine only once every component has a usable result: if anything
+    // is still stuck, this stays reflected below rather than silently
+    // dropped -- _isFullyResolvedFood blocks saving until it's resolved.
+    final result = FoodParseResult(items, [
+      for (final t in unresolvedTexts) UnresolvedSpan(t, 0, t.length),
+    ]);
+
+    // FoodEstimator is kept only as a transitional comparison signal --
+    // never as the saved result, even if AI is unavailable or fails.
+    if (kDebugMode) {
+      final legacy = FoodEstimator.estimate(text);
+      final current = _sumFoodParseResult(result);
+      if (legacy.calories != current.calories) {
+        debugPrint(
+          '[FoodParser migration] "$text" -> FoodParser=${current.calories}kcal '
+          '(resolved=${_isFullyResolvedFood(result)}) vs legacy FoodEstimator='
+          '${legacy.calories}kcal (legacy not used)',
+        );
+      }
+    }
+
+    if (!_isFullyResolvedFood(result)) {
+      setState(() => notice = _describeIncompleteFood(result));
       return;
     }
+    if (!mounted) return;
+
+    final estimate = _sumFoodParseResult(result);
+    // Water recognized as one component of a wider sentence ("glass water"
+    // inside a longer meal) doesn't go through WaterIntakeParser (that only
+    // matches a description that's *entirely* about water) -- so it must
+    // also be counted here, using the same grams-as-ml the parser already
+    // computed (e.g. "half glass water" -> 125ml), or it silently never
+    // reaches the day's water total.
+    final waterMl = result.items
+        .where((item) => item.canonicalId == 'water')
+        .fold(0.0, (sum, item) => sum + (item.grams ?? 0));
+    // An explicit meal word always wins. Otherwise: every resolved item
+    // being a drink is a drink-only entry ("black coffee" alone); any mix
+    // of food (with or without a drink alongside it, e.g. water/coffee
+    // inside a bigger meal) is just "Meal" -- never falls back to
+    // "Drinks" purely because a drink happened to be one of several
+    // components.
+    final category = explicitCategory ??
+        (result.items.isNotEmpty && result.items.every((item) => item.category == 'drink')
+            ? 'Drinks'
+            : 'Meal');
+    // An explicit time ("10am", "13:30", "o 14") becomes the entry's own
+    // time instead of "now" -- today's date, that clock time.
+    final now = DateTime.now();
+    final entryTime = explicitTime == null
+        ? now
+        : DateTime(now.year, now.month, now.day, explicitTime.hour, explicitTime.minute);
     Navigator.pop(
       context,
       FoodEntry(
         text,
-        _clockTime(),
+        _clockTime(entryTime),
         estimate.calories,
         estimate.protein,
         Icons.restaurant,
         carbs: estimate.carbs,
+        waterMl: waterMl.round(),
+        category: category,
       ),
     );
   }
@@ -2780,93 +4788,182 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 ],
               ),
             ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 15),
-            child: Row(
-              children: [
-                Expanded(child: Divider()),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: LText(
-                    'or describe it',
-                    style: TextStyle(fontSize: 12, color: Colors.black45),
-                  ),
-                ),
-                Expanded(child: Divider()),
-              ],
-            ),
-          ),
-          TextField(
-            controller: description,
-            minLines: 3,
-            maxLines: 5,
-            decoration: InputDecoration(
-              hintText: ui(
-                context,
-                'e.g. 2 spoons cottage cheese, a can of cola, a bag of crisps, glass of wine…',
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Row(
-            children: [
-              Icon(Icons.auto_awesome, size: 16, color: forest),
-              SizedBox(width: 7),
-              Expanded(
-                child: LText(
-                  'AI estimates include a confidence range—never fake precision.',
-                  style: TextStyle(fontSize: 11, color: Colors.black54),
-                ),
-              ),
-            ],
-          ),
-          if (notice != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFE5DD),
-                borderRadius: BorderRadius.circular(14),
-              ),
+          if (mode == 1 && takenPhoto != null)
+            _buildPhotoResolutionSection(context)
+          else ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 15),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, color: coral, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
                     child: LText(
-                      notice!,
-                      style: const TextStyle(fontSize: 12, color: ink),
+                      'or describe it',
+                      style: TextStyle(fontSize: 12, color: Colors.black45),
                     ),
                   ),
+                  Expanded(child: Divider()),
                 ],
               ),
             ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: ink,
-                padding: const EdgeInsets.all(17),
-              ),
-              onPressed: busy ? null : () => _addToDay(),
-              icon: const Icon(Icons.auto_awesome),
-              label: const LText(
-                'Add to day',
-                style: TextStyle(fontWeight: FontWeight.w700),
+            TextField(
+              controller: description,
+              minLines: 3,
+              maxLines: 5,
+              decoration: InputDecoration(
+                hintText: ui(
+                  context,
+                  'e.g. 2 spoons cottage cheese, a can of cola, a bag of crisps, glass of wine…',
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 12),
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome, size: 16, color: forest),
+                SizedBox(width: 7),
+                Expanded(
+                  child: LText(
+                    'AI estimates include a confidence range—never fake precision.',
+                    style: TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+                ),
+              ],
+            ),
+            if (notice != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE5DD),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.error_outline, color: coral, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: LText(
+                            notice!,
+                            style: const TextStyle(fontSize: 12, color: ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_unresolvedFoodName() != null) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _offerAddFood(_unresolvedFoodName()!),
+                          icon: const Icon(Icons.add_circle_outline, size: 18),
+                          label: const LText('Add this food'),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: ink,
+                  padding: const EdgeInsets.all(17),
+                ),
+                onPressed: busy ? null : () => _addToDay(),
+                icon: const Icon(Icons.auto_awesome),
+                label: const LText(
+                  'Add to day',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     ),
+  );
+
+  // "Take photo" (item 8): a photo with no description/calorie requirement
+  // at all -- just attach it to something today, or keep it on its own.
+  Widget _buildPhotoResolutionSection(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 16),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.file(
+          File(takenPhoto!.path),
+          height: 160,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      ),
+      const SizedBox(height: 14),
+      if (!choosingAttachEntry) ...[
+        TextField(
+          controller: photoCaption,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: ui(context, 'Caption'),
+            hintText: ui(context, 'e.g. breakfast, pizza, meal with Ania…'),
+          ),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: widget.entries.isEmpty || savingPhoto
+                ? null
+                : () => setState(() => choosingAttachEntry = true),
+            icon: const Icon(Icons.link),
+            label: const LText('Attach to existing entry'),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: savingPhoto ? null : _finishStandalonePhoto,
+            icon: savingPhoto
+                ? const SizedBox.square(dimension: 17, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.photo_library_outlined),
+            label: const LText('Keep as standalone photo'),
+          ),
+        ),
+      ] else ...[
+        const LText('Attach to which entry?', style: TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 8),
+        for (final entry in widget.entries) ...[
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(entry.displayIcon, color: forest),
+            title: Text(entry.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: Text('${entry.dayCategory} · ${entry.time}'),
+            onTap: savingPhoto ? null : () => _finishAttachPhoto(entry),
+          ),
+          const Divider(height: 1),
+        ],
+        const SizedBox(height: 6),
+        TextButton(
+          onPressed: () => setState(() => choosingAttachEntry = false),
+          child: const LText('Back'),
+        ),
+      ],
+    ],
   );
 }
 
@@ -3953,8 +6050,11 @@ class DietPlan {
   });
   final String name, style;
   final int target;
-  DietPlan copyWith({int? target}) =>
-      DietPlan(name: name, style: style, target: target ?? this.target);
+  DietPlan copyWith({int? target, String? style}) => DietPlan(
+    name: name,
+    style: style ?? this.style,
+    target: target ?? this.target,
+  );
   Map<String, Object> toJson() => {
     'name': name,
     'style': style,
@@ -3995,7 +6095,16 @@ class ContentUpdateService {
   }
 }
 
-const defaultServerUrl = 'http://aa-cloud-wp30:8094';
+const defaultServerUrl = String.fromEnvironment(
+  'A2_SERVER_URL',
+  defaultValue: 'http://100.105.169.100:8094',
+);
+
+// Set via --dart-define=A2_GOOGLE_CLIENT_ID=... at build time, once a Google
+// Cloud OAuth client has been registered for this app (package name/SHA-1 on
+// Android, bundle ID on iOS) -- that registration has to happen outside this
+// codebase. The server needs the same client ID as GOOGLE_CLIENT_ID.
+const googleClientId = String.fromEnvironment('A2_GOOGLE_CLIENT_ID');
 
 class AccountService {
   const AccountService();
@@ -4048,6 +6157,59 @@ class AccountService {
       await synchronise(serverUrl);
     }
     return body['user'] as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> authenticateWithGoogle({
+    required String serverUrl,
+    required String idToken,
+  }) async {
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/google'),
+          headers: {'content-type': 'application/json'},
+          body: jsonEncode({'idToken': idToken}),
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(body['error'] ?? 'Google sign-in failed');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('account_token', body['token'] as String);
+    await prefs.setString('account_user', jsonEncode(body['user']));
+    if ((body['user'] as Map<String, dynamic>)['privateSync'] == true) {
+      await synchronise(serverUrl);
+    }
+    return body['user'] as Map<String, dynamic>;
+  }
+
+  Future<void> changePassword({
+    required String serverUrl,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to change your password');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/password'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'currentPassword': currentPassword,
+            'newPassword': newPassword,
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(body['error'] ?? 'Could not change password');
+    }
   }
 
   Future<bool> refreshAccount(String serverUrl) async {
@@ -4121,6 +6283,42 @@ class AccountService {
         'waterTargetMl': prefs.getInt('water_target_ml'),
       },
     };
+  }
+
+  // A CSV opens directly in Excel, Google Sheets, Numbers, LibreOffice --
+  // there's no single "universal Excel format" without a heavy XLSX writer
+  // dependency, and CSV is the format every one of those already reads
+  // natively, so it covers "used globally" without that extra weight.
+  Future<String> exportDataAsCsv() async {
+    final payload = await _localPayload();
+    final daily = payload['dailyEntries'] as Map<String, dynamic>;
+    final rows = <List<String>>[
+      ['Date', 'Category', 'Name', 'Time', 'Type', 'Calories', 'Protein (g)', 'Carbs (g)'],
+    ];
+    final dateKeys = daily.keys.toList()..sort();
+    for (final key in dateKeys) {
+      final date = key.replaceFirst('daily_entries_', '');
+      final entries = daily[key] as List<dynamic>;
+      for (final raw in entries) {
+        final entry = raw as Map<String, dynamic>;
+        rows.add([
+          date,
+          (entry['category'] as String?) ?? '',
+          (entry['name'] as String?) ?? '',
+          (entry['time'] as String?) ?? '',
+          entry['isExercise'] == true ? 'Exercise' : 'Food',
+          '${entry['calories'] ?? 0}',
+          '${entry['protein'] ?? 0}',
+          '${entry['carbs'] ?? 0}',
+        ]);
+      }
+    }
+    String csvField(String value) {
+      final escaped = value.replaceAll('"', '""');
+      return value.contains(RegExp('[",\n]')) ? '"$escaped"' : escaped;
+    }
+
+    return rows.map((row) => row.map(csvField).join(',')).join('\r\n');
   }
 
   Future<void> uploadLocalData(String serverUrl) async {
@@ -4259,6 +6457,148 @@ class AccountService {
   }
 }
 
+// Copies a picked photo into the app's own documents directory (under
+// photos/) and returns that permanent path -- image_picker's own path is
+// often a transient cache file the OS can clear at any time. FoodEntry only
+// ever stores this path (see photoPaths), never the image bytes.
+class PhotoStore {
+  const PhotoStore();
+
+  Future<String> save(XFile photo) async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory('${docsDir.path}/photos');
+    await photosDir.create(recursive: true);
+    final extension = photo.path.contains('.') ? photo.path.split('.').last : 'jpg';
+    final fileName = '${DateTime.now().microsecondsSinceEpoch}.$extension';
+    final destination = '${photosDir.path}/$fileName';
+    await File(photo.path).copy(destination);
+    return destination;
+  }
+}
+
+// Backend-held photo storage for anything that crosses a device boundary
+// (see /api/v1/media on the server). A synced entry's wire form never
+// carries a raw filesystem path or embedded bytes -- only the small id
+// this returns; each receiving device downloads and caches the bytes
+// itself, once, under its own documents directory.
+class MediaService {
+  const MediaService();
+
+  String _mimeTypeFor(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    return 'image/jpeg';
+  }
+
+  String _extensionFor(String mimeType) => switch (mimeType.split(';').first.trim()) {
+    'image/png' => 'png',
+    'image/webp' => 'webp',
+    _ => 'jpg',
+  };
+
+  Future<String> upload(String serverUrl, File file) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to sync photos');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final bytes = await file.readAsBytes();
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/media'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({
+            'mimeType': _mimeTypeFor(file.path),
+            'dataBase64': base64Encode(bytes),
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Could not upload photo');
+    }
+    return body['id'] as String;
+  }
+
+  Future<Directory> _cacheDir() async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    final dir = Directory('${docsDir.path}/photos/remote');
+    await dir.create(recursive: true);
+    return dir;
+  }
+
+  /// Returns a local cache path for [mediaId], downloading it once if not
+  /// already cached. Returns null (never throws) on any failure -- offline,
+  /// signed out, 404 -- so callers can fall back to a placeholder and simply
+  /// try again next time this is rebuilt (e.g. next app open, pull-to-refresh).
+  Future<String?> download(String serverUrl, String mediaId) async {
+    final cacheDir = await _cacheDir();
+    for (final ext in const ['jpg', 'png', 'webp']) {
+      final cached = File('${cacheDir.path}/$mediaId.$ext');
+      if (await cached.exists()) return cached.path;
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('account_token');
+      if (token == null) return null;
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      final response = await http
+          .get(
+            Uri.parse('$base/api/v1/media/$mediaId'),
+            headers: {'authorization': 'Bearer $token'},
+          )
+          .timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) return null;
+      final ext = _extensionFor(response.headers['content-type'] ?? 'image/jpeg');
+      final file = File('${cacheDir.path}/$mediaId.$ext');
+      await file.writeAsBytes(response.bodyBytes);
+      return file.path;
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+class GoogleAuthService {
+  static bool _initialized = false;
+
+  static Future<void> _ensureInitialized() async {
+    if (_initialized) return;
+    await GoogleSignIn.instance.initialize(
+      clientId: googleClientId.isEmpty ? null : googleClientId,
+    );
+    _initialized = true;
+  }
+
+  /// Runs the interactive Google sign-in flow and returns the ID token to
+  /// send to the server for verification (see /api/v1/auth/google). Needs
+  /// [googleClientId] configured at build time AND a matching OAuth client
+  /// registered in Google Cloud Console (package name + SHA-1 on Android,
+  /// bundle ID on iOS) -- neither of those can be done from inside the app.
+  static Future<String> signIn() async {
+    if (googleClientId.isEmpty) {
+      throw Exception(
+        'Google sign-in needs a client ID configured for this build.',
+      );
+    }
+    await _ensureInitialized();
+    final account = await GoogleSignIn.instance.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw Exception('Google did not return a sign-in token.');
+    }
+    return idToken;
+  }
+
+  static Future<void> signOut() async {
+    if (!_initialized) return;
+    await GoogleSignIn.instance.signOut();
+  }
+}
+
 class NutritionEstimate {
   const NutritionEstimate(this.name, this.calories, this.protein, this.carbs);
   final String name;
@@ -4276,6 +6616,150 @@ class LinkedUser {
   );
 }
 
+// A pending sync request between two accounts, by email — nothing links (and
+// nobody's email becomes visible to the other person) until the recipient
+// explicitly accepts it.
+class SyncInvite {
+  const SyncInvite({
+    required this.id,
+    required this.fromName,
+    required this.fromEmail,
+    required this.toName,
+    required this.toEmail,
+  });
+  final String id, fromName, fromEmail, toName, toEmail;
+  String get fromLabel => fromName.isNotEmpty ? fromName : fromEmail;
+  String get toLabel => toName.isNotEmpty ? toName : toEmail;
+  factory SyncInvite.fromJson(Map<String, dynamic> j) => SyncInvite(
+    id: j['id'] as String,
+    fromName: (j['fromName'] as String?) ?? '',
+    fromEmail: (j['fromEmail'] as String?) ?? '',
+    toName: (j['toName'] as String?) ?? '',
+    toEmail: (j['toEmail'] as String?) ?? '',
+  );
+}
+
+class SyncInvites {
+  const SyncInvites({required this.incoming, required this.outgoing});
+  final List<SyncInvite> incoming, outgoing;
+}
+
+// Pulls new/changed foods from the backend's global catalogue into the
+// SAME local overlay "add this food" writes to (see
+// lib/parser/catalogue/local_overlay.dart) -- one shared canonical system,
+// not a second sync path. Best-effort and safe to call often: a failed or
+// unreachable sync just leaves the existing local catalogue untouched.
+class CatalogueSyncService {
+  const CatalogueSyncService();
+
+  Future<void> sync(String serverUrl) async {
+    try {
+      final localVersion = await LocalCatalogueOverlay.loadVersion();
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      final versionResponse = await http
+          .get(Uri.parse('$base/api/v1/catalogue/version'))
+          .timeout(const Duration(seconds: 10));
+      if (versionResponse.statusCode != 200) return;
+      final remoteVersion =
+          (jsonDecode(versionResponse.body) as Map<String, dynamic>)['version']
+              as int;
+      if (remoteVersion <= localVersion) return;
+      final changesResponse = await http
+          .get(Uri.parse('$base/api/v1/catalogue/changes?since=$localVersion'))
+          .timeout(const Duration(seconds: 20));
+      if (changesResponse.statusCode != 200) return;
+      final body = jsonDecode(changesResponse.body) as Map<String, dynamic>;
+      final foods = (body['foods'] as List<dynamic>).cast<Map<String, dynamic>>();
+      var overlay = await LocalCatalogueOverlay.load();
+      for (final food in foods) {
+        final entry = _validate(food);
+        // A record that fails basic sanity checks is simply skipped, never
+        // accepted as-is -- one bad record from the network can't corrupt
+        // the working local catalogue.
+        if (entry != null) overlay = await overlay.upsert(entry);
+      }
+      await LocalCatalogueOverlay.saveVersion(remoteVersion);
+    } catch (_) {
+      // Offline or the server is unreachable -- the app keeps working with
+      // whatever catalogue it already has.
+    }
+  }
+
+  OverlayFoodEntry? _validate(Map<String, dynamic> food) {
+    final id = food['id'] as String?;
+    final names = food['names'] as Map<String, dynamic>?;
+    final name = (names?['en'] as String?) ?? (names?['pl'] as String?);
+    final kcal = (food['kcalPer100g'] as num?)?.toDouble();
+    if (id == null || name == null || name.trim().isEmpty) return null;
+    if (kcal == null || kcal < 0 || kcal > 900) return null;
+    final aliases = food['aliases'] as Map<String, dynamic>?;
+    return OverlayFoodEntry(
+      id: 'global_$id',
+      canonical: name.trim(),
+      category: food['category'] as String?,
+      aliasesEn: (aliases?['en'] as List?)?.cast<String>() ?? const [],
+      aliasesPl: (aliases?['pl'] as List?)?.cast<String>() ?? const [],
+      kcalPer100g: kcal,
+      proteinPer100g: (food['proteinPer100g'] as num?)?.toDouble(),
+      carbsPer100g: (food['carbsPer100g'] as num?)?.toDouble(),
+      fatPer100g: (food['fatPer100g'] as num?)?.toDouble(),
+      fibrePer100g: (food['fibrePer100g'] as num?)?.toDouble(),
+      servingAmount: (food['servingAmount'] as num?)?.toDouble(),
+      servingUnit: food['servingUnit'] as String?,
+      source: (food['source'] as String?) ?? 'global catalogue',
+    );
+  }
+
+  // Sends a locally-added food to the backend as a global catalogue
+  // contribution. Best-effort, fire-and-forget from the caller's point of
+  // view -- the food is already usable locally regardless of whether this
+  // succeeds (see AddFoodSheet).
+  Future<void> contribute(
+    String serverUrl, {
+    required String name,
+    String? category,
+    required double kcal,
+    double? protein,
+    double? carbs,
+    double? fat,
+    double? fibre,
+    required double servingAmount,
+    String? servingUnit,
+    String locale = 'en',
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('account_token');
+      if (token == null) return;
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      await http
+          .post(
+            Uri.parse('$base/api/v1/catalogue/contribute'),
+            headers: {
+              'content-type': 'application/json',
+              'authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'name': name,
+              'category': category,
+              'kcal': kcal,
+              'protein': protein,
+              'carbs': carbs,
+              'fat': fat,
+              'fibre': fibre,
+              'servingAmount': servingAmount,
+              'servingUnit': servingUnit,
+              'basis': 'perServing',
+              'locale': locale,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (_) {
+      // Stays a local-only food until the next successful sync attempt.
+    }
+  }
+}
+
 class EntrySyncService {
   const EntrySyncService();
 
@@ -4288,6 +6772,8 @@ class EntrySyncService {
         ((user['linkedUserIds'] as List?)?.isNotEmpty ?? false);
   }
 
+  // Only people who have mutually confirmed a sync invite — never a
+  // directory of every registered account.
   Future<List<LinkedUser>> fetchPartners(String serverUrl) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('account_token');
@@ -4295,22 +6781,122 @@ class EntrySyncService {
     final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
     final response = await http
         .get(
-          Uri.parse('$base/api/v1/auth/users'),
+          Uri.parse('$base/api/v1/auth/link/partners'),
           headers: {'authorization': 'Bearer $token'},
         )
         .timeout(const Duration(seconds: 10));
     if (response.statusCode != 200) return [];
     final body = jsonDecode(response.body) as Map<String, dynamic>;
-    return ((body['users'] as List?) ?? [])
+    return ((body['partners'] as List?) ?? [])
         .map((e) => LinkedUser.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> updateLinks(
-    String serverUrl, {
-    List<String>? linkedUserIds,
-    bool? entrySyncEnabled,
+  Future<SyncInvites> fetchInvites(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) return const SyncInvites(incoming: [], outgoing: []);
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .get(
+          Uri.parse('$base/api/v1/auth/link/invites'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode != 200) {
+      return const SyncInvites(incoming: [], outgoing: []);
+    }
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    List<SyncInvite> parse(String key) => ((body[key] as List?) ?? [])
+        .map((e) => SyncInvite.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return SyncInvites(incoming: parse('incoming'), outgoing: parse('outgoing'));
+  }
+
+  // Sends a sync request by email. The recipient must explicitly accept it
+  // (see acceptInvite) before either person appears in the other's diary
+  // sync list — nobody is linked just by one side asking.
+  Future<void> sendInvite(String serverUrl, String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to send a sync invite');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/link/invites'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'email': email}),
+        )
+        .timeout(const Duration(seconds: 10));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(body['error'] ?? 'Could not send sync invite');
+    }
+  }
+
+  Future<void> respondToInvite(
+    String serverUrl,
+    String inviteId, {
+    required bool accept,
   }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to respond to sync invites');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse(
+            '$base/api/v1/auth/link/invites/$inviteId/${accept ? 'accept' : 'decline'}',
+          ),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(body['error'] ?? 'Could not respond to invite');
+    }
+    if (accept) await const AccountService().refreshAccount(serverUrl);
+  }
+
+  Future<void> cancelInvite(String serverUrl, String inviteId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to manage sync invites');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .delete(
+          Uri.parse('$base/api/v1/auth/link/invites/$inviteId'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 10));
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(body['error'] ?? 'Could not cancel invite');
+    }
+  }
+
+  Future<void> unlink(String serverUrl, String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to manage sync partners');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .delete(
+          Uri.parse('$base/api/v1/auth/link/$userId'),
+          headers: {'authorization': 'Bearer $token'},
+        )
+        .timeout(const Duration(seconds: 10));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Could not remove sync partner');
+    }
+    await prefs.setString('account_user', jsonEncode(body['user']));
+  }
+
+  Future<void> setEntrySyncEnabled(String serverUrl, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('account_token');
     if (token == null) throw Exception('Sign in to sync entries');
@@ -4322,10 +6908,7 @@ class EntrySyncService {
             'content-type': 'application/json',
             'authorization': 'Bearer $token',
           },
-          body: jsonEncode({
-            'linkedUserIds': ?linkedUserIds,
-            'entrySyncEnabled': ?entrySyncEnabled,
-          }),
+          body: jsonEncode({'entrySyncEnabled': value}),
         )
         .timeout(const Duration(seconds: 10));
     final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -4457,6 +7040,7 @@ class ProfilePage extends StatefulWidget {
     required this.onLocale,
     required this.onImported,
     required this.dailyTarget,
+    required this.dietStyle,
     required this.onPlanChanged,
     required this.onBodyChanged,
     required this.onSignedOut,
@@ -4465,6 +7049,7 @@ class ProfilePage extends StatefulWidget {
   final ValueChanged<Locale> onLocale;
   final VoidCallback onImported;
   final int dailyTarget;
+  final String dietStyle;
   final ValueChanged<DietPlan> onPlanChanged;
   final ValueChanged<BodyProfile> onBodyChanged;
   final VoidCallback onSignedOut;
@@ -4477,7 +7062,7 @@ class _ProfilePageState extends State<ProfilePage> {
   BodyProfile body = const BodyProfile();
   late DietPlan plan = DietPlan(
     name: 'Current plan',
-    style: 'Balanced',
+    style: widget.dietStyle,
     target: widget.dailyTarget,
   );
   List<DietPlan> savedPlans = [];
@@ -4492,16 +7077,52 @@ class _ProfilePageState extends State<ProfilePage> {
   bool accountPrivateSync = false;
   bool accountAiEnabled = false;
   bool accountIsAdmin = false;
+  bool accountGoogleLinked = false;
   bool entrySyncEnabled = false;
-  List<String> linkedUserIds = [];
   List<LinkedUser> syncPartners = [];
+  List<SyncInvite> incomingInvites = [];
+  List<SyncInvite> outgoingInvites = [];
   bool loadingSyncPartners = false;
+  Timer? _syncPollTimer;
 
   @override
   void initState() {
     super.initState();
     _restoreHealthSettings();
     _loadInstalledVersion();
+    // Sending/cancelling/accepting an invite is the OTHER person's action
+    // just as often as it's yours -- without some kind of live refresh,
+    // this list only ever reflects reality right after YOUR last tap, and
+    // looks "stuck" the moment they act on their end instead. Simple
+    // polling while this page is alive, not a full push/websocket system.
+    _syncPollTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (accountEmail != null && !loadingSyncPartners) _loadSyncPartners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _syncPollTimer?.cancel();
+    super.dispose();
+  }
+
+  // AppShell is the single owner of the live calorie target (it can change
+  // it independently — e.g. the maintenance-based realignment in its own
+  // _loadPlan finishing after this page already built with a stale value).
+  // Without this, the Settings plan card could show a different number than
+  // the dashboard until this page happened to reload from prefs itself.
+  @override
+  void didUpdateWidget(covariant ProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.dailyTarget != oldWidget.dailyTarget ||
+        widget.dietStyle != oldWidget.dietStyle) {
+      setState(
+        () => plan = plan.copyWith(
+          target: widget.dailyTarget,
+          style: widget.dietStyle,
+        ),
+      );
+    }
   }
 
   Future<void> _loadInstalledVersion() async {
@@ -4577,17 +7198,15 @@ class _ProfilePageState extends State<ProfilePage> {
       accountIsAdmin =
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['role'] == 'admin';
+      accountGoogleLinked =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['googleLinked'] ==
+              true;
       entrySyncEnabled =
           accountRaw != null &&
           (jsonDecode(accountRaw)
                   as Map<String, dynamic>)['entrySyncEnabled'] ==
               true;
-      linkedUserIds = accountRaw == null
-          ? []
-          : (((jsonDecode(accountRaw) as Map<String, dynamic>)['linkedUserIds']
-                        as List?) ??
-                    const [])
-                .cast<String>();
       ai = prefs.getBool('ai_enabled') ?? false;
       deviceId = storedDeviceId!;
       contentCheckedAt = prefs.getString('content_last_checked');
@@ -4617,10 +7236,20 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadSyncPartners() async {
     setState(() => loadingSyncPartners = true);
     try {
-      final partners = await const EntrySyncService().fetchPartners(
-        defaultServerUrl,
-      );
-      if (mounted) setState(() => syncPartners = partners);
+      const service = EntrySyncService();
+      final results = await Future.wait([
+        service.fetchPartners(defaultServerUrl),
+        service.fetchInvites(defaultServerUrl),
+      ]);
+      final partners = results[0] as List<LinkedUser>;
+      final invites = results[1] as SyncInvites;
+      if (mounted) {
+        setState(() {
+          syncPartners = partners;
+          incomingInvites = invites.incoming;
+          outgoingInvites = invites.outgoing;
+        });
+      }
     } catch (_) {
       // Keep whatever was last loaded when offline.
     } finally {
@@ -4631,9 +7260,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _setEntrySyncEnabled(bool value) async {
     setState(() => entrySyncEnabled = value);
     try {
-      await const EntrySyncService().updateLinks(
+      await const EntrySyncService().setEntrySyncEnabled(
         defaultServerUrl,
-        entrySyncEnabled: value,
+        value,
       );
     } catch (error) {
       if (mounted) {
@@ -4647,20 +7276,157 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _toggleSyncPartner(String id, bool selected) async {
-    final previous = linkedUserIds;
-    final updated = selected
-        ? [...linkedUserIds, id]
-        : linkedUserIds.where((item) => item != id).toList();
-    setState(() => linkedUserIds = updated);
+  void _showSyncError(Object error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: LText(error.toString().replaceFirst('Exception: ', '')),
+      ),
+    );
+  }
+
+  Future<void> _sendSyncInvite() async {
+    final controller = TextEditingController();
+    final email = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText('Invite someone to sync'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const LText(
+              'Enter their registered account email. They’ll need to confirm before you’re linked.',
+              style: TextStyle(color: Colors.black54),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: ui(context, 'Email address'),
+                border: const OutlineInputBorder(),
+              ),
+              onSubmitted: (value) => Navigator.pop(dialogContext, value),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const LText('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const LText('Send invite'),
+          ),
+        ],
+      ),
+    );
+    if (email == null || email.trim().isEmpty || !mounted) return;
     try {
-      await const EntrySyncService().updateLinks(
+      await const EntrySyncService().sendInvite(defaultServerUrl, email.trim());
+      await _loadSyncPartners();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: LText('Sync invite sent.')),
+        );
+      }
+    } catch (error) {
+      _showSyncError(error);
+    }
+  }
+
+  // "Not found" here almost always means the OTHER person just acted on
+  // this same invite (accepted/declined/it was cancelled from their side)
+  // between this list last refreshing and this tap -- not a real failure.
+  // Refresh and say so plainly instead of surfacing a confusing raw error
+  // for something that's already resolved.
+  Future<void> _handleInviteActionError(Object error) async {
+    await _loadSyncPartners();
+    if (!mounted) return;
+    final message = error.toString().replaceFirst('Exception: ', '');
+    if (message.toLowerCase().contains('not found')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: LText('That invite was already handled — refreshed.')),
+      );
+    } else {
+      _showSyncError(error);
+    }
+  }
+
+  Future<void> _respondToInvite(SyncInvite invite, bool accept) async {
+    try {
+      await const EntrySyncService().respondToInvite(
         defaultServerUrl,
-        linkedUserIds: updated,
+        invite.id,
+        accept: accept,
+      );
+      await _loadSyncPartners();
+    } catch (error) {
+      await _handleInviteActionError(error);
+    }
+  }
+
+  Future<void> _cancelInvite(SyncInvite invite) async {
+    try {
+      await const EntrySyncService().cancelInvite(defaultServerUrl, invite.id);
+      await _loadSyncPartners();
+    } catch (error) {
+      await _handleInviteActionError(error);
+    }
+  }
+
+  Future<void> _unlinkPartner(LinkedUser partner) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText('Stop syncing?'),
+        content: LText('${partner.label} will no longer sync diaries with you.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const LText('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const LText('Stop syncing'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await const EntrySyncService().unlink(defaultServerUrl, partner.id);
+      await _loadSyncPartners();
+    } catch (error) {
+      _showSyncError(error);
+    }
+  }
+
+  Future<void> _exportData() async {
+    try {
+      final csv = await const AccountService().exportDataAsCsv();
+      final dir = await getTemporaryDirectory();
+      final date = DateTime.now();
+      final fileName =
+          'a2-export-${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}.csv';
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsString(csv);
+      if (!mounted) return;
+      // The OS share sheet covers both "download" (save to Files/Drive) and
+      // "email" (share directly into Gmail/Mail) with the same action --
+      // whichever the person picks, no separate export paths to maintain.
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'text/csv')],
+          subject: 'a2 data export',
+          text: 'Your a2 data export ($fileName), opens in Excel, Sheets or Numbers.',
+        ),
       );
     } catch (error) {
       if (mounted) {
-        setState(() => linkedUserIds = previous);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: LText(error.toString().replaceFirst('Exception: ', '')),
@@ -4912,6 +7678,7 @@ class _ProfilePageState extends State<ProfilePage> {
               builder: (_) => AccountSheet(
                 serverUrl: contentServerUrl,
                 accountEmail: accountEmail,
+                googleLinked: accountGoogleLinked,
                 onSignedOut: widget.onSignedOut,
               ),
             );
@@ -5055,73 +7822,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-      if (accountEmail != null) ...[
-        const SizedBox(height: 22),
-        const SectionHeader('Sync diary with', 'SHARED'),
-        const SizedBox(height: 8),
-        Card(
-          child: Column(
-            children: [
-              SwitchListTile(
-                value: entrySyncEnabled,
-                onChanged: _setEntrySyncEnabled,
-                secondary: const Icon(Icons.sync, color: forest),
-                title: const LText(
-                  'Sync entries with linked people',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
-                subtitle: const LText(
-                  'Tap the sync icon on an entry to copy it into a linked person’s day',
-                ),
-              ),
-              if (loadingSyncPartners) ...[
-                const Divider(height: 1, indent: 55),
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                ),
-              ] else if (syncPartners.isEmpty) ...[
-                const Divider(height: 1, indent: 55),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  child: LText(
-                    'No other registered accounts yet — once someone else creates an account on this server, they’ll appear here to link with.',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                ),
-              ] else
-                for (final partner in syncPartners) ...[
-                  const Divider(height: 1, indent: 55),
-                  CheckboxListTile(
-                    value: linkedUserIds.contains(partner.id),
-                    onChanged: (value) =>
-                        _toggleSyncPartner(partner.id, value ?? false),
-                    secondary: CircleAvatar(
-                      backgroundColor: mint,
-                      child: Text(
-                        partner.label.isEmpty
-                            ? '?'
-                            : partner.label[0].toUpperCase(),
-                        style: const TextStyle(color: forest),
-                      ),
-                    ),
-                    title: LText(partner.label),
-                    subtitle:
-                        partner.email.isNotEmpty && partner.name.isNotEmpty
-                        ? LText(partner.email)
-                        : null,
-                  ),
-                ],
-            ],
-          ),
-        ),
-      ],
       const SizedBox(height: 22),
       const SectionHeader('Diet plans', 'ACTIVE'),
       const SizedBox(height: 8),
@@ -5197,21 +7897,135 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      const SizedBox(height: 22),
-      const SectionHeader('History', 'PRIVATE'),
-      const SizedBox(height: 8),
-      Card(
-        child: ListTile(
-          onTap: null,
-          leading: const Icon(Icons.chat_bubble_outline, color: forest),
-          title: const LText(
-            'Personal history',
-            style: TextStyle(fontWeight: FontWeight.w700),
+      if (accountEmail != null) ...[
+        const SizedBox(height: 22),
+        const SectionHeader('Sync diary with', 'SHARED'),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              SwitchListTile(
+                value: entrySyncEnabled && syncPartners.isNotEmpty,
+                onChanged: syncPartners.isEmpty ? null : _setEntrySyncEnabled,
+                secondary: const Icon(Icons.sync, color: forest),
+                title: const LText(
+                  'Sync entries with linked people',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: LText(
+                  syncPartners.isEmpty
+                      ? 'Invite someone below and wait for them to accept to turn this on'
+                      : 'Tap the sync icon on an entry to copy it into a linked person’s day',
+                ),
+              ),
+              if (loadingSyncPartners) ...[
+                const Divider(height: 1, indent: 55),
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+              ] else ...[
+                for (final invite in incomingInvites) ...[
+                  const Divider(height: 1, indent: 55),
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: gold,
+                      child: Icon(Icons.mail_outline, color: ink),
+                    ),
+                    title: LText(invite.fromLabel),
+                    subtitle: const LText('Wants to sync diaries with you'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.black45),
+                          tooltip: ui(context, 'Decline'),
+                          onPressed: () => _respondToInvite(invite, false),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.check_circle, color: success),
+                          tooltip: ui(context, 'Accept'),
+                          onPressed: () => _respondToInvite(invite, true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                for (final partner in syncPartners) ...[
+                  const Divider(height: 1, indent: 55),
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: mint,
+                      child: Text(
+                        partner.label.isEmpty
+                            ? '?'
+                            : partner.label[0].toUpperCase(),
+                        style: const TextStyle(color: forest),
+                      ),
+                    ),
+                    title: LText(partner.label),
+                    subtitle:
+                        partner.email.isNotEmpty && partner.name.isNotEmpty
+                        ? LText(partner.email)
+                        : null,
+                    trailing: IconButton(
+                      icon: const Icon(Icons.link_off, color: Colors.black45),
+                      tooltip: ui(context, 'Stop syncing'),
+                      onPressed: () => _unlinkPartner(partner),
+                    ),
+                  ),
+                ],
+                for (final invite in outgoingInvites) ...[
+                  const Divider(height: 1, indent: 55),
+                  ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: cream,
+                      child: Icon(Icons.hourglass_empty, color: Colors.black45),
+                    ),
+                    title: LText(invite.toLabel),
+                    subtitle: const LText(
+                      'Invite sent — waiting for confirmation',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.black45),
+                      tooltip: ui(context, 'Cancel'),
+                      onPressed: () => _cancelInvite(invite),
+                    ),
+                  ),
+                ],
+                if (syncPartners.isEmpty &&
+                    incomingInvites.isEmpty &&
+                    outgoingInvites.isEmpty) ...[
+                  const Divider(height: 1, indent: 55),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    child: LText(
+                      'No one linked yet — invite someone by their registered email below.',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                ],
+                const Divider(height: 1, indent: 55),
+                ListTile(
+                  onTap: _sendSyncInvite,
+                  leading: const Icon(Icons.person_add_alt, color: forest),
+                  title: const LText(
+                    'Invite someone by email',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            ],
           ),
-          subtitle: const LText('3 Aug – 12 Sep · meals, activity and weights'),
-          trailing: const Icon(Icons.chevron_right),
         ),
-      ),
+      ],
       const SizedBox(height: 22),
       const SectionHeader('Smart features', 'OPTIONAL'),
       const SizedBox(height: 8),
@@ -5369,13 +8183,15 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
             const Divider(height: 1, indent: 55),
-            const ListTile(
-              leading: Icon(Icons.file_download_outlined, color: forest),
-              title: LText(
+            ListTile(
+              onTap: _exportData,
+              leading: const Icon(Icons.file_download_outlined, color: forest),
+              title: const LText(
                 'Export my data',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
-              trailing: Icon(Icons.chevron_right),
+              subtitle: const LText('CSV · opens in Excel, Sheets or Numbers'),
+              trailing: const Icon(Icons.ios_share),
             ),
             const Divider(height: 1, indent: 55),
             ListTile(
@@ -5935,6 +8751,7 @@ class AccountSheet extends StatefulWidget {
     super.key,
     required this.serverUrl,
     required this.accountEmail,
+    this.googleLinked = false,
     this.initialRegister = false,
     this.accountRequired = false,
     this.onDismiss,
@@ -5942,6 +8759,7 @@ class AccountSheet extends StatefulWidget {
   });
   final String serverUrl;
   final String? accountEmail;
+  final bool googleLinked;
   final bool initialRegister;
   final bool accountRequired;
 
@@ -5965,11 +8783,23 @@ class _AccountSheetState extends State<AccountSheet> {
   bool busy = false;
   String? error;
 
+  final currentPassword = TextEditingController();
+  final newPassword = TextEditingController();
+  bool changingPassword = false;
+  String? passwordError;
+  bool passwordChanged = false;
+
+  late bool googleLinked = widget.googleLinked;
+  bool linkingGoogle = false;
+  String? googleError;
+
   @override
   void dispose() {
     email.dispose();
     password.dispose();
     name.dispose();
+    currentPassword.dispose();
+    newPassword.dispose();
     super.dispose();
   }
 
@@ -6004,6 +8834,100 @@ class _AccountSheetState extends State<AccountSheet> {
     }
   }
 
+  Future<void> _googleSignIn() async {
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final idToken = await GoogleAuthService.signIn();
+      await const AccountService().authenticateWithGoogle(
+        serverUrl: widget.serverUrl,
+        idToken: idToken,
+      );
+      if (mounted) {
+        if (widget.onDismiss != null) {
+          widget.onDismiss!();
+        } else {
+          Navigator.pop(context, true);
+        }
+      }
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => error = exception.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> _changePassword() async {
+    if (currentPassword.text.isEmpty || newPassword.text.length < 8) {
+      setState(
+        () => passwordError = newPassword.text.length < 8
+            ? 'New password must be at least 8 characters'
+            : 'Enter your current password',
+      );
+      return;
+    }
+    setState(() {
+      changingPassword = true;
+      passwordError = null;
+      passwordChanged = false;
+    });
+    try {
+      await const AccountService().changePassword(
+        serverUrl: widget.serverUrl,
+        currentPassword: currentPassword.text,
+        newPassword: newPassword.text,
+      );
+      if (mounted) {
+        setState(() => passwordChanged = true);
+        currentPassword.clear();
+        newPassword.clear();
+      }
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => passwordError = exception.toString().replaceFirst(
+            'Exception: ',
+            '',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => changingPassword = false);
+    }
+  }
+
+  Future<void> _linkGoogle() async {
+    setState(() {
+      linkingGoogle = true;
+      googleError = null;
+    });
+    try {
+      final idToken = await GoogleAuthService.signIn();
+      await const AccountService().authenticateWithGoogle(
+        serverUrl: widget.serverUrl,
+        idToken: idToken,
+      );
+      if (mounted) setState(() => googleLinked = true);
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => googleError = exception.toString().replaceFirst(
+            'Exception: ',
+            '',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => linkingGoogle = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => SafeArea(
     child: SingleChildScrollView(
@@ -6016,15 +8940,139 @@ class _AccountSheetState extends State<AccountSheet> {
       child: widget.accountEmail != null
           ? Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.verified_user, color: forest, size: 52),
-                const SizedBox(height: 12),
-                const LText(
-                  'You are signed in',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: mint,
+                      child: Icon(Icons.verified_user, color: forest),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const LText(
+                            'Manage account',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          LText(
+                            widget.accountEmail!,
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 7),
-                LText(widget.accountEmail!),
+                const SizedBox(height: 22),
+                const LText(
+                  'Change password',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: currentPassword,
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.password],
+                  decoration: InputDecoration(
+                    labelText: ui(context, 'Current password'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: newPassword,
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.newPassword],
+                  decoration: InputDecoration(
+                    labelText: ui(context, 'New password'),
+                    helperText: ui(context, 'At least 8 characters'),
+                  ),
+                ),
+                if (passwordError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: LText(
+                      passwordError!,
+                      style: const TextStyle(color: coral),
+                    ),
+                  ),
+                if (passwordChanged)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: LText(
+                      'Password changed.',
+                      style: const TextStyle(color: success),
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: changingPassword ? null : _changePassword,
+                    child: changingPassword
+                        ? const SizedBox.square(
+                            dimension: 17,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const LText('Change password'),
+                  ),
+                ),
+                const Divider(height: 32),
+                const LText(
+                  'Linked accounts',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 10),
+                if (googleLinked)
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: success, size: 20),
+                      const SizedBox(width: 8),
+                      const LText('Google account linked'),
+                    ],
+                  )
+                else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: linkingGoogle || googleClientId.isEmpty
+                          ? null
+                          : _linkGoogle,
+                      icon: linkingGoogle
+                          ? const SizedBox.square(
+                              dimension: 17,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.g_mobiledata, size: 22),
+                      label: const LText('Link Google account'),
+                    ),
+                  ),
+                  if (googleClientId.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: LText(
+                        'Google sign-in needs your Google client ID before it can be enabled.',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black45,
+                        ),
+                      ),
+                    ),
+                  if (googleError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: LText(
+                        googleError!,
+                        style: const TextStyle(color: coral),
+                      ),
+                    ),
+                ],
                 const SizedBox(height: 22),
                 SizedBox(
                   width: double.infinity,
@@ -6039,6 +9087,7 @@ class _AccountSheetState extends State<AccountSheet> {
                         Navigator.pop(context, true);
                       }
                     },
+                    style: OutlinedButton.styleFrom(foregroundColor: coral),
                     child: const LText('Sign out'),
                   ),
                 ),
@@ -6129,18 +9178,28 @@ class _AccountSheetState extends State<AccountSheet> {
                   ),
                 ),
                 if (!widget.accountRequired) const Divider(height: 28),
-                const Row(
-                  children: [
-                    Icon(Icons.g_mobiledata, size: 28, color: Colors.black38),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: LText(
-                        'Google sign-in needs your Google client ID before it can be enabled.',
-                        style: TextStyle(fontSize: 12, color: Colors.black45),
+                if (googleClientId.isEmpty)
+                  const Row(
+                    children: [
+                      Icon(Icons.g_mobiledata, size: 28, color: Colors.black38),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: LText(
+                          'Google sign-in needs your Google client ID before it can be enabled.',
+                          style: TextStyle(fontSize: 12, color: Colors.black45),
+                        ),
                       ),
+                    ],
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: busy ? null : _googleSignIn,
+                      icon: const Icon(Icons.g_mobiledata, size: 22),
+                      label: const LText('Continue with Google'),
                     ),
-                  ],
-                ),
+                  ),
                 if (!widget.accountRequired)
                   SizedBox(
                     width: double.infinity,

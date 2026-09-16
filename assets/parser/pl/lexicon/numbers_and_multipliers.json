@@ -1,0 +1,28 @@
+{
+  "cardinals": {
+    "zero": 0,
+    "jeden": 1,
+    "dwa": 2,
+    "trzy": 3,
+    "cztery": 4,
+    "pięć": 5
+  },
+  "multipliers": {},
+  "accepted_patterns": [
+    "1x",
+    "2x",
+    "3x",
+    "x1",
+    "x2",
+    "x3",
+    "2 x",
+    "3 x",
+    "2×",
+    "3×"
+  ],
+  "fractions": {
+    "pół": 0.5,
+    "połowa": 0.5,
+    "ćwierć": 0.25
+  }
+}

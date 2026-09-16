@@ -5,7 +5,9 @@ class PhraseTable<T> {
 
   final List<MapEntry<String, T>> _entries;
 
-  static bool _isWordChar(String ch) => RegExp(r'[a-z0-9]').hasMatch(ch);
+  // Unicode-aware so this still works correctly for any locale word that,
+  // for whatever reason, wasn't fully folded to plain ASCII.
+  static bool _isWordChar(String ch) => RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(ch);
 
   /// Matches the longest known phrase at the start of [text] (already
   /// lowercased/trimmed), requiring a word boundary right after it so
@@ -32,4 +34,18 @@ String consumeConnectorsAndWhitespace(String text, List<String> connectorWords) 
     if (match == null) return remaining;
     remaining = remaining.substring(match.$2).trimLeft();
   }
+}
+
+/// Drops any whole word in [fillerWords] from anywhere in [text] (not just
+/// the start) -- for filler verbs/prepositions in a free-form activity
+/// sentence ("played singles tennis **for** 2 hours", "cycled 10km **in**
+/// 30min") that aren't meaningful food-style connector words and can
+/// appear after other words have already been removed.
+String removeFillerWords(String text, List<String> fillerWords) {
+  if (fillerWords.isEmpty) return text;
+  final fillers = fillerWords.toSet();
+  final kept = text
+      .split(RegExp(r'\s+'))
+      .where((w) => w.isNotEmpty && !fillers.contains(w));
+  return kept.join(' ').trim();
 }

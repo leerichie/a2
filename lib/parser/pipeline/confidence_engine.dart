@@ -3,12 +3,16 @@ import '../models/parse_confidence.dart';
 /// High: exact entity + exact measurement (explicit grams/ml) + nutrient data.
 /// Medium: recognized food + a food-specific unit-to-grams conversion exists.
 /// Low: the above, but either the portion rule itself is authored as
-/// low-confidence, or the phrase used an approximation word ("about",
-/// "roughly", ...) -- approximation should lower confidence, not vanish.
+/// low-confidence, the phrase used an approximation word ("about",
+/// "roughly", ...), or the nutrient value itself came from a generic
+/// parent fallback (e.g. cheddar borrowing generic "cheese" data) rather
+/// than the subtype's own record -- any of these should lower confidence,
+/// not vanish.
 /// Incomplete: unresolved food, leftover meaningful text, no nutrient
-/// record for the resolved food, or no way to determine grams at all.
-/// Per explicit instruction: never invent a default gram value to avoid
-/// landing here -- a food with no usable portion data IS Incomplete.
+/// record for the resolved food (even via fallback), or no way to
+/// determine grams at all. Per explicit instruction: never invent a
+/// default gram value to avoid landing here -- a food with no usable
+/// portion data IS Incomplete.
 ParseConfidence deriveFoodConfidence({
   required bool foodResolved,
   required bool hasUnresolvedText,
@@ -17,11 +21,14 @@ ParseConfidence deriveFoodConfidence({
   required bool exactMeasurementGiven,
   required bool approximate,
   String? portionRuleConfidence,
+  bool nutrientDataIsFallback = false,
 }) {
   if (!foodResolved || hasUnresolvedText) return ParseConfidence.incomplete;
   if (!nutrientDataAvailable) return ParseConfidence.incomplete;
   if (!gramsKnown) return ParseConfidence.incomplete;
-  if (approximate || portionRuleConfidence == 'low') return ParseConfidence.low;
+  if (approximate || portionRuleConfidence == 'low' || nutrientDataIsFallback) {
+    return ParseConfidence.low;
+  }
   if (exactMeasurementGiven) return ParseConfidence.high;
   return ParseConfidence.medium;
 }

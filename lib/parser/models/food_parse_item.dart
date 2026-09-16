@@ -11,6 +11,7 @@ class FoodParseItem {
     this.fullness,
     this.canonicalId,
     this.canonicalName,
+    this.category,
     this.matchedAlias,
     this.modifiers = const [],
     this.preparations = const [],
@@ -27,6 +28,10 @@ class FoodParseItem {
   final String? fullness;
   final String? canonicalId;
   final String? canonicalName;
+  // The catalogue's taxonomic category ("drink", "vegetable", ...) --
+  // lets a caller distinguish a drink-only entry from a mixed meal
+  // without re-parsing the description text itself.
+  final String? category;
   final String? matchedAlias;
   final List<String> modifiers;
   final List<String> preparations;

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:a2/main.dart';
 import 'package:a2/l10n.dart';
+import 'package:a2/parser/food_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -91,6 +92,18 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    // FoodParser's local catalogue/nutrient JSON has grown large enough
+    // that a *cold* load can outrun what a fake-async pump() loop will
+    // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
+    // less) load then gets stuck forever, and rootBundle caches that
+    // stuck Future per asset path, so every later call for the same path
+    // (even one properly wrapped in runAsync) just awaits that same
+    // never-resolving Future. Pre-warming once via runAsync here lets the
+    // real read complete and populates the cache with the resolved
+    // string, so every subsequent load (including the app's own) is an
+    // instant cache hit instead of a fresh, fake-zone-broken request.
+    await tester.runAsync(() => FoodParser.load());
     await tester.pumpWidget(const A2App(startOnboarding: false));
     expect(find.text(greetingFor(DateTime.now())), findsOneWidget);
     expect(find.text('Nothing logged today'), findsOneWidget);
@@ -102,16 +115,29 @@ void main() {
     );
     tester.widget<ListTile>(foodOption).onTap!();
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.enterText(find.byType(TextField), 'Greek yoghurt and berries');
+    // "yoghurt and banana" -- both bare mentions with real migrated
+    // nutrient + default-portion data (100g yoghurt @80kcal/100g = 80,
+    // 120g banana @89kcal/100g = 106.8), so FoodParser fully resolves this
+    // locally: 80 + 106.8 = 186.8 -> 187 kcal.
+    await tester.enterText(find.byType(TextField), 'yoghurt and banana');
     final addButton = find.ancestor(
       of: find.text('Add to day'),
       matching: find.byType(FilledButton),
     );
-    tester.widget<FilledButton>(addButton).onPressed!();
-    await tester.pump(const Duration(milliseconds: 500));
+    // Even with the cache pre-warmed above, the app's own async chain
+    // still needs the real event loop (not the fake clock pump() advances)
+    // to actually finish -- runAsync steps outside that fake clock for
+    // the extent of this call so it genuinely completes before we assert.
+    await tester.runAsync(() async {
+      tester.widget<FilledButton>(addButton).onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
     // The hero ring's total and the single entry's own tile can coincide
-    // (both read "80" when it's the only entry logged), so accept either.
-    expect(find.text('80'), findsWidgets);
+    // (both read "187" when it's the only entry logged), so accept either.
+    expect(find.text('187'), findsWidgets);
     await tester.pump(const Duration(milliseconds: 50));
     final prefs = await SharedPreferences.getInstance();
     expect(
@@ -121,7 +147,7 @@ void main() {
     final dailyKey = prefs.getKeys().firstWhere(
       (key) => key.startsWith('daily_entries_'),
     );
-    expect(prefs.getStringList(dailyKey)!.single, contains('Greek yoghurt'));
+    expect(prefs.getStringList(dailyKey)!.single, contains('yoghurt and banana'));
 
     await tester.scrollUntilVisible(
       find.byIcon(Icons.delete_outline),
@@ -133,13 +159,13 @@ void main() {
     expect(find.text('Delete entry?'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Greek yoghurt and berries'), findsOneWidget);
+    expect(find.text('yoghurt and banana'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Greek yoghurt and berries'), findsNothing);
+    expect(find.text('yoghurt and banana'), findsNothing);
     expect(prefs.getStringList(dailyKey), isEmpty);
 
     // Signing out must replace the whole app with the sign-in gate, not just
@@ -153,6 +179,304 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.text('Save your progress'), findsOneWidget);
+  });
+
+  testWidgets('a partially-recognized multi-food sentence is blocked and '
+      'clearly flags the unresolved part, instead of silently dropping it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    // FoodParser's local catalogue/nutrient JSON has grown large enough
+    // that a *cold* load can outrun what a fake-async pump() loop will
+    // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
+    // less) load then gets stuck forever, and rootBundle caches that
+    // stuck Future per asset path, so every later call for the same path
+    // (even one properly wrapped in runAsync) just awaits that same
+    // never-resolving Future. Pre-warming once via runAsync here lets the
+    // real read complete and populates the cache with the resolved
+    // string, so every subsequent load (including the app's own) is an
+    // instant cache hit instead of a fresh, fake-zone-broken request.
+    await tester.runAsync(() => FoodParser.load());
+    await tester.pumpWidget(const A2App(startOnboarding: false));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('Add'));
+    await tester.pump(const Duration(milliseconds: 500));
+    tester
+        .widget<ListTile>(
+          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+        )
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(find.byType(TextField), 'egg and dragonfruit powder');
+    // Even with the cache pre-warmed above, the app's own async chain
+    // still needs the real event loop (not the fake clock pump() advances)
+    // to actually finish -- runAsync steps outside that fake clock for
+    // the extent of this call so it genuinely completes before we assert.
+    await tester.runAsync(() async {
+      tester
+          .widget<FilledButton>(
+            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+          )
+          .onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    // "egg" is recognized (real nutrient data) and is never listed -- the
+    // user-facing message only names what still needs attention. AI is
+    // unavailable in this test, so "dragonfruit powder" (the one
+    // component local could not resolve) surfaces as a short, natural
+    // clarification request; the whole entry is still blocked rather than
+    // silently summed to just the egg total.
+    expect(find.textContaining('Recognized'), findsNothing);
+    expect(find.textContaining('Please clarify: dragonfruit powder'), findsOneWidget);
+    expect(find.text('Nothing logged today'), findsOneWidget);
+  });
+
+  testWidgets(
+      'the real-world mixed breakfast sentence now resolves completely, '
+      'locally, with no AI needed', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    // FoodParser's local catalogue/nutrient JSON has grown large enough
+    // that a *cold* load can outrun what a fake-async pump() loop will
+    // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
+    // less) load then gets stuck forever, and rootBundle caches that
+    // stuck Future per asset path, so every later call for the same path
+    // (even one properly wrapped in runAsync) just awaits that same
+    // never-resolving Future. Pre-warming once via runAsync here lets the
+    // real read complete and populates the cache with the resolved
+    // string, so every subsequent load (including the app's own) is an
+    // instant cache hit instead of a fresh, fake-zone-broken request.
+    await tester.runAsync(() => FoodParser.load());
+    await tester.pumpWidget(const A2App(startOnboarding: false));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('Add'));
+    await tester.pump(const Duration(milliseconds: 500));
+    tester
+        .widget<ListTile>(
+          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+        )
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(
+      find.byType(TextField),
+      '2 tbsp coleslaw, 4 slice smoked salmon, boiled egg, 2 slice cheddar, '
+      'spoon light cottage cheese, black coffee, glass water, half glass fruit smoothie',
+    );
+    // Even with the cache pre-warmed above, the app's own async chain
+    // still needs the real event loop (not the fake clock pump() advances)
+    // to actually finish -- runAsync steps outside that fake clock for
+    // the extent of this call so it genuinely completes before we assert.
+    await tester.runAsync(() async {
+      tester
+          .widget<FilledButton>(
+            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+          )
+          .onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    // All 8 components now resolve locally with real nutrition data:
+    // coleslaw (tablespoon rule), smoked salmon (its own dedicated
+    // catalogue entry + slice portion), boiled egg (generic-parent
+    // fallback to egg), cheddar (its own real USDA record, see
+    // tool/import_usda_nutrients.py), light cottage cheese (generic-volume
+    // spoonful), black coffee and water (bare-mention defaults, water
+    // genuinely 0 kcal), and fruit smoothie (its own derived nutrient
+    // value, glass/half-glass via the existing drink-container mechanism).
+    // No AI call is needed at all -- the entry saves immediately, not
+    // blocked, no clarification shown.
+    expect(find.textContaining('Recognized'), findsNothing);
+    expect(find.textContaining("don't have nutrition data"), findsNothing);
+    expect(find.textContaining('Please clarify'), findsNothing);
+    expect(find.text('Nothing logged today'), findsNothing);
+    expect(find.textContaining('515'), findsWidgets);
+    final prefs = await SharedPreferences.getInstance();
+    final dailyKey = prefs.getKeys().firstWhere(
+      (key) => key.startsWith('daily_entries_'),
+    );
+    expect(
+      prefs.getStringList(dailyKey)!.single,
+      contains('smoked salmon'),
+    );
+  });
+
+  testWidgets(
+      'water recognized as part of a wider food sentence also updates '
+      'the day\'s water total, not just a water-only description', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    await tester.runAsync(() => FoodParser.load());
+    await tester.pumpWidget(const A2App(startOnboarding: false));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('Add'));
+    await tester.pump(const Duration(milliseconds: 500));
+    tester
+        .widget<ListTile>(
+          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+        )
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Not a water-only description (WaterIntakeParser would reject this --
+    // it only matches a description that's entirely about water), so this
+    // only resolves through FoodParser, alongside "toast".
+    await tester.enterText(find.byType(TextField), 'toast and half glass water');
+    await tester.runAsync(() async {
+      tester
+          .widget<FilledButton>(
+            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+          )
+          .onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    // Half of this app's own 250ml glass definition -> 125ml, credited to
+    // the day's water total even though the whole entry is saved as one
+    // food/drink diary line, not a separate water-only entry.
+    expect(find.text('125'), findsWidgets);
+  });
+
+  testWidgets(
+      'switching the app language to Polish makes the live Add Meal '
+      'screen actually use the Polish FoodParser, not a hardcoded locale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    // The app only reads the stored language preference when it takes the
+    // real cold-start path (startOnboarding: true skips it entirely, which
+    // is why every other test here defaults to English).
+    SharedPreferences.setMockInitialValues({
+      'onboarding_complete': true,
+      'language': 'pl',
+    });
+    await tester.runAsync(() => FoodParser.load(locale: 'pl'));
+    await tester.pumpWidget(const A2App());
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // The app's own UI chrome is translated via LText -- with the
+    // language preference set to Polish above, these labels are now
+    // "Dodaj"/"Jedzenie lub napój"/"Dodaj do dnia" rather than English.
+    await tester.tap(find.text('Dodaj'));
+    await tester.pump(const Duration(milliseconds: 500));
+    tester
+        .widget<ListTile>(
+          find.ancestor(of: find.text('Jedzenie lub napój'), matching: find.byType(ListTile)),
+        )
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(find.byType(TextField), 'duza kawa, pol lyzki jogurtu, mala herbata');
+    await tester.runAsync(() async {
+      tester
+          .widget<FilledButton>(
+            find.ancestor(of: find.text('Dodaj do dnia'), matching: find.byType(FilledButton)),
+          )
+          .onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    // All three resolve locally (coffee, yoghurt, tea) so the entry saves
+    // immediately -- if the sheet had loaded the English parser instead
+    // (the bug being fixed here), none of these Polish words would
+    // resolve locally and this would stay blocked with a clarification
+    // message instead of disappearing into a saved entry. The
+    // clarification message itself is not translated, so it would still
+    // read in English if it appeared.
+    expect(find.textContaining('Please clarify'), findsNothing);
+    expect(find.textContaining("don't have nutrition data"), findsNothing);
+    expect(find.text('Nic dziś nie zapisano'), findsNothing); // "Nothing logged today" (pl)
+  });
+
+  testWidgets('a brand/composite food FoodEstimator used to recognize is '
+      'never silently used as the saved total now', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    rootBundle.clear();
+    // FoodParser's local catalogue/nutrient JSON has grown large enough
+    // that a *cold* load can outrun what a fake-async pump() loop will
+    // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
+    // less) load then gets stuck forever, and rootBundle caches that
+    // stuck Future per asset path, so every later call for the same path
+    // (even one properly wrapped in runAsync) just awaits that same
+    // never-resolving Future. Pre-warming once via runAsync here lets the
+    // real read complete and populates the cache with the resolved
+    // string, so every subsequent load (including the app's own) is an
+    // instant cache hit instead of a fresh, fake-zone-broken request.
+    await tester.runAsync(() => FoodParser.load());
+    await tester.pumpWidget(const A2App(startOnboarding: false));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('Add'));
+    await tester.pump(const Duration(milliseconds: 500));
+    tester
+        .widget<ListTile>(
+          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+        )
+        .onTap!();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // FoodEstimator.estimate('big mac') would have returned 550 kcal
+    // (still true today -- this is the transitional comparison it's kept
+    // for), but it is never used as the saved result: the new canonical
+    // catalogue deliberately excludes brand/composite items, so this must
+    // block, not silently save the old number.
+    await tester.enterText(find.byType(TextField), 'big mac');
+    // Even with the cache pre-warmed above, the app's own async chain
+    // still needs the real event loop (not the fake clock pump() advances)
+    // to actually finish -- runAsync steps outside that fake clock for
+    // the extent of this call so it genuinely completes before we assert.
+    await tester.runAsync(() async {
+      tester
+          .widget<FilledButton>(
+            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+          )
+          .onPressed!();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    expect(find.text('550'), findsNothing);
+    expect(find.text('Nothing logged today'), findsOneWidget);
   });
 
   testWidgets('exercise entry uses the offline MET parser and body weight', (
@@ -181,8 +505,7 @@ void main() {
         .onTap!();
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.enterText(find.byType(TextField).first, 'HIIT');
-    await tester.enterText(find.byType(TextField).last, '20');
+    await tester.enterText(find.byType(TextField), '20 min HIIT');
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
@@ -232,10 +555,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     await tester.enterText(
-      find.byType(TextField).first,
-      'underwater basket weaving',
+      find.byType(TextField),
+      '20 min underwater basket weaving',
     );
-    await tester.enterText(find.byType(TextField).last, '20');
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
@@ -244,7 +566,7 @@ void main() {
     }
 
     expect(
-      find.textContaining('don\'t recognize "underwater basket weaving"'),
+      find.textContaining('don\'t recognize "20 min underwater basket weaving"'),
       findsOneWidget,
     );
     expect(find.text('Nothing logged today'), findsOneWidget);
@@ -273,8 +595,7 @@ void main() {
         .onTap!();
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.enterText(find.byType(TextField).first, 'HIIT');
-    await tester.enterText(find.byType(TextField).last, '20');
+    await tester.enterText(find.byType(TextField), '20 min HIIT');
     tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
@@ -564,10 +885,10 @@ void main() {
       targetProtein: 130,
       now: DateTime(2026, 1, 1, 14),
     );
-    expect(nudge.title, 'Right on target');
+    expect(nudge.title, 'Comfortably on track');
   });
 
-  test('daily nudge flags going well over the calorie target', () {
+  test('daily nudge flags going well over the calorie target with the exact amount', () {
     final nudge = DailyNudge.forToday(
       entries: [const FoodEntry('Dinner', '20:00', 2500, 90, Icons.restaurant)],
       calories: 2500,
@@ -576,7 +897,48 @@ void main() {
       targetProtein: 130,
       now: DateTime(2026, 1, 1, 21),
     );
-    expect(nudge.title, 'A little over today');
+    expect(nudge.title, 'Substantially over target');
+    expect(nudge.body, contains('400 kcal over today'));
+  });
+
+  test('daily nudge uses net calories, not gross, so exercise can bring a heavy day back on track', () {
+    final nudge = DailyNudge.forToday(
+      entries: const [
+        FoodEntry('Dinner', '20:00', 2807, 90, Icons.restaurant),
+        FoodEntry(
+          'Run',
+          '18:00 · 40 min',
+          500,
+          0,
+          Icons.directions_run,
+          isExercise: true,
+        ),
+      ],
+      calories: 2807,
+      exerciseCalories: 500,
+      targetCalories: 2600,
+      protein: 90,
+      targetProtein: 130,
+      now: DateTime(2026, 1, 1, 21),
+    );
+    expect(nudge.title, 'Back near target after exercise');
+  });
+
+  test('daily nudge suggests a MET-based walk duration when body weight is known', () {
+    final nudge = DailyNudge.forToday(
+      entries: [const FoodEntry('Dinner', '20:00', 2500, 90, Icons.restaurant)],
+      calories: 2500,
+      targetCalories: 2100,
+      protein: 90,
+      targetProtein: 130,
+      bodyWeightKg: 80,
+      walkMet: 4.8,
+      now: DateTime(2026, 1, 1, 21),
+    );
+    // 400 kcal over ÷ (4.8 MET × 80 kg) × 60 ≈ 62 min, rounded to the
+    // nearest 5 — never a fixed, invented calorie burn.
+    expect(nudge.body, contains('min'));
+    expect(nudge.body, isNot(contains('extreme')));
   });
 
   test('daily nudge recognises a balanced day of food and exercise', () {

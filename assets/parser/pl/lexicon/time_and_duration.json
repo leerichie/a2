@@ -1,0 +1,14 @@
+{
+  "units": {
+    "second": ["sekunda", "sekundy", "sekund"],
+    "minute": ["min", "minuta", "minuty", "minut"],
+    "hour": ["godzina", "godziny", "godzin", "godz"]
+  },
+  "fractions": {},
+  "patterns": [],
+  "distance_units": {
+    "km": ["km", "kilometr", "kilometry", "kilometrów"],
+    "m": ["m", "metr", "metry", "metrów"]
+  },
+  "step_units": ["krok", "kroki", "kroków"]
+}

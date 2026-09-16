@@ -1,0 +1,32 @@
+{
+  "horse_riding": [
+    "jazda konna",
+    "jazdy konnej",
+    "konno"
+  ],
+  "walking": [
+    "spacer",
+    "chodzenie"
+  ],
+  "singles_tennis": [
+    "tenis singlowy",
+    "tenis pojedynczy"
+  ],
+  "doubles_tennis": [
+    "tenis deblowy"
+  ],
+  "table_tennis": [
+    "tenis stołowy",
+    "ping pong"
+  ],
+  "easy_swimming": [
+    "spokojne plywanie",
+    "wolne plywanie"
+  ],
+  "lap_swimming": [
+    "plywanie na okrazenia"
+  ],
+  "vigorous_swimming": [
+    "szybkie plywanie"
+  ]
+}

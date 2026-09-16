@@ -1,12 +1,178 @@
 [
   {
-    "foodId": "cottage_cheese",
-    "kcalPer100g": 98,
-    "proteinPer100g": 11,
-    "carbsPer100g": 3.4,
+    "foodId": "ajvar",
+    "kcalPer100g": 110,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 9,
+    "fatPer100g": 8,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "ale",
+    "kcalPer100g": 34.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 8.8,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174846",
+    "sourceDescription": "Beverages, carbonated, ginger ale"
+  },
+  {
+    "foodId": "almond_milk",
+    "kcalPer100g": 17,
+    "proteinPer100g": 0.6,
+    "carbsPer100g": 0.6,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "almonds",
+    "kcalPer100g": 579,
+    "proteinPer100g": 21,
+    "carbsPer100g": 22,
+    "fatPer100g": 50,
+    "fibrePer100g": 12.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "americano",
+    "kcalPer100g": 5,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 1,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "anchovy",
+    "kcalPer100g": 131.0,
+    "proteinPer100g": 20.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 4.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174182",
+    "sourceDescription": "Fish, anchovy, european, raw"
+  },
+  {
+    "foodId": "apple",
+    "kcalPer100g": 52,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 14,
     "fatPer100g": null,
     "fibrePer100g": null,
-    "source": "FoodEstimator.foods['cottage cheese']"
+    "source": "FoodEstimator.foods['apple']"
+  },
+  {
+    "foodId": "apple_cider_vinegar",
+    "kcalPer100g": 22,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0.9,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "apple_juice",
+    "kcalPer100g": 46,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 11,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "apricot",
+    "kcalPer100g": 48,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 11,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "artichoke",
+    "kcalPer100g": 47,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 10.5,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 5.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "asparagus",
+    "kcalPer100g": 20,
+    "proteinPer100g": 2.2,
+    "carbsPer100g": 3.9,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 2.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "aubergine",
+    "kcalPer100g": 25,
+    "proteinPer100g": 1,
+    "carbsPer100g": 6,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "avocado",
+    "kcalPer100g": 160,
+    "proteinPer100g": 2,
+    "carbsPer100g": 8.5,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['avocado']"
+  },
+  {
+    "foodId": "bacon",
+    "kcalPer100g": 450,
+    "proteinPer100g": 37,
+    "carbsPer100g": 1.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['bacon']"
+  },
+  {
+    "foodId": "bagel",
+    "kcalPer100g": 250,
+    "proteinPer100g": 10,
+    "carbsPer100g": 48,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "baked_beans",
+    "kcalPer100g": 75,
+    "proteinPer100g": 4.8,
+    "carbsPer100g": 13,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 3.7,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "balsamic_vinegar",
+    "kcalPer100g": 88,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 17,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "bamboo_shoots",
+    "kcalPer100g": 27,
+    "proteinPer100g": 2.6,
+    "carbsPer100g": 5.2,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
   },
   {
     "foodId": "banana",
@@ -18,6 +184,1132 @@
     "source": "FoodEstimator.foods['banana']"
   },
   {
+    "foodId": "barbecue_sauce",
+    "kcalPer100g": 172,
+    "proteinPer100g": 1,
+    "carbsPer100g": 40,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 0.7,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "bean_sprouts",
+    "kcalPer100g": 30,
+    "proteinPer100g": 3,
+    "carbsPer100g": 6,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "beans",
+    "kcalPer100g": 127,
+    "proteinPer100g": 6.6,
+    "carbsPer100g": 21,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['beans']"
+  },
+  {
+    "foodId": "beef",
+    "kcalPer100g": 250,
+    "proteinPer100g": 26,
+    "carbsPer100g": 0,
+    "fatPer100g": 17,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (generic mixed beef cuts/mince average, per 100g)"
+  },
+  {
+    "foodId": "beef_brisket",
+    "kcalPer100g": 251.0,
+    "proteinPer100g": 18.2,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 19.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170200",
+    "sourceDescription": "Beef, cured, corned beef, brisket, cooked"
+  },
+  {
+    "foodId": "beef_jerky",
+    "kcalPer100g": 410.0,
+    "proteinPer100g": 33.2,
+    "carbsPer100g": 11.0,
+    "fatPer100g": 25.6,
+    "fibrePer100g": 1.8,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167536",
+    "sourceDescription": "Snacks, beef jerky, chopped and formed"
+  },
+  {
+    "foodId": "beef_ribeye",
+    "kcalPer100g": 208.0,
+    "proteinPer100g": 28.4,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 10.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174702",
+    "sourceDescription": "Beef, ribeye filet, boneless, separable lean only, trimmed to 0\" fat, choice, cooked, grilled"
+  },
+  {
+    "foodId": "beef_sirloin",
+    "kcalPer100g": 206.0,
+    "proteinPer100g": 29.6,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 8.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168633",
+    "sourceDescription": "Beef, top sirloin, steak, separable lean and fat, trimmed to 0\" fat, select, cooked, broiled"
+  },
+  {
+    "foodId": "beef_steak",
+    "kcalPer100g": 202.0,
+    "proteinPer100g": 27.6,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 9.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169435",
+    "sourceDescription": "Beef, flank, steak, separable lean and fat, trimmed to 0\" fat, choice, cooked, broiled"
+  },
+  {
+    "foodId": "beef_tenderloin",
+    "kcalPer100g": 200.0,
+    "proteinPer100g": 29.4,
+    "carbsPer100g": 0.3,
+    "fatPer100g": 9.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173094",
+    "sourceDescription": "Beef, New Zealand, imported, tenderloin, separable lean only, cooked, fast fried"
+  },
+  {
+    "foodId": "beer",
+    "kcalPer100g": 43,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 3.6,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['beer']"
+  },
+  {
+    "foodId": "beetroot",
+    "kcalPer100g": 43,
+    "proteinPer100g": 1.6,
+    "carbsPer100g": 10,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "bell_pepper",
+    "kcalPer100g": 31,
+    "proteinPer100g": 1,
+    "carbsPer100g": 6,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['bell pepper']"
+  },
+  {
+    "foodId": "biscuit",
+    "kcalPer100g": 490,
+    "proteinPer100g": 6,
+    "carbsPer100g": 68,
+    "fatPer100g": 22,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "black_beans",
+    "kcalPer100g": 132.0,
+    "proteinPer100g": 8.9,
+    "carbsPer100g": 23.7,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 8.7,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175237",
+    "sourceDescription": "Beans, black, mature seeds, cooked, boiled, with salt"
+  },
+  {
+    "foodId": "blackberry",
+    "kcalPer100g": 43,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 10,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 5.3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "blackcurrant",
+    "kcalPer100g": 63,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 15,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "blue_cheese",
+    "kcalPer100g": 353,
+    "proteinPer100g": 21,
+    "carbsPer100g": 2,
+    "fatPer100g": 29,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "blueberries",
+    "kcalPer100g": 57,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 14,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "boiled_egg",
+    "kcalPer100g": 143.0,
+    "proteinPer100g": 12.6,
+    "carbsPer100g": 0.7,
+    "fatPer100g": 9.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171287",
+    "sourceDescription": "Egg, whole, raw, fresh"
+  },
+  {
+    "foodId": "brazil_nuts",
+    "kcalPer100g": 656,
+    "proteinPer100g": 14,
+    "carbsPer100g": 12,
+    "fatPer100g": 66,
+    "fibrePer100g": 7.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "bread",
+    "kcalPer100g": 265,
+    "proteinPer100g": 9,
+    "carbsPer100g": 49,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['bread']"
+  },
+  {
+    "foodId": "bread_roll",
+    "kcalPer100g": 280,
+    "proteinPer100g": 9,
+    "carbsPer100g": 53,
+    "fatPer100g": 3,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "brie",
+    "kcalPer100g": 334,
+    "proteinPer100g": 20,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 28,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "brioche",
+    "kcalPer100g": 295,
+    "proteinPer100g": 8,
+    "carbsPer100g": 45,
+    "fatPer100g": 9,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "broccoli",
+    "kcalPer100g": 34,
+    "proteinPer100g": 2.8,
+    "carbsPer100g": 7,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 2.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "brown_lentils",
+    "kcalPer100g": 116,
+    "proteinPer100g": 9,
+    "carbsPer100g": 20,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 7.9,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "brown_rice",
+    "kcalPer100g": 363.0,
+    "proteinPer100g": 7.2,
+    "carbsPer100g": 76.5,
+    "fatPer100g": 2.8,
+    "fibrePer100g": 4.6,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168898",
+    "sourceDescription": "Rice flour, brown"
+  },
+  {
+    "foodId": "brownie",
+    "kcalPer100g": 466,
+    "proteinPer100g": 5.5,
+    "carbsPer100g": 55,
+    "fatPer100g": 25,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "brussels_sprouts",
+    "kcalPer100g": 43,
+    "proteinPer100g": 3.4,
+    "carbsPer100g": 9,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 3.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "buckwheat_groats",
+    "kcalPer100g": 92.0,
+    "proteinPer100g": 3.4,
+    "carbsPer100g": 19.9,
+    "fatPer100g": 0.6,
+    "fibrePer100g": 2.7,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170686",
+    "sourceDescription": "Buckwheat groats, roasted, cooked"
+  },
+  {
+    "foodId": "bulgur",
+    "kcalPer100g": 83,
+    "proteinPer100g": 3.1,
+    "carbsPer100g": 18.6,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 4.5,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "burger_bun",
+    "kcalPer100g": 280,
+    "proteinPer100g": 9,
+    "carbsPer100g": 53,
+    "fatPer100g": 4,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "butter",
+    "kcalPer100g": 717,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 0.1,
+    "fatPer100g": 81,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "buttermilk",
+    "kcalPer100g": 62.0,
+    "proteinPer100g": 3.2,
+    "carbsPer100g": 4.9,
+    "fatPer100g": 3.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172225",
+    "sourceDescription": "Milk, buttermilk, fluid, whole"
+  },
+  {
+    "foodId": "cabbage",
+    "kcalPer100g": 25,
+    "proteinPer100g": 1.3,
+    "carbsPer100g": 5.8,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['cabbage']"
+  },
+  {
+    "foodId": "caesar_dressing",
+    "kcalPer100g": 450,
+    "proteinPer100g": 1.3,
+    "carbsPer100g": 5,
+    "fatPer100g": 47,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "caesar_salad",
+    "kcalPer100g": 150,
+    "proteinPer100g": 7,
+    "carbsPer100g": 5,
+    "fatPer100g": 11,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "camembert",
+    "kcalPer100g": 300,
+    "proteinPer100g": 20,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 24,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cappuccino",
+    "kcalPer100g": 40,
+    "proteinPer100g": 2.2,
+    "carbsPer100g": 3.3,
+    "fatPer100g": 2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "caramel",
+    "kcalPer100g": 382,
+    "proteinPer100g": 2.5,
+    "carbsPer100g": 77,
+    "fatPer100g": 8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "carp",
+    "kcalPer100g": 162.0,
+    "proteinPer100g": 22.9,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 7.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174185",
+    "sourceDescription": "Fish, carp, cooked, dry heat"
+  },
+  {
+    "foodId": "carrot",
+    "kcalPer100g": 41,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 10,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['carrot']"
+  },
+  {
+    "foodId": "cashews",
+    "kcalPer100g": 553,
+    "proteinPer100g": 18,
+    "carbsPer100g": 30,
+    "fatPer100g": 44,
+    "fibrePer100g": 3.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "catfish",
+    "kcalPer100g": 144.0,
+    "proteinPer100g": 18.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 7.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175166",
+    "sourceDescription": "Fish, catfish, channel, farmed, cooked, dry heat"
+  },
+  {
+    "foodId": "cauliflower",
+    "kcalPer100g": 25,
+    "proteinPer100g": 1.9,
+    "carbsPer100g": 5,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "celeriac",
+    "kcalPer100g": 42,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 9.2,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "celery",
+    "kcalPer100g": 16,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 3,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "cereal_bar",
+    "kcalPer100g": 400,
+    "proteinPer100g": 5,
+    "carbsPer100g": 68,
+    "fatPer100g": 12,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "chard",
+    "kcalPer100g": 19,
+    "proteinPer100g": 1.8,
+    "carbsPer100g": 3.7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "cheddar",
+    "kcalPer100g": 410.0,
+    "proteinPer100g": 24.2,
+    "carbsPer100g": 2.1,
+    "fatPer100g": 33.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170899",
+    "sourceDescription": "Cheese, cheddar, sharp, sliced"
+  },
+  {
+    "foodId": "cheese",
+    "kcalPer100g": 350,
+    "proteinPer100g": 25,
+    "carbsPer100g": 1.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['cheese']"
+  },
+  {
+    "foodId": "cheese_spread",
+    "kcalPer100g": 295.0,
+    "proteinPer100g": 7.1,
+    "carbsPer100g": 3.5,
+    "fatPer100g": 28.6,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169081",
+    "sourceDescription": "Cheese spread, cream cheese base"
+  },
+  {
+    "foodId": "cheeseburger",
+    "kcalPer100g": 187.5,
+    "proteinPer100g": 9.4,
+    "carbsPer100g": 19.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "Derived from FoodEstimator.wholeItems['cheeseburger'] (300kcal/15g protein/31g carbs per item) converted to a per-100g rate assuming a typical item weight of 160g."
+  },
+  {
+    "foodId": "cheesecake",
+    "kcalPer100g": 321,
+    "proteinPer100g": 5.5,
+    "carbsPer100g": 26,
+    "fatPer100g": 22,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cherry",
+    "kcalPer100g": 63,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 16,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "chia_seeds",
+    "kcalPer100g": 486,
+    "proteinPer100g": 17,
+    "carbsPer100g": 42,
+    "fatPer100g": 31,
+    "fibrePer100g": 34,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "chicken",
+    "kcalPer100g": 165,
+    "proteinPer100g": 31,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['chicken']"
+  },
+  {
+    "foodId": "chicken_breast",
+    "kcalPer100g": 187.0,
+    "proteinPer100g": 33.4,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 4.7,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171078",
+    "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, fried"
+  },
+  {
+    "foodId": "chicken_drumstick",
+    "kcalPer100g": 195.0,
+    "proteinPer100g": 28.6,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 8.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172375",
+    "sourceDescription": "Chicken, broilers or fryers, drumstick, meat only, cooked, fried"
+  },
+  {
+    "foodId": "chicken_nuggets",
+    "kcalPer100g": 250.0,
+    "proteinPer100g": 14.0,
+    "carbsPer100g": 15.0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "Derived from FoodEstimator.wholeItems['chicken nuggets'] (250kcal/14g protein/15g carbs per item) converted to a per-100g rate assuming a typical item weight of 100g."
+  },
+  {
+    "foodId": "chicken_soup",
+    "kcalPer100g": 36.0,
+    "proteinPer100g": 2.5,
+    "carbsPer100g": 3.5,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172884",
+    "sourceDescription": "Soup, stock, chicken, home-prepared"
+  },
+  {
+    "foodId": "chicken_thigh",
+    "kcalPer100g": 218.0,
+    "proteinPer100g": 28.2,
+    "carbsPer100g": 1.2,
+    "fatPer100g": 10.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172387",
+    "sourceDescription": "Chicken, broilers or fryers, thigh, meat only, cooked, fried"
+  },
+  {
+    "foodId": "chicken_wing",
+    "kcalPer100g": 211.0,
+    "proteinPer100g": 30.1,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 9.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172391",
+    "sourceDescription": "Chicken, broilers or fryers, wing, meat only, cooked, fried"
+  },
+  {
+    "foodId": "chickpeas",
+    "kcalPer100g": 164,
+    "proteinPer100g": 8.9,
+    "carbsPer100g": 27,
+    "fatPer100g": 2.6,
+    "fibrePer100g": 7.6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "chicory",
+    "kcalPer100g": 17,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 4,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "chilli_con_carne",
+    "kcalPer100g": 170,
+    "proteinPer100g": 10,
+    "carbsPer100g": 12,
+    "fatPer100g": 9,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "chilli_sauce",
+    "kcalPer100g": 100,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 22,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "chocolate_bar",
+    "kcalPer100g": 534,
+    "proteinPer100g": 6,
+    "carbsPer100g": 58,
+    "fatPer100g": 30,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "chorizo",
+    "kcalPer100g": 296.0,
+    "proteinPer100g": 13.6,
+    "carbsPer100g": 3.8,
+    "fatPer100g": 25.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173859",
+    "sourceDescription": "Sausage, pork, chorizo, link or ground, raw"
+  },
+  {
+    "foodId": "cider",
+    "kcalPer100g": 21.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 0.9,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173469",
+    "sourceDescription": "Vinegar, cider"
+  },
+  {
+    "foodId": "clam",
+    "kcalPer100g": 148.0,
+    "proteinPer100g": 25.6,
+    "carbsPer100g": 5.1,
+    "fatPer100g": 1.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171975",
+    "sourceDescription": "Mollusks, clam, mixed species, cooked, moist heat"
+  },
+  {
+    "foodId": "clementine",
+    "kcalPer100g": 47,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 12,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "coca_cola",
+    "kcalPer100g": 42,
+    "proteinPer100g": 0,
+    "carbsPer100g": 10.6,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "coconut",
+    "kcalPer100g": 354,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 15,
+    "fatPer100g": 33,
+    "fibrePer100g": 9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "coconut_oil",
+    "kcalPer100g": 862,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 99,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cod",
+    "kcalPer100g": 105,
+    "proteinPer100g": 23,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['cod']"
+  },
+  {
+    "foodId": "coffee",
+    "kcalPer100g": 3,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.wholeItems['coffee'] (fixed per-mention, not per-100g)"
+  },
+  {
+    "foodId": "coke_zero",
+    "kcalPer100g": 0.3,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "cola",
+    "kcalPer100g": 42,
+    "proteinPer100g": 0,
+    "carbsPer100g": 10.6,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "coleslaw",
+    "kcalPer100g": 150,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 12,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['coleslaw']"
+  },
+  {
+    "foodId": "condensed_milk",
+    "kcalPer100g": 321,
+    "proteinPer100g": 7.9,
+    "carbsPer100g": 54.4,
+    "fatPer100g": 8.7,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "cooked_ham",
+    "kcalPer100g": 172.0,
+    "proteinPer100g": 22.3,
+    "carbsPer100g": 0.3,
+    "fatPer100g": 8.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168110",
+    "sourceDescription": "Pork, cured, ham, low sodium, lean and fat, cooked"
+  },
+  {
+    "foodId": "cookie",
+    "kcalPer100g": 490,
+    "proteinPer100g": 5,
+    "carbsPer100g": 65,
+    "fatPer100g": 24,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "coriander_leaves",
+    "kcalPer100g": 23,
+    "proteinPer100g": 2.1,
+    "carbsPer100g": 3.7,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 2.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "corn_cake",
+    "kcalPer100g": 387.0,
+    "proteinPer100g": 8.1,
+    "carbsPer100g": 83.4,
+    "fatPer100g": 2.4,
+    "fibrePer100g": 1.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168857",
+    "sourceDescription": "Snacks, corn cakes"
+  },
+  {
+    "foodId": "corn_flour",
+    "kcalPer100g": 361.0,
+    "proteinPer100g": 6.9,
+    "carbsPer100g": 76.8,
+    "fatPer100g": 3.9,
+    "fibrePer100g": 7.3,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169748",
+    "sourceDescription": "Corn flour, whole-grain, white"
+  },
+  {
+    "foodId": "cornstarch",
+    "kcalPer100g": 381.0,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 91.3,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169698",
+    "sourceDescription": "Cornstarch"
+  },
+  {
+    "foodId": "cottage_cheese",
+    "kcalPer100g": 98,
+    "proteinPer100g": 11,
+    "carbsPer100g": 3.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['cottage cheese']"
+  },
+  {
+    "foodId": "courgette",
+    "kcalPer100g": 17,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 3.1,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "couscous",
+    "kcalPer100g": 112,
+    "proteinPer100g": 3.8,
+    "carbsPer100g": 23,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.4,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "crab",
+    "kcalPer100g": 97,
+    "proteinPer100g": 19,
+    "carbsPer100g": 0,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cracker",
+    "kcalPer100g": 430,
+    "proteinPer100g": 8,
+    "carbsPer100g": 65,
+    "fatPer100g": 15,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cranberry",
+    "kcalPer100g": 46,
+    "proteinPer100g": 0.4,
+    "carbsPer100g": 12,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 4.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "crayfish",
+    "kcalPer100g": 87.0,
+    "proteinPer100g": 17.5,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 1.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175170",
+    "sourceDescription": "Crustaceans, crayfish, mixed species, farmed, cooked, moist heat"
+  },
+  {
+    "foodId": "cream_cheese",
+    "kcalPer100g": 342,
+    "proteinPer100g": 6,
+    "carbsPer100g": 4,
+    "fatPer100g": 34,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cream_soup",
+    "kcalPer100g": 100,
+    "proteinPer100g": 3,
+    "carbsPer100g": 8,
+    "fatPer100g": 6,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "crepe",
+    "kcalPer100g": 230,
+    "proteinPer100g": 6,
+    "carbsPer100g": 30,
+    "fatPer100g": 9,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "crispbread",
+    "kcalPer100g": 375,
+    "proteinPer100g": 9,
+    "carbsPer100g": 71,
+    "fatPer100g": 2,
+    "fibrePer100g": 12,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "crisps",
+    "kcalPer100g": 520,
+    "proteinPer100g": 6,
+    "carbsPer100g": 53,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['crisp']"
+  },
+  {
+    "foodId": "croissant",
+    "kcalPer100g": 406,
+    "proteinPer100g": 8,
+    "carbsPer100g": 45,
+    "fatPer100g": 21,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "cucumber",
+    "kcalPer100g": 15,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "cupcake",
+    "kcalPer100g": 400,
+    "proteinPer100g": 4.5,
+    "carbsPer100g": 55,
+    "fatPer100g": 18,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "curry",
+    "kcalPer100g": 150,
+    "proteinPer100g": 10,
+    "carbsPer100g": 6,
+    "fatPer100g": 9,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "custard",
+    "kcalPer100g": 120,
+    "proteinPer100g": 3.7,
+    "carbsPer100g": 18,
+    "fatPer100g": 4,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "dark_chocolate",
+    "kcalPer100g": 546,
+    "proteinPer100g": 7.8,
+    "carbsPer100g": 46,
+    "fatPer100g": 31,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "date",
+    "kcalPer100g": 282,
+    "proteinPer100g": 2.5,
+    "carbsPer100g": 75,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 6.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "diet_coke",
+    "kcalPer100g": 0.3,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "double_espresso",
+    "kcalPer100g": 9,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 1.7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "doughnut",
+    "kcalPer100g": 452,
+    "proteinPer100g": 5,
+    "carbsPer100g": 51,
+    "fatPer100g": 25,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "dragon_fruit",
+    "kcalPer100g": 60,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 13,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 1.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "duck",
+    "kcalPer100g": 230,
+    "proteinPer100g": 25,
+    "carbsPer100g": 0,
+    "fatPer100g": 13,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (generic roast duck meat average, per 100g)"
+  },
+  {
+    "foodId": "duck_breast",
+    "kcalPer100g": 123.0,
+    "proteinPer100g": 19.9,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 4.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174469",
+    "sourceDescription": "Duck, wild, breast, meat only, raw"
+  },
+  {
+    "foodId": "duck_egg",
+    "kcalPer100g": 185.0,
+    "proteinPer100g": 12.8,
+    "carbsPer100g": 1.4,
+    "fatPer100g": 13.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172189",
+    "sourceDescription": "Egg, duck, whole, fresh, raw"
+  },
+  {
+    "foodId": "duck_leg",
+    "kcalPer100g": 217.0,
+    "proteinPer100g": 26.8,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 11.4,
+    "fibrePer100g": null,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171112",
+    "sourceDescription": "Duck, young duckling, domesticated, White Pekin, leg, meat and skin, bone in, cooked, roasted"
+  },
+  {
+    "foodId": "edam",
+    "kcalPer100g": 357,
+    "proteinPer100g": 25,
+    "carbsPer100g": 1,
+    "fatPer100g": 28,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "edamame",
+    "kcalPer100g": 121,
+    "proteinPer100g": 11,
+    "carbsPer100g": 10,
+    "fatPer100g": 5,
+    "fibrePer100g": 5.2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "eel",
+    "kcalPer100g": 236.0,
+    "proteinPer100g": 23.6,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 14.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174194",
+    "sourceDescription": "Fish, eel, mixed species, cooked, dry heat"
+  },
+  {
     "foodId": "egg",
     "kcalPer100g": 143,
     "proteinPer100g": 13,
@@ -25,6 +1317,914 @@
     "fatPer100g": null,
     "fibrePer100g": null,
     "source": "FoodEstimator.foods['egg']"
+  },
+  {
+    "foodId": "egg_noodles",
+    "kcalPer100g": 140,
+    "proteinPer100g": 4.7,
+    "carbsPer100g": 25,
+    "fatPer100g": 2.1,
+    "fibrePer100g": 1.2,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "egg_white",
+    "kcalPer100g": 52,
+    "proteinPer100g": 10.9,
+    "carbsPer100g": 0.7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "egg_yolk",
+    "kcalPer100g": 322,
+    "proteinPer100g": 15.9,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 26.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "elderberry",
+    "kcalPer100g": 73,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 18,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "energy_drink",
+    "kcalPer100g": 45,
+    "proteinPer100g": 0,
+    "carbsPer100g": 11,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "espresso",
+    "kcalPer100g": 9,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 1.7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "evaporated_milk",
+    "kcalPer100g": 134,
+    "proteinPer100g": 6.8,
+    "carbsPer100g": 10,
+    "fatPer100g": 7.9,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "falafel",
+    "kcalPer100g": 333,
+    "proteinPer100g": 13,
+    "carbsPer100g": 32,
+    "fatPer100g": 18,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "fennel",
+    "kcalPer100g": 31,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 3.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "feta",
+    "kcalPer100g": 264,
+    "proteinPer100g": 14,
+    "carbsPer100g": 4,
+    "fatPer100g": 21,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "fig",
+    "kcalPer100g": 74,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 19,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "fish_and_chips",
+    "kcalPer100g": 216,
+    "proteinPer100g": 9,
+    "carbsPer100g": 23,
+    "fatPer100g": 10,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "flat_white",
+    "kcalPer100g": 50,
+    "proteinPer100g": 2.8,
+    "carbsPer100g": 3.8,
+    "fatPer100g": 2.8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "flaxseed",
+    "kcalPer100g": 534,
+    "proteinPer100g": 18,
+    "carbsPer100g": 29,
+    "fatPer100g": 42,
+    "fibrePer100g": 27,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "focaccia",
+    "kcalPer100g": 249,
+    "proteinPer100g": 7,
+    "carbsPer100g": 42,
+    "fatPer100g": 6,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "frankfurter",
+    "kcalPer100g": 298.0,
+    "proteinPer100g": 10.3,
+    "carbsPer100g": 5.0,
+    "fatPer100g": 26.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171633",
+    "sourceDescription": "Frankfurter, meat and poultry, cooked, boiled"
+  },
+  {
+    "foodId": "fried_chicken",
+    "kcalPer100g": 290,
+    "proteinPer100g": 18,
+    "carbsPer100g": 15,
+    "fatPer100g": 19,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "fried_egg",
+    "kcalPer100g": 143.0,
+    "proteinPer100g": 12.6,
+    "carbsPer100g": 0.7,
+    "fatPer100g": 9.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171287",
+    "sourceDescription": "Egg, whole, raw, fresh"
+  },
+  {
+    "foodId": "fried_rice",
+    "kcalPer100g": 163,
+    "proteinPer100g": 4,
+    "carbsPer100g": 20,
+    "fatPer100g": 7,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "fries",
+    "kcalPer100g": 295.7,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 38.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "Derived from FoodEstimator.wholeItems['fries (medium)'] (340kcal/4g protein/44g carbs per item) converted to a per-100g rate assuming a typical item weight of 115g."
+  },
+  {
+    "foodId": "fruit_yoghurt",
+    "kcalPer100g": 98,
+    "proteinPer100g": 3.8,
+    "carbsPer100g": 15,
+    "fatPer100g": 2.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "garlic",
+    "kcalPer100g": 149,
+    "proteinPer100g": 6.4,
+    "carbsPer100g": 33,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 2.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "garlic_sauce",
+    "kcalPer100g": 350,
+    "proteinPer100g": 1,
+    "carbsPer100g": 8,
+    "fatPer100g": 35,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "ghee",
+    "kcalPer100g": 900,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 100,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g, pure fat)"
+  },
+  {
+    "foodId": "gherkin",
+    "kcalPer100g": 12,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 2.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['pickle']"
+  },
+  {
+    "foodId": "gin",
+    "kcalPer100g": 220,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['gin']"
+  },
+  {
+    "foodId": "goat_cheese",
+    "kcalPer100g": 364,
+    "proteinPer100g": 22,
+    "carbsPer100g": 2,
+    "fatPer100g": 30,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "goose_breast",
+    "kcalPer100g": 133.0,
+    "proteinPer100g": 24.3,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 4.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173634",
+    "sourceDescription": "Canada Goose, breast meat only, skinless, raw"
+  },
+  {
+    "foodId": "gooseberry",
+    "kcalPer100g": 44,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 10,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 4.3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "gouda",
+    "kcalPer100g": 356,
+    "proteinPer100g": 25,
+    "carbsPer100g": 2,
+    "fatPer100g": 27,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "goulash",
+    "kcalPer100g": 130,
+    "proteinPer100g": 9,
+    "carbsPer100g": 8,
+    "fatPer100g": 6,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "granola_bar",
+    "kcalPer100g": 420,
+    "proteinPer100g": 7,
+    "carbsPer100g": 60,
+    "fatPer100g": 15,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "grapefruit",
+    "kcalPer100g": 42,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 11,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "grapefruit_juice",
+    "kcalPer100g": 39,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 9,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "grapes",
+    "kcalPer100g": 69,
+    "proteinPer100g": 0.6,
+    "carbsPer100g": 18,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "greek_salad",
+    "kcalPer100g": 110,
+    "proteinPer100g": 4,
+    "carbsPer100g": 6,
+    "fatPer100g": 8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "green_beans",
+    "kcalPer100g": 31,
+    "proteinPer100g": 1.8,
+    "carbsPer100g": 7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "green_lentils",
+    "kcalPer100g": 116,
+    "proteinPer100g": 9,
+    "carbsPer100g": 20,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 7.9,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "green_pepper",
+    "kcalPer100g": 20.0,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 4.6,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.7,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170427",
+    "sourceDescription": "Peppers, sweet, green, raw"
+  },
+  {
+    "foodId": "green_tea",
+    "kcalPer100g": 1.0,
+    "proteinPer100g": 0.2,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171917",
+    "sourceDescription": "Beverages, tea, green, brewed, regular"
+  },
+  {
+    "foodId": "gruyere",
+    "kcalPer100g": 413.0,
+    "proteinPer100g": 29.8,
+    "carbsPer100g": 0.4,
+    "fatPer100g": 32.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171242",
+    "sourceDescription": "Cheese, gruyere"
+  },
+  {
+    "foodId": "guacamole",
+    "kcalPer100g": 150,
+    "proteinPer100g": 2,
+    "carbsPer100g": 8,
+    "fatPer100g": 14,
+    "fibrePer100g": 5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "guava",
+    "kcalPer100g": 68,
+    "proteinPer100g": 2.6,
+    "carbsPer100g": 14,
+    "fatPer100g": 1,
+    "fibrePer100g": 5.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "gummy_sweets",
+    "kcalPer100g": 343,
+    "proteinPer100g": 6.9,
+    "carbsPer100g": 77,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "haddock",
+    "kcalPer100g": 105,
+    "proteinPer100g": 21,
+    "carbsPer100g": 0,
+    "fatPer100g": 0.8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "halibut",
+    "kcalPer100g": 239.0,
+    "proteinPer100g": 18.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 17.7,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174232",
+    "sourceDescription": "Fish, halibut, greenland, cooked, dry heat"
+  },
+  {
+    "foodId": "halloumi",
+    "kcalPer100g": 321,
+    "proteinPer100g": 25,
+    "carbsPer100g": 2,
+    "fatPer100g": 25,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "ham",
+    "kcalPer100g": 145,
+    "proteinPer100g": 21,
+    "carbsPer100g": 1.5,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['ham']"
+  },
+  {
+    "foodId": "hamburger",
+    "kcalPer100g": 166.7,
+    "proteinPer100g": 8.0,
+    "carbsPer100g": 20.0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "Derived from FoodEstimator.wholeItems['hamburger'] (250kcal/12g protein/30g carbs per item) converted to a per-100g rate assuming a typical item weight of 150g."
+  },
+  {
+    "foodId": "hard_candy",
+    "kcalPer100g": 394,
+    "proteinPer100g": 0,
+    "carbsPer100g": 98,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "hazelnuts",
+    "kcalPer100g": 628,
+    "proteinPer100g": 15,
+    "carbsPer100g": 17,
+    "fatPer100g": 61,
+    "fibrePer100g": 9.7,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "hemp_seeds",
+    "kcalPer100g": 553.0,
+    "proteinPer100g": 31.6,
+    "carbsPer100g": 8.7,
+    "fatPer100g": 48.8,
+    "fibrePer100g": 4.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170148",
+    "sourceDescription": "Seeds, hemp seed, hulled"
+  },
+  {
+    "foodId": "herbal_tea",
+    "kcalPer100g": 2.0,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 0.2,
+    "fibrePer100g": null,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169828",
+    "sourceDescription": "Tea, herbal, brewed, Hohoysi (Hopi)"
+  },
+  {
+    "foodId": "herring",
+    "kcalPer100g": 158,
+    "proteinPer100g": 18,
+    "carbsPer100g": 0,
+    "fatPer100g": 9,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "horseradish",
+    "kcalPer100g": 48,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 11,
+    "fatPer100g": 0.7,
+    "fibrePer100g": 3.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "hot_dog",
+    "kcalPer100g": 250,
+    "proteinPer100g": 10,
+    "carbsPer100g": 20,
+    "fatPer100g": 15,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "hot_dog_bun",
+    "kcalPer100g": 280,
+    "proteinPer100g": 9,
+    "carbsPer100g": 53,
+    "fatPer100g": 4,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "hot_sauce",
+    "kcalPer100g": 15,
+    "proteinPer100g": 1,
+    "carbsPer100g": 3,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "hummus",
+    "kcalPer100g": 166,
+    "proteinPer100g": 7.9,
+    "carbsPer100g": 11,
+    "fatPer100g": 9.6,
+    "fibrePer100g": 6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "ice_cream",
+    "kcalPer100g": 207,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 24,
+    "fatPer100g": 11,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "iceberg_lettuce",
+    "kcalPer100g": 14.0,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 3.0,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.2,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169248",
+    "sourceDescription": "Lettuce, iceberg (includes crisphead types), raw"
+  },
+  {
+    "foodId": "instant_coffee",
+    "kcalPer100g": 3.0,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 0.8,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174134",
+    "sourceDescription": "Beverages, coffee, instant, chicory"
+  },
+  {
+    "foodId": "isotonic_drink",
+    "kcalPer100g": 24,
+    "proteinPer100g": 0,
+    "carbsPer100g": 6,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "kale",
+    "kcalPer100g": 49,
+    "proteinPer100g": 4.3,
+    "carbsPer100g": 8.8,
+    "fatPer100g": 0.9,
+    "fibrePer100g": 3.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "kebab",
+    "kcalPer100g": 250,
+    "proteinPer100g": 12,
+    "carbsPer100g": 20,
+    "fatPer100g": 14,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "ketchup",
+    "kcalPer100g": 101,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 24,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "kiwi_fruit",
+    "kcalPer100g": 61,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 15,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "lamb",
+    "kcalPer100g": 294,
+    "proteinPer100g": 25,
+    "carbsPer100g": 0,
+    "fatPer100g": 21,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (generic mixed lamb cuts average, per 100g)"
+  },
+  {
+    "foodId": "lamb_chop",
+    "kcalPer100g": 264.0,
+    "proteinPer100g": 31.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 15.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172626",
+    "sourceDescription": "Lamb, New Zealand, imported, neck chops, separable lean only, cooked, braised"
+  },
+  {
+    "foodId": "lamb_leg",
+    "kcalPer100g": 225.0,
+    "proteinPer100g": 26.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 12.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172485",
+    "sourceDescription": "Lamb, leg, shank half, separable lean and fat, trimmed to 1/4\" fat, choice, cooked, roasted"
+  },
+  {
+    "foodId": "lamb_shoulder",
+    "kcalPer100g": 269.0,
+    "proteinPer100g": 24.9,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 18.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174382",
+    "sourceDescription": "Lamb, shoulder, arm, separable lean and fat, trimmed to 1/8\" fat, cooked, broiled"
+  },
+  {
+    "foodId": "lasagne",
+    "kcalPer100g": 155,
+    "proteinPer100g": 8,
+    "carbsPer100g": 13,
+    "fatPer100g": 8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "latte",
+    "kcalPer100g": 42,
+    "proteinPer100g": 2.4,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 2.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "leek",
+    "kcalPer100g": 61,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 14,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "lemon",
+    "kcalPer100g": 29,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 9.3,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "lemon_lime_soda",
+    "kcalPer100g": 46,
+    "proteinPer100g": 0,
+    "carbsPer100g": 11.5,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "lemonade",
+    "kcalPer100g": 21,
+    "proteinPer100g": 0,
+    "carbsPer100g": 5.2,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "lettuce",
+    "kcalPer100g": 15,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 2.9,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['lettuce']"
+  },
+  {
+    "foodId": "light_mayonnaise",
+    "kcalPer100g": 238.0,
+    "proteinPer100g": 0.4,
+    "carbsPer100g": 9.2,
+    "fatPer100g": 22.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173594",
+    "sourceDescription": "Salad dressing, mayonnaise, light"
+  },
+  {
+    "foodId": "lime",
+    "kcalPer100g": 30,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 10.5,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "liqueur",
+    "kcalPer100g": 308.0,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 32.2,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173665",
+    "sourceDescription": "Alcoholic beverage, liqueur, coffee, 63 proof"
+  },
+  {
+    "foodId": "liver_sausage",
+    "kcalPer100g": 326.0,
+    "proteinPer100g": 14.1,
+    "carbsPer100g": 2.2,
+    "fatPer100g": 28.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173870",
+    "sourceDescription": "Liver sausage, liverwurst, pork"
+  },
+  {
+    "foodId": "lobster",
+    "kcalPer100g": 89.0,
+    "proteinPer100g": 19.0,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 0.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174209",
+    "sourceDescription": "Crustaceans, lobster, northern, cooked, moist heat"
+  },
+  {
+    "foodId": "lychee",
+    "kcalPer100g": 66,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 17,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 1.3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "macadamia_nuts",
+    "kcalPer100g": 718,
+    "proteinPer100g": 8,
+    "carbsPer100g": 14,
+    "fatPer100g": 76,
+    "fibrePer100g": 8.6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "macaroni",
+    "kcalPer100g": 128.0,
+    "proteinPer100g": 4.5,
+    "carbsPer100g": 26.6,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 4.3,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168904",
+    "sourceDescription": "Macaroni, vegetable, enriched, cooked"
+  },
+  {
+    "foodId": "mackerel",
+    "kcalPer100g": 205,
+    "proteinPer100g": 19,
+    "carbsPer100g": 0,
+    "fatPer100g": 14,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "malt_vinegar",
+    "kcalPer100g": 18,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0.4,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "mandarin",
+    "kcalPer100g": 47,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 12,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "mango",
+    "kcalPer100g": 60,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 15,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "margarine",
+    "kcalPer100g": 719.0,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 0.9,
+    "fatPer100g": 80.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171018",
+    "sourceDescription": "Margarine, regular, hard, soybean (hydrogenated)"
+  },
+  {
+    "foodId": "marshmallow",
+    "kcalPer100g": 318,
+    "proteinPer100g": 1.8,
+    "carbsPer100g": 81,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "mascarpone",
+    "kcalPer100g": 450,
+    "proteinPer100g": 7,
+    "carbsPer100g": 4,
+    "fatPer100g": 44,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "mayonnaise",
+    "kcalPer100g": 680.0,
+    "proteinPer100g": 1.0,
+    "carbsPer100g": 0.6,
+    "fatPer100g": 74.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171009",
+    "sourceDescription": "Salad dressing, mayonnaise, regular"
+  },
+  {
+    "foodId": "meatballs",
+    "kcalPer100g": 197.0,
+    "proteinPer100g": 21.0,
+    "carbsPer100g": 8.0,
+    "fatPer100g": 9.0,
+    "fibrePer100g": 4.6,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169067",
+    "sourceDescription": "Meatballs, meatless"
+  },
+  {
+    "foodId": "melon",
+    "kcalPer100g": 34,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 8,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
   },
   {
     "foodId": "milk",
@@ -36,6 +2236,1981 @@
     "source": "FoodEstimator.foods['milk']"
   },
   {
+    "foodId": "milk_chocolate",
+    "kcalPer100g": 534,
+    "proteinPer100g": 7.6,
+    "carbsPer100g": 57,
+    "fatPer100g": 30,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "minced_beef",
+    "kcalPer100g": 240.0,
+    "proteinPer100g": 25.1,
+    "carbsPer100g": 0.6,
+    "fatPer100g": 14.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172161",
+    "sourceDescription": "Beef, ground, unspecified fat content, cooked"
+  },
+  {
+    "foodId": "minced_chicken",
+    "kcalPer100g": 189.0,
+    "proteinPer100g": 23.3,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 10.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171117",
+    "sourceDescription": "Chicken, ground, crumbles, cooked, pan-browned"
+  },
+  {
+    "foodId": "minced_lamb",
+    "kcalPer100g": 283.0,
+    "proteinPer100g": 24.8,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 19.6,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172544",
+    "sourceDescription": "Lamb, ground, cooked, broiled"
+  },
+  {
+    "foodId": "minced_pork",
+    "kcalPer100g": 297.0,
+    "proteinPer100g": 25.7,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 20.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167903",
+    "sourceDescription": "Pork, fresh, ground, cooked"
+  },
+  {
+    "foodId": "minced_turkey",
+    "kcalPer100g": 203.0,
+    "proteinPer100g": 27.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 10.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171506",
+    "sourceDescription": "Turkey, Ground, cooked"
+  },
+  {
+    "foodId": "mineral_water",
+    "kcalPer100g": 22.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 5.5,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174161",
+    "sourceDescription": "Beverages, Water with added vitamins and minerals, bottles, sweetened, assorted fruit flavors"
+  },
+  {
+    "foodId": "mocha",
+    "kcalPer100g": 60,
+    "proteinPer100g": 2.8,
+    "carbsPer100g": 7,
+    "fatPer100g": 2.8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml, typical with milk where applicable)"
+  },
+  {
+    "foodId": "mortadella",
+    "kcalPer100g": 311.0,
+    "proteinPer100g": 16.4,
+    "carbsPer100g": 3.0,
+    "fatPer100g": 25.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174573",
+    "sourceDescription": "Mortadella, beef, pork"
+  },
+  {
+    "foodId": "mozzarella",
+    "kcalPer100g": 141.0,
+    "proteinPer100g": 31.7,
+    "carbsPer100g": 3.5,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 1.8,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169051",
+    "sourceDescription": "Cheese, mozzarella, nonfat"
+  },
+  {
+    "foodId": "muffin",
+    "kcalPer100g": 377,
+    "proteinPer100g": 6,
+    "carbsPer100g": 49,
+    "fatPer100g": 18,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "mulberry",
+    "kcalPer100g": 43,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 9.8,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 1.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "multivitamin_juice",
+    "kcalPer100g": 45,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 10,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "mushroom",
+    "kcalPer100g": 22,
+    "proteinPer100g": 3.1,
+    "carbsPer100g": 3.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['mushroom']"
+  },
+  {
+    "foodId": "mussel",
+    "kcalPer100g": 172.0,
+    "proteinPer100g": 23.8,
+    "carbsPer100g": 7.4,
+    "fatPer100g": 4.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174217",
+    "sourceDescription": "Mollusks, mussel, blue, cooked, moist heat"
+  },
+  {
+    "foodId": "mustard",
+    "kcalPer100g": 66,
+    "proteinPer100g": 4.4,
+    "carbsPer100g": 8,
+    "fatPer100g": 3.3,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "naan_bread",
+    "kcalPer100g": 310,
+    "proteinPer100g": 9,
+    "carbsPer100g": 50,
+    "fatPer100g": 8,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "nectarine",
+    "kcalPer100g": 44,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 11,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "oat_bran",
+    "kcalPer100g": 246.0,
+    "proteinPer100g": 17.3,
+    "carbsPer100g": 66.2,
+    "fatPer100g": 7.0,
+    "fibrePer100g": 15.4,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168872",
+    "sourceDescription": "Oat bran, raw"
+  },
+  {
+    "foodId": "oat_milk",
+    "kcalPer100g": 47,
+    "proteinPer100g": 1,
+    "carbsPer100g": 6.5,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "oat_yoghurt",
+    "kcalPer100g": 70,
+    "proteinPer100g": 1,
+    "carbsPer100g": 10,
+    "fatPer100g": 2.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "oats",
+    "kcalPer100g": 389,
+    "proteinPer100g": 16.9,
+    "carbsPer100g": 66.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['oat']"
+  },
+  {
+    "foodId": "octopus",
+    "kcalPer100g": 164.0,
+    "proteinPer100g": 29.8,
+    "carbsPer100g": 4.4,
+    "fatPer100g": 2.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174249",
+    "sourceDescription": "Mollusks, octopus, common, cooked, moist heat"
+  },
+  {
+    "foodId": "okra",
+    "kcalPer100g": 33,
+    "proteinPer100g": 1.9,
+    "carbsPer100g": 7.5,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 3.2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "olive_oil",
+    "kcalPer100g": 884,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": 100,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "onion",
+    "kcalPer100g": 40,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 9.3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['onion']"
+  },
+  {
+    "foodId": "orange",
+    "kcalPer100g": 47,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 12,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 2.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "orange_juice",
+    "kcalPer100g": 45,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 10,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "orange_soda",
+    "kcalPer100g": 46,
+    "proteinPer100g": 0,
+    "carbsPer100g": 11.5,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "oyster",
+    "kcalPer100g": 163.0,
+    "proteinPer100g": 18.9,
+    "carbsPer100g": 9.9,
+    "fatPer100g": 4.6,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174250",
+    "sourceDescription": "Mollusks, oyster, Pacific, cooked, moist heat"
+  },
+  {
+    "foodId": "paella",
+    "kcalPer100g": 150,
+    "proteinPer100g": 7,
+    "carbsPer100g": 18,
+    "fatPer100g": 5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "pak_choi",
+    "kcalPer100g": 13,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 2.2,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pancake",
+    "kcalPer100g": 227,
+    "proteinPer100g": 6,
+    "carbsPer100g": 28,
+    "fatPer100g": 10,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "papaya",
+    "kcalPer100g": 43,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 11,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1.7,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "parmesan",
+    "kcalPer100g": 420,
+    "proteinPer100g": 38,
+    "carbsPer100g": 4,
+    "fatPer100g": 29,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "parsnip",
+    "kcalPer100g": 75.0,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 18.0,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 4.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170417",
+    "sourceDescription": "Parsnips, raw"
+  },
+  {
+    "foodId": "passion_fruit",
+    "kcalPer100g": 97,
+    "proteinPer100g": 2.2,
+    "carbsPer100g": 23,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 10.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pasta",
+    "kcalPer100g": 158,
+    "proteinPer100g": 5.8,
+    "carbsPer100g": 31,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['pasta']"
+  },
+  {
+    "foodId": "pea",
+    "kcalPer100g": 81,
+    "proteinPer100g": 5.4,
+    "carbsPer100g": 14,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 5.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "peach",
+    "kcalPer100g": 39,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 9.5,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['peach']"
+  },
+  {
+    "foodId": "peanuts",
+    "kcalPer100g": 567,
+    "proteinPer100g": 26,
+    "carbsPer100g": 16,
+    "fatPer100g": 49,
+    "fibrePer100g": 8.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pear",
+    "kcalPer100g": 57,
+    "proteinPer100g": 0.4,
+    "carbsPer100g": 15,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 3.1,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pecans",
+    "kcalPer100g": 691,
+    "proteinPer100g": 9,
+    "carbsPer100g": 14,
+    "fatPer100g": 72,
+    "fibrePer100g": 9.6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pepperoni",
+    "kcalPer100g": 504.0,
+    "proteinPer100g": 19.2,
+    "carbsPer100g": 1.2,
+    "fatPer100g": 46.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174575",
+    "sourceDescription": "Pepperoni, beef and pork, sliced"
+  },
+  {
+    "foodId": "perch",
+    "kcalPer100g": 117.0,
+    "proteinPer100g": 24.9,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173679",
+    "sourceDescription": "Fish, perch, mixed species, cooked, dry heat"
+  },
+  {
+    "foodId": "persimmon",
+    "kcalPer100g": 70,
+    "proteinPer100g": 0.6,
+    "carbsPer100g": 18,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 3.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pesto",
+    "kcalPer100g": 400,
+    "proteinPer100g": 4,
+    "carbsPer100g": 7,
+    "fatPer100g": 40,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pho",
+    "kcalPer100g": 45,
+    "proteinPer100g": 3,
+    "carbsPer100g": 6,
+    "fatPer100g": 1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "pickled_herring",
+    "kcalPer100g": 262.0,
+    "proteinPer100g": 14.2,
+    "carbsPer100g": 9.6,
+    "fatPer100g": 18.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175118",
+    "sourceDescription": "Fish, herring, Atlantic, pickled"
+  },
+  {
+    "foodId": "pike",
+    "kcalPer100g": 119.0,
+    "proteinPer100g": 24.5,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 1.6,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171997",
+    "sourceDescription": "Fish, pike, walleye, cooked, dry heat"
+  },
+  {
+    "foodId": "pineapple",
+    "kcalPer100g": 50,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 13,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pistachios",
+    "kcalPer100g": 560,
+    "proteinPer100g": 20,
+    "carbsPer100g": 28,
+    "fatPer100g": 45,
+    "fibrePer100g": 10.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pita_bread",
+    "kcalPer100g": 275,
+    "proteinPer100g": 9,
+    "carbsPer100g": 55,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pizza",
+    "kcalPer100g": 266,
+    "proteinPer100g": 11,
+    "carbsPer100g": 33,
+    "fatPer100g": 10,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (typical pizza, per 100g)"
+  },
+  {
+    "foodId": "plaice",
+    "kcalPer100g": 91,
+    "proteinPer100g": 18,
+    "carbsPer100g": 0,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "plum",
+    "kcalPer100g": 46,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 11.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['plum']"
+  },
+  {
+    "foodId": "poached_egg",
+    "kcalPer100g": 143.0,
+    "proteinPer100g": 12.5,
+    "carbsPer100g": 0.7,
+    "fatPer100g": 9.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172186",
+    "sourceDescription": "Egg, whole, cooked, poached"
+  },
+  {
+    "foodId": "poke_bowl",
+    "kcalPer100g": 130,
+    "proteinPer100g": 9,
+    "carbsPer100g": 15,
+    "fatPer100g": 4,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "polenta",
+    "kcalPer100g": 85,
+    "proteinPer100g": 2,
+    "carbsPer100g": 18,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "polish_sausage",
+    "kcalPer100g": 326.0,
+    "proteinPer100g": 14.1,
+    "carbsPer100g": 1.6,
+    "fatPer100g": 28.7,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174577",
+    "sourceDescription": "Polish sausage, pork"
+  },
+  {
+    "foodId": "pollock",
+    "kcalPer100g": 86.6,
+    "proteinPer100g": 19.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 1.0,
+    "fibrePer100g": null,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173726",
+    "sourceDescription": "Fish, pollock, Alaska, cooked"
+  },
+  {
+    "foodId": "pomegranate",
+    "kcalPer100g": 83,
+    "proteinPer100g": 1.7,
+    "carbsPer100g": 19,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "popcorn",
+    "kcalPer100g": 387,
+    "proteinPer100g": 9,
+    "carbsPer100g": 78,
+    "fatPer100g": 4,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "poppy_seeds",
+    "kcalPer100g": 525.0,
+    "proteinPer100g": 18.0,
+    "carbsPer100g": 28.1,
+    "fatPer100g": 41.6,
+    "fibrePer100g": 19.5,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171330",
+    "sourceDescription": "Spices, poppy seed"
+  },
+  {
+    "foodId": "pork",
+    "kcalPer100g": 242,
+    "proteinPer100g": 27,
+    "carbsPer100g": 0,
+    "fatPer100g": 14,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (generic mixed pork cuts average, per 100g)"
+  },
+  {
+    "foodId": "pork_belly",
+    "kcalPer100g": 518.0,
+    "proteinPer100g": 9.3,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 53.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167812",
+    "sourceDescription": "Pork, fresh, belly, raw"
+  },
+  {
+    "foodId": "pork_chop",
+    "kcalPer100g": 202.0,
+    "proteinPer100g": 24.7,
+    "carbsPer100g": 0.8,
+    "fatPer100g": 11.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168380",
+    "sourceDescription": "Pork, fresh, blade, (chops), boneless, separable lean and fat, cooked, broiled"
+  },
+  {
+    "foodId": "pork_loin",
+    "kcalPer100g": 210.0,
+    "proteinPer100g": 28.6,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 9.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168232",
+    "sourceDescription": "Pork, fresh, loin, whole, separable lean only, cooked, broiled"
+  },
+  {
+    "foodId": "pork_ribs",
+    "kcalPer100g": 247.0,
+    "proteinPer100g": 27.7,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 14.3,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168306",
+    "sourceDescription": "Pork, fresh, loin, country-style ribs, separable lean only, cooked, braised"
+  },
+  {
+    "foodId": "pork_tenderloin",
+    "kcalPer100g": 143.0,
+    "proteinPer100g": 26.2,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 3.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168250",
+    "sourceDescription": "Pork, fresh, loin, tenderloin, separable lean only, cooked, roasted"
+  },
+  {
+    "foodId": "potato",
+    "kcalPer100g": 87,
+    "proteinPer100g": 1.9,
+    "carbsPer100g": 20,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['potato']"
+  },
+  {
+    "foodId": "potato_pancakes",
+    "kcalPer100g": 268.0,
+    "proteinPer100g": 6.1,
+    "carbsPer100g": 27.8,
+    "fatPer100g": 14.8,
+    "fibrePer100g": 3.3,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170092",
+    "sourceDescription": "Potato pancakes"
+  },
+  {
+    "foodId": "potato_starch",
+    "kcalPer100g": 320.0,
+    "proteinPer100g": 3.1,
+    "carbsPer100g": 52.8,
+    "fatPer100g": 10.7,
+    "fibrePer100g": 3.5,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174099",
+    "sourceDescription": "Bread, gluten-free, white, made with potato extract, rice starch, and rice flour"
+  },
+  {
+    "foodId": "pretzel",
+    "kcalPer100g": 380,
+    "proteinPer100g": 10,
+    "carbsPer100g": 76,
+    "fatPer100g": 3,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "protein_bar",
+    "kcalPer100g": 370,
+    "proteinPer100g": 25,
+    "carbsPer100g": 38,
+    "fatPer100g": 12,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pudding",
+    "kcalPer100g": 150,
+    "proteinPer100g": 3,
+    "carbsPer100g": 22,
+    "fatPer100g": 5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "pumpkin",
+    "kcalPer100g": 26,
+    "proteinPer100g": 1,
+    "carbsPer100g": 6.5,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "pumpkin_seeds",
+    "kcalPer100g": 559,
+    "proteinPer100g": 30,
+    "carbsPer100g": 11,
+    "fatPer100g": 49,
+    "fibrePer100g": 6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "quail_egg",
+    "kcalPer100g": 158.0,
+    "proteinPer100g": 13.1,
+    "carbsPer100g": 0.4,
+    "fatPer100g": 11.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172191",
+    "sourceDescription": "Egg, quail, whole, fresh, raw"
+  },
+  {
+    "foodId": "quince",
+    "kcalPer100g": 57,
+    "proteinPer100g": 0.4,
+    "carbsPer100g": 15,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.9,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "quinoa",
+    "kcalPer100g": 120,
+    "proteinPer100g": 4.4,
+    "carbsPer100g": 21,
+    "fatPer100g": 1.9,
+    "fibrePer100g": 2.8,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "rabbit",
+    "kcalPer100g": 197.0,
+    "proteinPer100g": 29.1,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 8.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172522",
+    "sourceDescription": "Game meat, rabbit, domesticated, composite of cuts, cooked, roasted"
+  },
+  {
+    "foodId": "radish",
+    "kcalPer100g": 16,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 3.4,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "raisins",
+    "kcalPer100g": 300,
+    "proteinPer100g": 3.1,
+    "carbsPer100g": 79,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['raisin']"
+  },
+  {
+    "foodId": "ramen",
+    "kcalPer100g": 70,
+    "proteinPer100g": 4,
+    "carbsPer100g": 10,
+    "fatPer100g": 2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "rapeseed_oil",
+    "kcalPer100g": 884.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 100.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172336",
+    "sourceDescription": "Oil, canola"
+  },
+  {
+    "foodId": "raspberry",
+    "kcalPer100g": 52,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 12,
+    "fatPer100g": 0.7,
+    "fibrePer100g": 6.5,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "red_cabbage",
+    "kcalPer100g": 31.0,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 7.4,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.1,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169977",
+    "sourceDescription": "Cabbage, red, raw"
+  },
+  {
+    "foodId": "red_kidney_beans",
+    "kcalPer100g": 127.0,
+    "proteinPer100g": 8.7,
+    "carbsPer100g": 22.8,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 7.4,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175242",
+    "sourceDescription": "Beans, kidney, red, mature seeds, cooked, boiled, with salt"
+  },
+  {
+    "foodId": "red_lentils",
+    "kcalPer100g": 116,
+    "proteinPer100g": 9,
+    "carbsPer100g": 20,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 7.9,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "red_pepper",
+    "kcalPer100g": 26.0,
+    "proteinPer100g": 1.0,
+    "carbsPer100g": 6.0,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.1,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170108",
+    "sourceDescription": "Peppers, sweet, red, raw"
+  },
+  {
+    "foodId": "red_wine",
+    "kcalPer100g": 85.0,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 2.6,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173190",
+    "sourceDescription": "Alcoholic beverage, wine, table, red"
+  },
+  {
+    "foodId": "redcurrant",
+    "kcalPer100g": 56,
+    "proteinPer100g": 1.4,
+    "carbsPer100g": 14,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 4.3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "rhubarb",
+    "kcalPer100g": 21,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 4.5,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "rice",
+    "kcalPer100g": 130,
+    "proteinPer100g": 2.7,
+    "carbsPer100g": 28,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['rice']"
+  },
+  {
+    "foodId": "rice_cake",
+    "kcalPer100g": 387,
+    "proteinPer100g": 8,
+    "carbsPer100g": 81,
+    "fatPer100g": 3,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "rice_milk",
+    "kcalPer100g": 47,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 9.2,
+    "fatPer100g": 1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "rice_noodles",
+    "kcalPer100g": 109,
+    "proteinPer100g": 1.8,
+    "carbsPer100g": 25,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.9,
+    "source": "generic standard nutrition reference (cooked, per 100g)"
+  },
+  {
+    "foodId": "ricotta",
+    "kcalPer100g": 174,
+    "proteinPer100g": 11,
+    "carbsPer100g": 3,
+    "fatPer100g": 13,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "risotto",
+    "kcalPer100g": 130,
+    "proteinPer100g": 3,
+    "carbsPer100g": 20,
+    "fatPer100g": 4,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "rocket",
+    "kcalPer100g": 25,
+    "proteinPer100g": 2.6,
+    "carbsPer100g": 3.7,
+    "fatPer100g": 0.7,
+    "fibrePer100g": 1.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "romaine_lettuce",
+    "kcalPer100g": 17.0,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 3.3,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2.1,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169247",
+    "sourceDescription": "Lettuce, cos or romaine, raw"
+  },
+  {
+    "foodId": "rum",
+    "kcalPer100g": 220,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['rum']"
+  },
+  {
+    "foodId": "rye_bread",
+    "kcalPer100g": 259.0,
+    "proteinPer100g": 8.5,
+    "carbsPer100g": 48.3,
+    "fatPer100g": 3.3,
+    "fibrePer100g": 5.8,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172684",
+    "sourceDescription": "Bread, rye"
+  },
+  {
+    "foodId": "rye_flour",
+    "kcalPer100g": 325.0,
+    "proteinPer100g": 15.9,
+    "carbsPer100g": 68.6,
+    "fatPer100g": 2.2,
+    "fibrePer100g": 23.8,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168885",
+    "sourceDescription": "Rye flour, dark"
+  },
+  {
+    "foodId": "salad",
+    "kcalPer100g": 60,
+    "proteinPer100g": 2,
+    "carbsPer100g": 5,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['salad']"
+  },
+  {
+    "foodId": "salami",
+    "kcalPer100g": 261.0,
+    "proteinPer100g": 12.6,
+    "carbsPer100g": 1.9,
+    "fatPer100g": 22.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172935",
+    "sourceDescription": "Salami, cooked, beef"
+  },
+  {
+    "foodId": "salmon",
+    "kcalPer100g": 208,
+    "proteinPer100g": 20,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['salmon']"
+  },
+  {
+    "foodId": "salsa",
+    "kcalPer100g": 36,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 7,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 1.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "salted_nuts",
+    "kcalPer100g": 484.0,
+    "proteinPer100g": 14.2,
+    "carbsPer100g": 44.9,
+    "fatPer100g": 31.9,
+    "fibrePer100g": 5.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167969",
+    "sourceDescription": "Snacks, trail mix, regular, with chocolate chips, salted nuts and seeds"
+  },
+  {
+    "foodId": "sandwich",
+    "kcalPer100g": 250,
+    "proteinPer100g": 9,
+    "carbsPer100g": 30,
+    "fatPer100g": 10,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (typical filled sandwich, per 100g)"
+  },
+  {
+    "foodId": "sardine",
+    "kcalPer100g": 208,
+    "proteinPer100g": 25,
+    "carbsPer100g": 0,
+    "fatPer100g": 11,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "sauerkraut",
+    "kcalPer100g": 19.0,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 4.3,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 2.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169279",
+    "sourceDescription": "Sauerkraut, canned, solids and liquids"
+  },
+  {
+    "foodId": "sausage",
+    "kcalPer100g": 300,
+    "proteinPer100g": 13,
+    "carbsPer100g": 3,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['sausage']"
+  },
+  {
+    "foodId": "savoy_cabbage",
+    "kcalPer100g": 27.0,
+    "proteinPer100g": 2.0,
+    "carbsPer100g": 6.1,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 3.1,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "170388",
+    "sourceDescription": "Cabbage, savoy, raw"
+  },
+  {
+    "foodId": "scallop",
+    "kcalPer100g": 111.0,
+    "proteinPer100g": 20.5,
+    "carbsPer100g": 5.4,
+    "fatPer100g": 0.8,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167742",
+    "sourceDescription": "Mollusks, scallop, (bay and sea), cooked, steamed"
+  },
+  {
+    "foodId": "scrambled_egg",
+    "kcalPer100g": 149.0,
+    "proteinPer100g": 10.0,
+    "carbsPer100g": 1.6,
+    "fatPer100g": 11.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172187",
+    "sourceDescription": "Egg, whole, cooked, scrambled"
+  },
+  {
+    "foodId": "sea_bass",
+    "kcalPer100g": 97,
+    "proteinPer100g": 18,
+    "carbsPer100g": 0,
+    "fatPer100g": 2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "semolina",
+    "kcalPer100g": 360.0,
+    "proteinPer100g": 12.7,
+    "carbsPer100g": 72.8,
+    "fatPer100g": 1.1,
+    "fibrePer100g": 3.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169715",
+    "sourceDescription": "Semolina, enriched"
+  },
+  {
+    "foodId": "sesame_oil",
+    "kcalPer100g": 884.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 100.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171016",
+    "sourceDescription": "Oil, sesame, salad or cooking"
+  },
+  {
+    "foodId": "sesame_seeds",
+    "kcalPer100g": 573,
+    "proteinPer100g": 18,
+    "carbsPer100g": 23,
+    "fatPer100g": 50,
+    "fibrePer100g": 12,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "shrimp",
+    "kcalPer100g": 99,
+    "proteinPer100g": 24,
+    "carbsPer100g": 0.2,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "skimmed_milk",
+    "kcalPer100g": 35,
+    "proteinPer100g": 3.4,
+    "carbsPer100g": 5,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "smoked_ham",
+    "kcalPer100g": 122.0,
+    "proteinPer100g": 17.9,
+    "carbsPer100g": 7.3,
+    "fatPer100g": 2.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174611",
+    "sourceDescription": "Ham, honey, smoked, cooked"
+  },
+  {
+    "foodId": "smoked_salmon",
+    "kcalPer100g": 117,
+    "proteinPer100g": 18.3,
+    "carbsPer100g": 0,
+    "fatPer100g": 4.3,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical smoked/cured salmon, per 100g)"
+  },
+  {
+    "foodId": "smoothie",
+    "kcalPer100g": 68.0,
+    "proteinPer100g": 1.2,
+    "carbsPer100g": 14.0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "Derived from FoodEstimator.wholeItems['fruit smoothie'] (170kcal/3g protein/35g carbs per item) converted to a per-100ml rate assuming that item is one 250ml glass (this app's own standard glass volume) -- generic catalogue item; a specific/branded smoothie can later get its own record."
+  },
+  {
+    "foodId": "sole",
+    "kcalPer100g": 86.0,
+    "proteinPer100g": 15.2,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 2.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174197",
+    "sourceDescription": "Fish, flatfish (flounder and sole species), cooked, dry heat"
+  },
+  {
+    "foodId": "sorbet",
+    "kcalPer100g": 130,
+    "proteinPer100g": 0.5,
+    "carbsPer100g": 32,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "soup",
+    "kcalPer100g": 55,
+    "proteinPer100g": 2.5,
+    "carbsPer100g": 7,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['soup']"
+  },
+  {
+    "foodId": "sour_cream",
+    "kcalPer100g": 193,
+    "proteinPer100g": 2.1,
+    "carbsPer100g": 4.6,
+    "fatPer100g": 19.7,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "sourdough_bread",
+    "kcalPer100g": 272.0,
+    "proteinPer100g": 10.8,
+    "carbsPer100g": 51.9,
+    "fatPer100g": 2.4,
+    "fibrePer100g": 2.2,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172675",
+    "sourceDescription": "Bread, french or vienna (includes sourdough)"
+  },
+  {
+    "foodId": "soy_milk",
+    "kcalPer100g": 33,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 1.8,
+    "fatPer100g": 1.8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "soy_sauce",
+    "kcalPer100g": 53,
+    "proteinPer100g": 8,
+    "carbsPer100g": 5,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.8,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "soy_yoghurt",
+    "kcalPer100g": 64,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 4,
+    "fatPer100g": 3,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "spaghetti",
+    "kcalPer100g": 130.0,
+    "proteinPer100g": 4.6,
+    "carbsPer100g": 26.1,
+    "fatPer100g": 0.6,
+    "fibrePer100g": null,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168912",
+    "sourceDescription": "Spaghetti, spinach, cooked"
+  },
+  {
+    "foodId": "spaghetti_bolognese",
+    "kcalPer100g": 145,
+    "proteinPer100g": 7,
+    "carbsPer100g": 17,
+    "fatPer100g": 5,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "spinach",
+    "kcalPer100g": 23,
+    "proteinPer100g": 2.9,
+    "carbsPer100g": 3.6,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 2.2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "split_peas",
+    "kcalPer100g": 116.0,
+    "proteinPer100g": 8.3,
+    "carbsPer100g": 20.5,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 8.3,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175257",
+    "sourceDescription": "Peas, split, mature seeds, cooked, boiled, with salt"
+  },
+  {
+    "foodId": "sponge_cake",
+    "kcalPer100g": 297,
+    "proteinPer100g": 6,
+    "carbsPer100g": 52,
+    "fatPer100g": 8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "sports_drink",
+    "kcalPer100g": 24,
+    "proteinPer100g": 0,
+    "carbsPer100g": 6,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "spring_onion",
+    "kcalPer100g": 32,
+    "proteinPer100g": 1.8,
+    "carbsPer100g": 7.3,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "squid",
+    "kcalPer100g": 175.0,
+    "proteinPer100g": 17.9,
+    "carbsPer100g": 7.8,
+    "fatPer100g": 7.5,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171982",
+    "sourceDescription": "Mollusks, squid, mixed species, cooked, fried"
+  },
+  {
+    "foodId": "stew",
+    "kcalPer100g": 110,
+    "proteinPer100g": 8,
+    "carbsPer100g": 7,
+    "fatPer100g": 4,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "stir_fry",
+    "kcalPer100g": 120,
+    "proteinPer100g": 8,
+    "carbsPer100g": 8,
+    "fatPer100g": 6,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "strawberry",
+    "kcalPer100g": 32,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 7.7,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "sunflower_oil",
+    "kcalPer100g": 884.0,
+    "proteinPer100g": 0.0,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 100.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172357",
+    "sourceDescription": "Oil, industrial, mid-oleic, sunflower"
+  },
+  {
+    "foodId": "sunflower_seeds",
+    "kcalPer100g": 584,
+    "proteinPer100g": 21,
+    "carbsPer100g": 20,
+    "fatPer100g": 51,
+    "fibrePer100g": 8.6,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "surimi",
+    "kcalPer100g": 99.0,
+    "proteinPer100g": 15.2,
+    "carbsPer100g": 6.8,
+    "fatPer100g": 0.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173702",
+    "sourceDescription": "Fish, surimi"
+  },
+  {
+    "foodId": "sushi",
+    "kcalPer100g": 150,
+    "proteinPer100g": 5,
+    "carbsPer100g": 28,
+    "fatPer100g": 1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "swede",
+    "kcalPer100g": 37,
+    "proteinPer100g": 1.1,
+    "carbsPer100g": 8,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 2.3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "sweet_potato",
+    "kcalPer100g": 86,
+    "proteinPer100g": 1.6,
+    "carbsPer100g": 20,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "sweetcorn",
+    "kcalPer100g": 86,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 19,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 2,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "swordfish",
+    "kcalPer100g": 172.0,
+    "proteinPer100g": 23.4,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 7.9,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173704",
+    "sourceDescription": "Fish, swordfish, cooked, dry heat"
+  },
+  {
+    "foodId": "tartar_sauce",
+    "kcalPer100g": 300,
+    "proteinPer100g": 0.7,
+    "carbsPer100g": 6,
+    "fatPer100g": 31,
+    "fibrePer100g": 0.2,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tea",
+    "kcalPer100g": 2,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.wholeItems['tea'] (fixed per-mention, not per-100g)"
+  },
+  {
+    "foodId": "tempeh",
+    "kcalPer100g": 193,
+    "proteinPer100g": 19,
+    "carbsPer100g": 9,
+    "fatPer100g": 11,
+    "fibrePer100g": 5.4,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tequila",
+    "kcalPer100g": 110.0,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 11.3,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168753",
+    "sourceDescription": "Alcoholic beverage, tequila sunrise, canned"
+  },
+  {
+    "foodId": "thousand_island_dressing",
+    "kcalPer100g": 290,
+    "proteinPer100g": 0.6,
+    "carbsPer100g": 15,
+    "fatPer100g": 27,
+    "fibrePer100g": 0.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "toffee",
+    "kcalPer100g": 459,
+    "proteinPer100g": 2,
+    "carbsPer100g": 74,
+    "fatPer100g": 18,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tofu",
+    "kcalPer100g": 76,
+    "proteinPer100g": 8,
+    "carbsPer100g": 1.9,
+    "fatPer100g": 4.8,
+    "fibrePer100g": 0.3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tomato",
+    "kcalPer100g": 18,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 3.9,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['tomato']"
+  },
+  {
+    "foodId": "tomato_juice",
+    "kcalPer100g": 17,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 3.5,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "tomato_paste",
+    "kcalPer100g": 82,
+    "proteinPer100g": 4.3,
+    "carbsPer100g": 18.9,
+    "fatPer100g": 0.5,
+    "fibrePer100g": 4.1,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tomato_sauce",
+    "kcalPer100g": 82,
+    "proteinPer100g": 1.6,
+    "carbsPer100g": 18,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 1.5,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "tomato_soup",
+    "kcalPer100g": 30.0,
+    "proteinPer100g": 0.8,
+    "carbsPer100g": 6.6,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 0.6,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171591",
+    "sourceDescription": "Soup, tomato, low sodium, with water"
+  },
+  {
+    "foodId": "tonic_water",
+    "kcalPer100g": 34,
+    "proteinPer100g": 0,
+    "carbsPer100g": 8.5,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "tortilla_chips",
+    "kcalPer100g": 490,
+    "proteinPer100g": 7,
+    "carbsPer100g": 63,
+    "fatPer100g": 24,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "trout",
+    "kcalPer100g": 148,
+    "proteinPer100g": 20.8,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['trout']"
+  },
+  {
+    "foodId": "tuna",
+    "kcalPer100g": 132,
+    "proteinPer100g": 28,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['tuna']"
+  },
+  {
+    "foodId": "tuna_in_oil",
+    "kcalPer100g": 198.0,
+    "proteinPer100g": 29.1,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 8.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "173708",
+    "sourceDescription": "Fish, tuna, light, canned in oil, drained solids"
+  },
+  {
+    "foodId": "tuna_salad",
+    "kcalPer100g": 130,
+    "proteinPer100g": 10,
+    "carbsPer100g": 4,
+    "fatPer100g": 8,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
+    "foodId": "turkey",
+    "kcalPer100g": 189,
+    "proteinPer100g": 29,
+    "carbsPer100g": 0,
+    "fatPer100g": 7,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (generic roast turkey average, per 100g)"
+  },
+  {
+    "foodId": "turkey_breast",
+    "kcalPer100g": 147.0,
+    "proteinPer100g": 30.1,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 2.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171496",
+    "sourceDescription": "Turkey, whole, breast, meat only, cooked, roasted"
+  },
+  {
+    "foodId": "turkey_thigh",
+    "kcalPer100g": 159.0,
+    "proteinPer100g": 25.1,
+    "carbsPer100g": 0.5,
+    "fatPer100g": 6.2,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172877",
+    "sourceDescription": "Turkey, retail parts, thigh, meat only, cooked, roasted"
+  },
+  {
+    "foodId": "turnip",
+    "kcalPer100g": 28,
+    "proteinPer100g": 0.9,
+    "carbsPer100g": 6.4,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1.8,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "veal_cutlet",
+    "kcalPer100g": 151.0,
+    "proteinPer100g": 31.9,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 2.6,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174880",
+    "sourceDescription": "Veal, leg, top round, cap off, cutlet, boneless, cooked, grilled"
+  },
+  {
+    "foodId": "vegetable_soup",
+    "kcalPer100g": 5.0,
+    "proteinPer100g": 0.2,
+    "carbsPer100g": 0.9,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "171583",
+    "sourceDescription": "Soup, vegetable broth, ready to serve"
+  },
+  {
+    "foodId": "venison",
+    "kcalPer100g": 116.0,
+    "proteinPer100g": 21.5,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 2.7,
+    "fibrePer100g": null,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167622",
+    "sourceDescription": "Deer (venison), sitka, raw (Alaska Native)"
+  },
+  {
+    "foodId": "vinaigrette",
+    "kcalPer100g": 330,
+    "proteinPer100g": 0.2,
+    "carbsPer100g": 5,
+    "fatPer100g": 34,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "vinegar",
+    "kcalPer100g": 18,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0.4,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.foods['vinegar']"
+  },
+  {
+    "foodId": "vodka",
+    "kcalPer100g": 220,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['vodka']"
+  },
+  {
+    "foodId": "waffle",
+    "kcalPer100g": 291,
+    "proteinPer100g": 7,
+    "carbsPer100g": 43,
+    "fatPer100g": 11,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "walnuts",
+    "kcalPer100g": 654,
+    "proteinPer100g": 15,
+    "carbsPer100g": 14,
+    "fatPer100g": 65,
+    "fibrePer100g": 6.7,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "water",
+    "kcalPer100g": 0,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "known zero-calorie"
+  },
+  {
+    "foodId": "watercress",
+    "kcalPer100g": 11,
+    "proteinPer100g": 2.3,
+    "carbsPer100g": 1.3,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "watermelon",
+    "kcalPer100g": 30,
+    "proteinPer100g": 0.6,
+    "carbsPer100g": 8,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.4,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "wheat_flour",
+    "kcalPer100g": 361.0,
+    "proteinPer100g": 12.0,
+    "carbsPer100g": 72.5,
+    "fatPer100g": 1.7,
+    "fibrePer100g": 2.4,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168913",
+    "sourceDescription": "Wheat flours, bread, unenriched"
+  },
+  {
+    "foodId": "wheat_pasta",
+    "kcalPer100g": 159.0,
+    "proteinPer100g": 5.8,
+    "carbsPer100g": 31.5,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 4.6,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168916",
+    "sourceDescription": "Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, cooked"
+  },
+  {
+    "foodId": "whisky",
+    "kcalPer100g": 220,
+    "proteinPer100g": 0,
+    "carbsPer100g": 0,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['whisky']"
+  },
+  {
+    "foodId": "white_beans",
+    "kcalPer100g": 139.0,
+    "proteinPer100g": 9.7,
+    "carbsPer100g": 25.1,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 6.3,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175249",
+    "sourceDescription": "Beans, white, mature seeds, cooked, boiled, with salt"
+  },
+  {
+    "foodId": "white_bread",
+    "kcalPer100g": 238.0,
+    "proteinPer100g": 10.7,
+    "carbsPer100g": 43.9,
+    "fatPer100g": 2.1,
+    "fibrePer100g": 9.2,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "167532",
+    "sourceDescription": "Bread, white wheat"
+  },
+  {
+    "foodId": "white_chocolate",
+    "kcalPer100g": 539,
+    "proteinPer100g": 5.9,
+    "carbsPer100g": 59,
+    "fatPer100g": 30,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "white_rice",
+    "kcalPer100g": 360.0,
+    "proteinPer100g": 6.6,
+    "carbsPer100g": 79.3,
+    "fatPer100g": 0.6,
+    "fibrePer100g": 1.4,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168879",
+    "sourceDescription": "Rice, white, medium-grain, raw, enriched"
+  },
+  {
+    "foodId": "white_wine",
+    "kcalPer100g": 82.0,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 2.6,
+    "fatPer100g": 0.0,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "174837",
+    "sourceDescription": "Alcoholic beverage, wine, table, white"
+  },
+  {
+    "foodId": "whole_milk",
+    "kcalPer100g": 65,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 4.7,
+    "fatPer100g": 3.6,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100ml)"
+  },
+  {
+    "foodId": "wholemeal_bread",
+    "kcalPer100g": 278.0,
+    "proteinPer100g": 8.4,
+    "carbsPer100g": 51.4,
+    "fatPer100g": 5.4,
+    "fibrePer100g": 6.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "172690",
+    "sourceDescription": "Bread, whole-wheat, prepared from recipe"
+  },
+  {
+    "foodId": "wholemeal_flour",
+    "kcalPer100g": 332.0,
+    "proteinPer100g": 9.6,
+    "carbsPer100g": 74.5,
+    "fatPer100g": 1.9,
+    "fibrePer100g": 13.1,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "168944",
+    "sourceDescription": "Wheat flour, whole-grain, soft wheat"
+  },
+  {
+    "foodId": "wild_boar",
+    "kcalPer100g": 160.0,
+    "proteinPer100g": 28.3,
+    "carbsPer100g": 0.0,
+    "fatPer100g": 4.4,
+    "fibrePer100g": 0.0,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "175298",
+    "sourceDescription": "Game meat, boar, wild, cooked, roasted"
+  },
+  {
+    "foodId": "wild_rice",
+    "kcalPer100g": 357.0,
+    "proteinPer100g": 14.7,
+    "carbsPer100g": 74.9,
+    "fatPer100g": 1.1,
+    "fibrePer100g": 6.2,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169726",
+    "sourceDescription": "Wild rice, raw"
+  },
+  {
+    "foodId": "wine",
+    "kcalPer100g": 83,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 2.6,
+    "fatPer100g": null,
+    "fibrePer100g": null,
+    "source": "FoodEstimator.drinks['wine']"
+  },
+  {
+    "foodId": "worcestershire_sauce",
+    "kcalPer100g": 78,
+    "proteinPer100g": 0,
+    "carbsPer100g": 19.5,
+    "fatPer100g": 0,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "wrap",
+    "kcalPer100g": 280,
+    "proteinPer100g": 9,
+    "carbsPer100g": 46,
+    "fatPer100g": 6,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (per 100g)"
+  },
+  {
+    "foodId": "yellow_pepper",
+    "kcalPer100g": 27.0,
+    "proteinPer100g": 1.0,
+    "carbsPer100g": 6.3,
+    "fatPer100g": 0.2,
+    "fibrePer100g": 0.9,
+    "source": "USDA FoodData Central (SR Legacy)",
+    "sourceId": "169383",
+    "sourceDescription": "Peppers, sweet, yellow, raw"
+  },
+  {
     "foodId": "yoghurt",
     "kcalPer100g": 80,
     "proteinPer100g": 5,
@@ -43,14 +4218,5 @@
     "fatPer100g": null,
     "fibrePer100g": null,
     "source": "FoodEstimator.foods['yoghurt']"
-  },
-  {
-    "foodId": "beer",
-    "kcalPer100g": 43,
-    "proteinPer100g": 0.5,
-    "carbsPer100g": 3.6,
-    "fatPer100g": null,
-    "fibrePer100g": null,
-    "source": "FoodEstimator.drinks['beer']"
   }
 ]

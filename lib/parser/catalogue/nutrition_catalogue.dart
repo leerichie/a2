@@ -11,6 +11,7 @@ class NutrientRecord {
     this.fatPer100g,
     this.fibrePer100g,
     required this.source,
+    this.sourceId,
   });
 
   final String foodId;
@@ -20,6 +21,9 @@ class NutrientRecord {
   final double? fatPer100g;
   final double? fibrePer100g;
   final String source;
+  // The upstream dataset's own record id (e.g. a USDA FoodData Central
+  // fdc_id) for traceability -- not read by the parser at runtime.
+  final String? sourceId;
 }
 
 class NutritionCatalogue {
@@ -44,6 +48,7 @@ class NutritionCatalogue {
         fatPer100g: (m['fatPer100g'] as num?)?.toDouble(),
         fibrePer100g: (m['fibrePer100g'] as num?)?.toDouble(),
         source: m['source'] as String,
+        sourceId: m['sourceId'] as String?,
       );
       byId[record.foodId] = record;
     }

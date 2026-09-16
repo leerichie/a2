@@ -1,6 +1,7 @@
 {
   "walking": [
     "walk",
+    "walked",
     "walking",
     "walking outdoors"
   ],
@@ -35,6 +36,7 @@
   ],
   "moderate_cycling": [
     "bike ride",
+    "cycled",
     "cycling",
     "moderate cycling"
   ],
@@ -112,6 +114,7 @@
     "spinning"
   ],
   "easy_swimming": [
+    "breaststroke",
     "easy swimming",
     "slow swimming"
   ],
@@ -176,6 +179,8 @@
   ],
   "hill_walking": [
     "hill walking",
+    "uphill walk",
+    "uphill walking",
     "walking hills"
   ],
   "climbing": [
@@ -183,7 +188,9 @@
     "rock climbing"
   ],
   "horse_riding": [
+    "cross country riding",
     "horse riding",
+    "horse riding cross country",
     "horseback riding"
   ],
   "gardening": [
@@ -222,5 +229,12 @@
   ],
   "sitting": [
     "sitting"
+  ],
+  "jumping": [
+    "jump rope",
+    "jumping",
+    "rope jumping",
+    "skipping",
+    "skipping rope"
   ]
 }

@@ -8,8 +8,8 @@
       "seconds"
     ],
     "minute": [
-      "m",
       "min",
+      "min.",
       "mins",
       "minute",
       "minutes"
@@ -47,5 +47,10 @@
     "1:30",
     "90 min",
     "90 minutes"
-  ]
+  ],
+  "distance_units": {
+    "km": ["km", "km.", "kilometre", "kilometres", "kilometer", "kilometers"],
+    "m": ["m", "m.", "metre", "metres", "meter", "meters"]
+  },
+  "step_units": ["step", "steps"]
 }

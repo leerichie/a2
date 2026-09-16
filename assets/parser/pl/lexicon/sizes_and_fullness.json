@@ -1,0 +1,8 @@
+{
+  "canonical": {
+    "small": ["mały", "mała", "małe"],
+    "medium": ["średni", "średnia", "średnie"],
+    "large": ["duży", "duża", "duże"]
+  },
+  "fullness": {}
+}

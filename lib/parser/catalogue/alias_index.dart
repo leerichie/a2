@@ -1,3 +1,5 @@
+import '../pipeline/text_folding.dart';
+
 class AliasCollision {
   const AliasCollision(this.alias, this.ids);
   final String alias;
@@ -7,7 +9,7 @@ class AliasCollision {
   String toString() => '"$alias" -> $ids';
 }
 
-String normalizeAlias(String s) => s.trim().toLowerCase();
+String normalizeAlias(String s) => foldDiacritics(s.trim().toLowerCase());
 
 class AliasIndex {
   AliasIndex._(this._byAlias, this.collisions);

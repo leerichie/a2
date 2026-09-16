@@ -40,11 +40,16 @@ ActivityResolution resolveActivity(
     return ActivityResolution(entry: byId[id], matchedAlias: trimmed);
   }
 
+  // Substring match against the canonical name AND every locale alias
+  // (not canonical alone) -- needed so an ambiguous bare word in any
+  // supported language ("tenis", "pływanie") still finds its candidate
+  // activities, not just an ambiguous bare English word.
   final lower = trimmed.toLowerCase();
   final suggestions = catalogue.entries
-      .where((e) =>
-          e.canonical.toLowerCase().contains(lower) ||
-          lower.contains(e.canonical.toLowerCase()))
+      .where((e) {
+        final names = [e.canonical, ...e.aliases].map((n) => n.toLowerCase());
+        return names.any((n) => n.contains(lower) || lower.contains(n));
+      })
       .map((e) => e.id)
       .take(3)
       .toList();

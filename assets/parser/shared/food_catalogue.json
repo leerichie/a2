@@ -7,7 +7,8 @@
   {
     "id": "ale",
     "canonical": "ale",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "almond_milk",
@@ -72,7 +73,8 @@
   {
     "id": "back_bacon",
     "canonical": "back bacon",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "bacon"
   },
   {
     "id": "bacon",
@@ -87,7 +89,8 @@
   {
     "id": "baguette",
     "canonical": "baguette",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "baked_beans",
@@ -129,7 +132,8 @@
   {
     "id": "basmati_rice",
     "canonical": "basmati rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
   },
   {
     "id": "bean_sprouts",
@@ -137,14 +141,21 @@
     "category": "vegetable"
   },
   {
+    "id": "beans",
+    "canonical": "beans",
+    "category": "legume_nut_seed"
+  },
+  {
     "id": "beef_brisket",
     "canonical": "beef brisket",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beef_curry",
     "canonical": "beef curry",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "curry"
   },
   {
     "id": "beef_jerky",
@@ -154,27 +165,32 @@
   {
     "id": "beef_ribeye",
     "canonical": "beef ribeye",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beef_sirloin",
     "canonical": "beef sirloin",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beef_steak",
     "canonical": "beef steak",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beef_stew_meat",
     "canonical": "beef stew meat",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beef_tenderloin",
     "canonical": "beef tenderloin",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "beer",
@@ -205,7 +221,8 @@
   {
     "id": "black_beans",
     "canonical": "black beans",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "black_pudding",
@@ -236,12 +253,14 @@
   {
     "id": "boiled_egg",
     "canonical": "boiled egg",
-    "category": "egg"
+    "category": "egg",
+    "genericParent": "egg"
   },
   {
     "id": "brandy",
     "canonical": "brandy",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "whisky"
   },
   {
     "id": "brazil_nuts",
@@ -287,7 +306,8 @@
   {
     "id": "brown_rice",
     "canonical": "brown rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
   },
   {
     "id": "brownie",
@@ -318,7 +338,8 @@
   {
     "id": "burger_patty",
     "canonical": "burger patty",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "butter",
@@ -328,18 +349,21 @@
   {
     "id": "butter_beans",
     "canonical": "butter beans",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "buttermilk",
     "canonical": "buttermilk",
     "category": "dairy",
-    "region": "Europe/Poland"
+    "region": "Europe/Poland",
+    "genericParent": "milk"
   },
   {
     "id": "button_mushroom",
     "canonical": "button mushroom",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "mushroom"
   },
   {
     "id": "cabbage",
@@ -364,7 +388,8 @@
   {
     "id": "cannellini_beans",
     "canonical": "cannellini beans",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "cappuccino",
@@ -424,7 +449,8 @@
   {
     "id": "champagne",
     "canonical": "champagne",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "chard",
@@ -434,12 +460,19 @@
   {
     "id": "cheddar",
     "canonical": "cheddar cheese",
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
+  },
+  {
+    "id": "cheese",
+    "canonical": "cheese",
     "category": "dairy_alternative"
   },
   {
     "id": "cheese_spread",
     "canonical": "cheese spread",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "cheeseburger",
@@ -462,19 +495,27 @@
     "category": "legume_nut_seed"
   },
   {
+    "id": "chicken",
+    "canonical": "chicken",
+    "category": "meat_poultry"
+  },
+  {
     "id": "chicken_breast",
     "canonical": "chicken breast",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "chicken_curry",
     "canonical": "chicken curry",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "curry"
   },
   {
     "id": "chicken_drumstick",
     "canonical": "chicken drumstick",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "chicken_nuggets",
@@ -484,17 +525,20 @@
   {
     "id": "chicken_soup",
     "canonical": "chicken soup",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "soup"
   },
   {
     "id": "chicken_thigh",
     "canonical": "chicken thigh",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "chicken_wing",
     "canonical": "chicken wing",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "chickpeas",
@@ -529,7 +573,8 @@
   {
     "id": "cider",
     "canonical": "cider",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "clam",
@@ -589,7 +634,8 @@
   {
     "id": "cooked_ham",
     "canonical": "cooked ham",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "ham"
   },
   {
     "id": "cookie",
@@ -725,7 +771,8 @@
   {
     "id": "dijon_mustard",
     "canonical": "Dijon mustard",
-    "category": "sauce_condiment_fat"
+    "category": "sauce_condiment_fat",
+    "genericParent": "mustard"
   },
   {
     "id": "double_espresso",
@@ -745,7 +792,8 @@
   {
     "id": "duck_breast",
     "canonical": "duck breast",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "duck"
   },
   {
     "id": "duck_egg",
@@ -755,7 +803,8 @@
   {
     "id": "duck_leg",
     "canonical": "duck leg",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "duck"
   },
   {
     "id": "edam",
@@ -800,7 +849,8 @@
   {
     "id": "emmental",
     "canonical": "emmental",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "energy_drink",
@@ -866,7 +916,8 @@
   {
     "id": "frankfurter",
     "canonical": "frankfurter",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "sausage"
   },
   {
     "id": "fried_chicken",
@@ -876,7 +927,8 @@
   {
     "id": "fried_egg",
     "canonical": "fried egg",
-    "category": "egg"
+    "category": "egg",
+    "genericParent": "egg"
   },
   {
     "id": "fried_rice",
@@ -891,7 +943,8 @@
   {
     "id": "fruit_tea",
     "canonical": "fruit tea",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "tea"
   },
   {
     "id": "fruit_yoghurt",
@@ -901,7 +954,8 @@
   {
     "id": "fusilli",
     "canonical": "fusilli",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "garlic",
@@ -987,7 +1041,8 @@
   {
     "id": "greek_yoghurt",
     "canonical": "greek yoghurt",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "yoghurt"
   },
   {
     "id": "green_beans",
@@ -1002,17 +1057,20 @@
   {
     "id": "green_pepper",
     "canonical": "green pepper",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "bell_pepper"
   },
   {
     "id": "green_tea",
     "canonical": "green tea",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "tea"
   },
   {
     "id": "gruyere",
     "canonical": "gruyere",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "guacamole",
@@ -1032,7 +1090,8 @@
   {
     "id": "gyros",
     "canonical": "gyros",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "kebab"
   },
   {
     "id": "haddock",
@@ -1082,7 +1141,8 @@
   {
     "id": "herbal_tea",
     "canonical": "herbal tea",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "tea"
   },
   {
     "id": "herring",
@@ -1107,7 +1167,8 @@
   {
     "id": "hot_dog_sausage",
     "canonical": "hot dog sausage",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "sausage"
   },
   {
     "id": "hot_sauce",
@@ -1127,17 +1188,20 @@
   {
     "id": "iceberg_lettuce",
     "canonical": "iceberg lettuce",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "lettuce"
   },
   {
     "id": "instant_coffee",
     "canonical": "instant coffee",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "coffee"
   },
   {
     "id": "ipa",
     "canonical": "IPA",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "isotonic_drink",
@@ -1147,7 +1211,8 @@
   {
     "id": "jasmine_rice",
     "canonical": "jasmine rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
   },
   {
     "id": "kabanos_sausage",
@@ -1169,7 +1234,8 @@
     "id": "kefir",
     "canonical": "kefir",
     "category": "dairy",
-    "region": "Europe/Poland"
+    "region": "Europe/Poland",
+    "genericParent": "milk"
   },
   {
     "id": "ketchup",
@@ -1179,7 +1245,8 @@
   {
     "id": "king_prawn",
     "canonical": "king prawn",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "shrimp"
   },
   {
     "id": "kiwi_fruit",
@@ -1189,27 +1256,32 @@
   {
     "id": "lactose_free_milk",
     "canonical": "lactose-free milk",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "milk"
   },
   {
     "id": "lager",
     "canonical": "lager",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "lamb_chop",
     "canonical": "lamb chop",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "lamb"
   },
   {
     "id": "lamb_leg",
     "canonical": "lamb leg",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "lamb"
   },
   {
     "id": "lamb_shoulder",
     "canonical": "lamb shoulder",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "lamb"
   },
   {
     "id": "lasagne",
@@ -1219,7 +1291,8 @@
   {
     "id": "lasagne_sheets",
     "canonical": "lasagne sheets",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "latte",
@@ -1268,7 +1341,8 @@
   {
     "id": "linseed",
     "canonical": "linseed",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "flaxseed"
   },
   {
     "id": "liqueur",
@@ -1298,7 +1372,8 @@
   {
     "id": "macaroni",
     "canonical": "macaroni",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "mackerel",
@@ -1323,7 +1398,8 @@
   {
     "id": "margarine",
     "canonical": "margarine",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "butter"
   },
   {
     "id": "marshmallow",
@@ -1348,7 +1424,8 @@
   {
     "id": "meatballs",
     "canonical": "meatballs",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "melon",
@@ -1379,17 +1456,20 @@
   {
     "id": "minced_beef",
     "canonical": "minced beef",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "beef"
   },
   {
     "id": "minced_chicken",
     "canonical": "minced chicken",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "minced_lamb",
     "canonical": "minced lamb",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "lamb"
   },
   {
     "id": "minced_meat_cutlet",
@@ -1400,17 +1480,20 @@
   {
     "id": "minced_pork",
     "canonical": "minced pork",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "minced_turkey",
     "canonical": "minced turkey",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "turkey"
   },
   {
     "id": "mineral_water",
     "canonical": "mineral water",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "water"
   },
   {
     "id": "mizeria",
@@ -1431,7 +1514,8 @@
   {
     "id": "mozzarella",
     "canonical": "mozzarella",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "muffin",
@@ -1446,7 +1530,8 @@
   {
     "id": "multigrain_bread",
     "canonical": "multigrain bread",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "multivitamin_juice",
@@ -1616,12 +1701,14 @@
   {
     "id": "pecorino",
     "canonical": "pecorino",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "penne",
     "canonical": "penne",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "pepperoni",
@@ -1651,12 +1738,14 @@
   {
     "id": "pickled_beetroot",
     "canonical": "pickled beetroot",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "beetroot"
   },
   {
     "id": "pickled_herring",
     "canonical": "pickled herring",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "herring"
   },
   {
     "id": "pierogi",
@@ -1697,7 +1786,8 @@
   {
     "id": "plain_yoghurt",
     "canonical": "plain yoghurt",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "yoghurt"
   },
   {
     "id": "plum",
@@ -1707,7 +1797,8 @@
   {
     "id": "poached_egg",
     "canonical": "poached egg",
-    "category": "egg"
+    "category": "egg",
+    "genericParent": "egg"
   },
   {
     "id": "poke_bowl",
@@ -1748,37 +1839,44 @@
   {
     "id": "pork_belly",
     "canonical": "pork belly",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "pork_chop",
     "canonical": "pork chop",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "pork_loin",
     "canonical": "pork loin",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "pork_ribs",
     "canonical": "pork ribs",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "pork_tenderloin",
     "canonical": "pork tenderloin",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "pork"
   },
   {
     "id": "porter",
     "canonical": "porter",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "portobello_mushroom",
     "canonical": "portobello mushroom",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "mushroom"
   },
   {
     "id": "potato",
@@ -1804,7 +1902,8 @@
   {
     "id": "processed_cheese",
     "canonical": "processed cheese",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "prosciutto",
@@ -1814,7 +1913,8 @@
   {
     "id": "prosecco",
     "canonical": "prosecco",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "protein_bar",
@@ -1850,7 +1950,8 @@
     "id": "quark",
     "canonical": "quark",
     "category": "dairy",
-    "region": "Europe/Poland"
+    "region": "Europe/Poland",
+    "genericParent": "yoghurt"
   },
   {
     "id": "quince",
@@ -1873,6 +1974,11 @@
     "category": "vegetable"
   },
   {
+    "id": "raisins",
+    "canonical": "raisins",
+    "category": "fruit"
+  },
+  {
     "id": "ramen",
     "canonical": "ramen",
     "category": "prepared_meal"
@@ -1880,7 +1986,8 @@
   {
     "id": "rapeseed_oil",
     "canonical": "rapeseed oil",
-    "category": "sauce_condiment_fat"
+    "category": "sauce_condiment_fat",
+    "genericParent": "olive_oil"
   },
   {
     "id": "raspberry",
@@ -1890,12 +1997,14 @@
   {
     "id": "red_cabbage",
     "canonical": "red cabbage",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "cabbage"
   },
   {
     "id": "red_kidney_beans",
     "canonical": "red kidney beans",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "red_lentils",
@@ -1905,17 +2014,20 @@
   {
     "id": "red_onion",
     "canonical": "red onion",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "onion"
   },
   {
     "id": "red_pepper",
     "canonical": "red pepper",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "bell_pepper"
   },
   {
     "id": "red_wine",
     "canonical": "red wine",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "redcurrant",
@@ -1960,7 +2072,8 @@
   {
     "id": "risotto_rice",
     "canonical": "risotto rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
   },
   {
     "id": "rocket",
@@ -1970,12 +2083,14 @@
   {
     "id": "rolled_oats",
     "canonical": "rolled oats",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "oats"
   },
   {
     "id": "romaine_lettuce",
     "canonical": "romaine lettuce",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "lettuce"
   },
   {
     "id": "ros",
@@ -1986,7 +2101,8 @@
   {
     "id": "ros_wine",
     "canonical": "rosé wine",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "rum",
@@ -1996,12 +2112,18 @@
   {
     "id": "rye_bread",
     "canonical": "rye bread",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "rye_flour",
     "canonical": "rye flour",
     "category": "grain_bakery"
+  },
+  {
+    "id": "salad",
+    "canonical": "salad",
+    "category": "prepared_meal"
   },
   {
     "id": "salami",
@@ -2021,7 +2143,8 @@
   {
     "id": "salted_nuts",
     "canonical": "salted nuts",
-    "category": "snack_dessert"
+    "category": "snack_dessert",
+    "genericParent": "peanuts"
   },
   {
     "id": "sardine",
@@ -2031,12 +2154,19 @@
   {
     "id": "sauerkraut",
     "canonical": "sauerkraut",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "cabbage"
+  },
+  {
+    "id": "sausage",
+    "canonical": "sausage",
+    "category": "meat_poultry"
   },
   {
     "id": "savoy_cabbage",
     "canonical": "savoy cabbage",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "cabbage"
   },
   {
     "id": "scallop",
@@ -2046,7 +2176,8 @@
   {
     "id": "scrambled_egg",
     "canonical": "scrambled egg",
-    "category": "egg"
+    "category": "egg",
+    "genericParent": "egg"
   },
   {
     "id": "sea_bass",
@@ -2065,7 +2196,8 @@
     "base_food": "milk",
     "modifiers": [
       "reduced-fat"
-    ]
+    ],
+    "genericParent": "milk"
   },
   {
     "id": "semolina",
@@ -2076,7 +2208,8 @@
   {
     "id": "sesame_oil",
     "canonical": "sesame oil",
-    "category": "sauce_condiment_fat"
+    "category": "sauce_condiment_fat",
+    "genericParent": "olive_oil"
   },
   {
     "id": "sesame_seeds",
@@ -2086,12 +2219,14 @@
   {
     "id": "shawarma",
     "canonical": "shawarma",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "kebab"
   },
   {
     "id": "sheep_cheese",
     "canonical": "sheep cheese",
-    "category": "dairy_alternative"
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   },
   {
     "id": "shrimp",
@@ -2111,17 +2246,20 @@
     "id": "skyr",
     "canonical": "skyr",
     "category": "dairy",
-    "region": "Europe/Poland"
+    "region": "Europe/Poland",
+    "genericParent": "yoghurt"
   },
   {
     "id": "smoked_ham",
     "canonical": "smoked ham",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "ham"
   },
   {
     "id": "smoked_mackerel",
     "canonical": "smoked mackerel",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "mackerel"
   },
   {
     "id": "smoked_salmon",
@@ -2131,7 +2269,8 @@
   {
     "id": "smoked_trout",
     "canonical": "smoked trout",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "trout"
   },
   {
     "id": "smoothie",
@@ -2149,6 +2288,11 @@
     "category": "snack_dessert"
   },
   {
+    "id": "soup",
+    "canonical": "soup",
+    "category": "prepared_meal"
+  },
+  {
     "id": "sour_cream",
     "canonical": "sour cream",
     "category": "dairy",
@@ -2157,7 +2301,8 @@
   {
     "id": "sourdough_bread",
     "canonical": "sourdough bread",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "soy_milk",
@@ -2177,7 +2322,8 @@
   {
     "id": "spaghetti",
     "canonical": "spaghetti",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "spaghetti_bolognese",
@@ -2187,12 +2333,14 @@
   {
     "id": "sparkling_water",
     "canonical": "sparkling water",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "water"
   },
   {
     "id": "sparkling_wine",
     "canonical": "sparkling wine",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "spinach",
@@ -2202,7 +2350,8 @@
   {
     "id": "split_peas",
     "canonical": "split peas",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "sponge_cake",
@@ -2237,7 +2386,8 @@
   {
     "id": "stout",
     "canonical": "stout",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "beer"
   },
   {
     "id": "strawberry",
@@ -2247,12 +2397,14 @@
   {
     "id": "streaky_bacon",
     "canonical": "streaky bacon",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "bacon"
   },
   {
     "id": "sunflower_oil",
     "canonical": "sunflower oil",
-    "category": "sauce_condiment_fat"
+    "category": "sauce_condiment_fat",
+    "genericParent": "olive_oil"
   },
   {
     "id": "sunflower_seeds",
@@ -2307,7 +2459,8 @@
   {
     "id": "tequila",
     "canonical": "tequila",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "whisky"
   },
   {
     "id": "thousand_island_dressing",
@@ -2347,7 +2500,8 @@
   {
     "id": "tomato_soup",
     "canonical": "tomato soup",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "soup"
   },
   {
     "id": "tonic_water",
@@ -2372,7 +2526,8 @@
   {
     "id": "tuna_in_brine",
     "canonical": "tuna in brine",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "tuna"
   },
   {
     "id": "tuna_in_oil",
@@ -2387,17 +2542,20 @@
   {
     "id": "tuna_steak",
     "canonical": "tuna steak",
-    "category": "fish_seafood"
+    "category": "fish_seafood",
+    "genericParent": "tuna"
   },
   {
     "id": "turkey_breast",
     "canonical": "turkey breast",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "turkey"
   },
   {
     "id": "turkey_thigh",
     "canonical": "turkey thigh",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "turkey"
   },
   {
     "id": "turnip",
@@ -2423,7 +2581,8 @@
   {
     "id": "vegetable_soup",
     "canonical": "vegetable soup",
-    "category": "prepared_meal"
+    "category": "prepared_meal",
+    "genericParent": "soup"
   },
   {
     "id": "venison",
@@ -2478,7 +2637,8 @@
   {
     "id": "wheat_pasta",
     "canonical": "wheat pasta",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "whisky",
@@ -2488,17 +2648,20 @@
   {
     "id": "white_beans",
     "canonical": "white beans",
-    "category": "legume_nut_seed"
+    "category": "legume_nut_seed",
+    "genericParent": "beans"
   },
   {
     "id": "white_bread",
     "canonical": "white bread",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "white_cabbage",
     "canonical": "white cabbage",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "cabbage"
   },
   {
     "id": "white_chocolate",
@@ -2508,17 +2671,20 @@
   {
     "id": "white_rice",
     "canonical": "white rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
   },
   {
     "id": "white_wine",
     "canonical": "white wine",
-    "category": "drink"
+    "category": "drink",
+    "genericParent": "wine"
   },
   {
     "id": "whole_chicken",
     "canonical": "whole chicken",
-    "category": "meat_poultry"
+    "category": "meat_poultry",
+    "genericParent": "chicken"
   },
   {
     "id": "whole_milk",
@@ -2532,12 +2698,14 @@
   {
     "id": "wholegrain_mustard",
     "canonical": "wholegrain mustard",
-    "category": "sauce_condiment_fat"
+    "category": "sauce_condiment_fat",
+    "genericParent": "mustard"
   },
   {
     "id": "wholemeal_bread",
     "canonical": "wholemeal bread",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "bread"
   },
   {
     "id": "wholemeal_flour",
@@ -2547,7 +2715,8 @@
   {
     "id": "wholewheat_pasta",
     "canonical": "wholewheat pasta",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "pasta"
   },
   {
     "id": "wild_boar",
@@ -2557,7 +2726,13 @@
   {
     "id": "wild_rice",
     "canonical": "wild rice",
-    "category": "grain_bakery"
+    "category": "grain_bakery",
+    "genericParent": "rice"
+  },
+  {
+    "id": "wine",
+    "canonical": "wine",
+    "category": "drink"
   },
   {
     "id": "worcestershire_sauce",
@@ -2572,11 +2747,42 @@
   {
     "id": "yellow_pepper",
     "canonical": "yellow pepper",
-    "category": "vegetable"
+    "category": "vegetable",
+    "genericParent": "bell_pepper"
   },
   {
     "id": "yoghurt",
     "canonical": "yoghurt",
     "category": "dairy"
+  },
+  {
+    "id": "beef",
+    "canonical": "beef",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "pork",
+    "canonical": "pork",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "turkey",
+    "canonical": "turkey",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "lamb",
+    "canonical": "lamb",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "duck",
+    "canonical": "duck",
+    "category": "meat_poultry"
+  },
+  {
+    "id": "sandwich",
+    "canonical": "sandwich",
+    "category": "prepared_meal"
   }
 ]

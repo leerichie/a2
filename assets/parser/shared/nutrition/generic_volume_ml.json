@@ -1,0 +1,26 @@
+{
+  "teaspoon": {
+    "ml": 5,
+    "confidence": "medium"
+  },
+  "tablespoon": {
+    "ml": 15,
+    "confidence": "medium"
+  },
+  "dessertspoon": {
+    "ml": 10,
+    "confidence": "medium"
+  },
+  "cup": {
+    "ml": 240,
+    "confidence": "medium"
+  },
+  "fluid_ounce": {
+    "ml": 30,
+    "confidence": "medium"
+  },
+  "spoonful": {
+    "ml": 15,
+    "confidence": "low"
+  }
+}

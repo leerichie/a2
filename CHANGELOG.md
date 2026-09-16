@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0+40 — 2026-09-16
+
+- Fixed Android release builds failing during R8 shrinking because the ML Kit
+  Flutter wrapper references optional Chinese, Devanagari, Japanese and Korean
+  text-recognition modules that a2 does not use. The release rules now suppress
+  only those expected optional-module warnings; Latin label scanning remains
+  included.
+
+## 1.0.0+38 — 2026-09-15
+
+- Made plain `flutter run` use the a2 server's direct private Tailscale address,
+  avoiding emulator failures caused by the short server name not resolving.
+- Allowed only local Flutter web pages (`localhost` and `127.0.0.1`) to call
+  the private API, including Chrome's private-network check, so Chrome debug
+  runs work without disabling browser security.
+- Added an optional `A2_SERVER_URL` compile-time override for testing another
+  server without editing source code.
+
 ## 1.0.0+37 — 2026-09-14
 
 - Added the foundation for a centralized, canonical food/exercise text parser

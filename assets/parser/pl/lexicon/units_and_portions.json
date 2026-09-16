@@ -1,0 +1,11 @@
+{
+  "standard_volume": {
+    "teaspoon": ["łyżeczka", "łyżeczki", "łyżeczek"],
+    "tablespoon": ["łyżka", "łyżki", "łyżek"]
+  },
+  "approx_household": {},
+  "count_piece": {
+    "slice": ["kromka", "kromki", "plaster", "plastry"]
+  },
+  "packaging": {}
+}

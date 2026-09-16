@@ -383,5 +383,12 @@
     "category": "daily_activity",
     "intensity": "light",
     "met": 1.3
+  },
+  {
+    "id": "jumping",
+    "canonical": "jumping",
+    "category": "fitness",
+    "intensity": "vigorous",
+    "met": 8.8
   }
 ]

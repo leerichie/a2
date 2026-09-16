@@ -38,5 +38,3103 @@
     "size": "standard",
     "grams": 13.5,
     "confidence": "medium"
+  },
+  {
+    "foodId": "oats",
+    "foodNameAsGiven": "oats",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "peach",
+    "foodNameAsGiven": "peach",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "plum",
+    "foodNameAsGiven": "plum",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "crisps",
+    "foodNameAsGiven": "crisps",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "raisins",
+    "foodNameAsGiven": "raisins",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "coleslaw",
+    "foodNameAsGiven": "coleslaw",
+    "unit": null,
+    "size": null,
+    "grams": 70,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "ham",
+    "foodNameAsGiven": "ham",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bacon",
+    "foodNameAsGiven": "bacon",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sausage",
+    "foodNameAsGiven": "sausage",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bread",
+    "foodNameAsGiven": "bread",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "apple",
+    "foodNameAsGiven": "apple",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chicken",
+    "foodNameAsGiven": "chicken",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "salmon",
+    "foodNameAsGiven": "salmon",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "trout",
+    "foodNameAsGiven": "trout",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tuna",
+    "foodNameAsGiven": "tuna",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cod",
+    "foodNameAsGiven": "cod",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "rice",
+    "foodNameAsGiven": "rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pasta",
+    "foodNameAsGiven": "pasta",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "potato",
+    "foodNameAsGiven": "potato",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cheese",
+    "foodNameAsGiven": "cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "avocado",
+    "foodNameAsGiven": "avocado",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "mushroom",
+    "foodNameAsGiven": "mushroom",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tomato",
+    "foodNameAsGiven": "tomato",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "onion",
+    "foodNameAsGiven": "onion",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "carrot",
+    "foodNameAsGiven": "carrot",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bell_pepper",
+    "foodNameAsGiven": "bell pepper",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "gherkin",
+    "foodNameAsGiven": "gherkin",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cabbage",
+    "foodNameAsGiven": "cabbage",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "lettuce",
+    "foodNameAsGiven": "lettuce",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "salad",
+    "foodNameAsGiven": "salad",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "vinegar",
+    "foodNameAsGiven": "vinegar",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "beans",
+    "foodNameAsGiven": "beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "soup",
+    "foodNameAsGiven": "soup",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "milk",
+    "foodNameAsGiven": "milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "banana",
+    "foodNameAsGiven": "banana",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "egg",
+    "foodNameAsGiven": "egg",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "yoghurt",
+    "foodNameAsGiven": "yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cottage_cheese",
+    "foodNameAsGiven": "cottage cheese",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "coffee",
+    "foodNameAsGiven": "coffee",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tea",
+    "foodNameAsGiven": "tea",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "smoothie",
+    "foodNameAsGiven": "smoothie",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "Bare mention assumes one standard 250ml glass -- the same glass volume already used to derive nutrients.json's smoothie record, and the implicit default the old FoodEstimator baked into its 'fruit smoothie' whole-item figure. Without this rule, 'smoothie'/'fruit smoothie' with no container word has no resolvable volume and reports no nutrition data (the regression this restores)."
+  },
+  {
+    "foodId": "smoked_salmon",
+    "foodNameAsGiven": "smoked salmon",
+    "unit": "slice",
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "typical packaged smoked-salmon deli slice (~20-30g)"
+  },
+  {
+    "foodId": "smoked_salmon",
+    "foodNameAsGiven": "smoked salmon",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical smoked-salmon serving/starter portion when no amount is given"
+  },
+  {
+    "foodId": "boiled_egg",
+    "foodNameAsGiven": "boiled egg",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "poached_egg",
+    "foodNameAsGiven": "poached egg",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "fried_egg",
+    "foodNameAsGiven": "fried egg",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "scrambled_egg",
+    "foodNameAsGiven": "scrambled egg",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium",
+    "source": "typical 2-egg scrambled-egg breakfast serving"
+  },
+  {
+    "foodId": "egg_white",
+    "foodNameAsGiven": "egg white",
+    "unit": null,
+    "size": null,
+    "grams": 33,
+    "confidence": "medium",
+    "source": "typical white from one large egg"
+  },
+  {
+    "foodId": "egg_yolk",
+    "foodNameAsGiven": "egg yolk",
+    "unit": null,
+    "size": null,
+    "grams": 17,
+    "confidence": "medium",
+    "source": "typical yolk from one large egg"
+  },
+  {
+    "foodId": "beef",
+    "foodNameAsGiven": "beef",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pork",
+    "foodNameAsGiven": "pork",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "turkey",
+    "foodNameAsGiven": "turkey",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "lamb",
+    "foodNameAsGiven": "lamb",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "duck",
+    "foodNameAsGiven": "duck",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "beef_steak",
+    "foodNameAsGiven": "beef steak",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "beef_sirloin",
+    "foodNameAsGiven": "beef sirloin",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "beef_ribeye",
+    "foodNameAsGiven": "beef ribeye",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "beef_tenderloin",
+    "foodNameAsGiven": "beef tenderloin",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "beef_brisket",
+    "foodNameAsGiven": "beef brisket",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "beef_stew_meat",
+    "foodNameAsGiven": "beef stew meat",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "minced_beef",
+    "foodNameAsGiven": "minced beef",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "burger_patty",
+    "foodNameAsGiven": "burger patty",
+    "unit": null,
+    "size": null,
+    "grams": 110,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "meatballs",
+    "foodNameAsGiven": "meatballs",
+    "unit": null,
+    "size": null,
+    "grams": 90,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "pork_chop",
+    "foodNameAsGiven": "pork chop",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "pork_loin",
+    "foodNameAsGiven": "pork loin",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "pork_belly",
+    "foodNameAsGiven": "pork belly",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "pork_tenderloin",
+    "foodNameAsGiven": "pork tenderloin",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "pork_ribs",
+    "foodNameAsGiven": "pork ribs",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "minced_pork",
+    "foodNameAsGiven": "minced pork",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "turkey_breast",
+    "foodNameAsGiven": "turkey breast",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "turkey_thigh",
+    "foodNameAsGiven": "turkey thigh",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "minced_turkey",
+    "foodNameAsGiven": "minced turkey",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "lamb_chop",
+    "foodNameAsGiven": "lamb chop",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "lamb_leg",
+    "foodNameAsGiven": "lamb leg",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "lamb_shoulder",
+    "foodNameAsGiven": "lamb shoulder",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "minced_lamb",
+    "foodNameAsGiven": "minced lamb",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "duck_breast",
+    "foodNameAsGiven": "duck breast",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "duck_leg",
+    "foodNameAsGiven": "duck leg",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "back_bacon",
+    "foodNameAsGiven": "back bacon",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "streaky_bacon",
+    "foodNameAsGiven": "streaky bacon",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "cooked_ham",
+    "foodNameAsGiven": "cooked ham",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "smoked_ham",
+    "foodNameAsGiven": "smoked ham",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "minced_chicken",
+    "foodNameAsGiven": "minced chicken",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "chicken_drumstick",
+    "foodNameAsGiven": "chicken drumstick",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "chicken_wing",
+    "foodNameAsGiven": "chicken wing",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "whole_chicken",
+    "foodNameAsGiven": "whole chicken",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "hot_dog_sausage",
+    "foodNameAsGiven": "hot dog sausage",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "frankfurter",
+    "foodNameAsGiven": "frankfurter",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium",
+    "source": "typical single serving/piece weight"
+  },
+  {
+    "foodId": "mackerel",
+    "foodNameAsGiven": "mackerel",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "herring",
+    "foodNameAsGiven": "herring",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "shrimp",
+    "foodNameAsGiven": "shrimp",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "crab",
+    "foodNameAsGiven": "crab",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "smoked_mackerel",
+    "foodNameAsGiven": "smoked mackerel",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "smoked_trout",
+    "foodNameAsGiven": "smoked trout",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pickled_herring",
+    "foodNameAsGiven": "pickled herring",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "king_prawn",
+    "foodNameAsGiven": "king prawn",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "feta",
+    "foodNameAsGiven": "feta",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "parmesan",
+    "foodNameAsGiven": "parmesan",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "brie",
+    "foodNameAsGiven": "brie",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "camembert",
+    "foodNameAsGiven": "camembert",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cream_cheese",
+    "foodNameAsGiven": "cream cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "mascarpone",
+    "foodNameAsGiven": "mascarpone",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "halloumi",
+    "foodNameAsGiven": "halloumi",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "ricotta",
+    "foodNameAsGiven": "ricotta",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "goat_cheese",
+    "foodNameAsGiven": "goat cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "blue_cheese",
+    "foodNameAsGiven": "blue cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "gouda",
+    "foodNameAsGiven": "gouda",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "edam",
+    "foodNameAsGiven": "edam",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cheese_spread",
+    "foodNameAsGiven": "cheese spread",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "processed_cheese",
+    "foodNameAsGiven": "processed cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "emmental",
+    "foodNameAsGiven": "emmental",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "gruyere",
+    "foodNameAsGiven": "gruyere",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pecorino",
+    "foodNameAsGiven": "pecorino",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sheep_cheese",
+    "foodNameAsGiven": "sheep cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "whole_milk",
+    "foodNameAsGiven": "whole milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "skimmed_milk",
+    "foodNameAsGiven": "skimmed milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "almond_milk",
+    "foodNameAsGiven": "almond milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "oat_milk",
+    "foodNameAsGiven": "oat milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "soy_milk",
+    "foodNameAsGiven": "soy milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "rice_milk",
+    "foodNameAsGiven": "rice milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "condensed_milk",
+    "foodNameAsGiven": "condensed milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "evaporated_milk",
+    "foodNameAsGiven": "evaporated milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "semi_skimmed_milk",
+    "foodNameAsGiven": "semi-skimmed milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "lactose_free_milk",
+    "foodNameAsGiven": "lactose-free milk",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "butter",
+    "foodNameAsGiven": "butter",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical spread portion"
+  },
+  {
+    "foodId": "margarine",
+    "foodNameAsGiven": "margarine",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical spread portion"
+  },
+  {
+    "foodId": "sour_cream",
+    "foodNameAsGiven": "sour cream",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical dollop/side portion"
+  },
+  {
+    "foodId": "buttermilk",
+    "foodNameAsGiven": "buttermilk",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "kefir",
+    "foodNameAsGiven": "kefir",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "quark",
+    "foodNameAsGiven": "quark",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "skyr",
+    "foodNameAsGiven": "skyr",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "plain_yoghurt",
+    "foodNameAsGiven": "plain yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "fruit_yoghurt",
+    "foodNameAsGiven": "fruit yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "oat_yoghurt",
+    "foodNameAsGiven": "oat yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "soy_yoghurt",
+    "foodNameAsGiven": "soy yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "white_bread",
+    "foodNameAsGiven": "white bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "wholemeal_bread",
+    "foodNameAsGiven": "wholemeal bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "multigrain_bread",
+    "foodNameAsGiven": "multigrain bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "rye_bread",
+    "foodNameAsGiven": "rye bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sourdough_bread",
+    "foodNameAsGiven": "sourdough bread",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "baguette",
+    "foodNameAsGiven": "baguette",
+    "unit": "slice",
+    "size": "medium",
+    "grams": 35,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "basmati_rice",
+    "foodNameAsGiven": "basmati rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "brown_rice",
+    "foodNameAsGiven": "brown rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "jasmine_rice",
+    "foodNameAsGiven": "jasmine rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "white_rice",
+    "foodNameAsGiven": "white rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "wild_rice",
+    "foodNameAsGiven": "wild rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "risotto_rice",
+    "foodNameAsGiven": "risotto rice",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "macaroni",
+    "foodNameAsGiven": "macaroni",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "penne",
+    "foodNameAsGiven": "penne",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "spaghetti",
+    "foodNameAsGiven": "spaghetti",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "fusilli",
+    "foodNameAsGiven": "fusilli",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "lasagne_sheets",
+    "foodNameAsGiven": "lasagne sheets",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "wheat_pasta",
+    "foodNameAsGiven": "wheat pasta",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "wholewheat_pasta",
+    "foodNameAsGiven": "wholewheat pasta",
+    "unit": null,
+    "size": null,
+    "grams": 180,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "rolled_oats",
+    "foodNameAsGiven": "rolled oats",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bagel",
+    "foodNameAsGiven": "bagel",
+    "unit": null,
+    "size": null,
+    "grams": 95,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "bread_roll",
+    "foodNameAsGiven": "bread roll",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "burger_bun",
+    "foodNameAsGiven": "burger bun",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "hot_dog_bun",
+    "foodNameAsGiven": "hot dog bun",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "pita_bread",
+    "foodNameAsGiven": "pita bread",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "naan_bread",
+    "foodNameAsGiven": "naan bread",
+    "unit": null,
+    "size": null,
+    "grams": 160,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "focaccia",
+    "foodNameAsGiven": "focaccia",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "brioche",
+    "foodNameAsGiven": "brioche",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "croissant",
+    "foodNameAsGiven": "croissant",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "crispbread",
+    "foodNameAsGiven": "crispbread",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "cracker",
+    "foodNameAsGiven": "cracker",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "rice_cake",
+    "foodNameAsGiven": "rice cake",
+    "unit": null,
+    "size": null,
+    "grams": 9,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "pretzel",
+    "foodNameAsGiven": "pretzel",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "wrap",
+    "foodNameAsGiven": "wrap",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "couscous",
+    "foodNameAsGiven": "couscous",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "quinoa",
+    "foodNameAsGiven": "quinoa",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "bulgur",
+    "foodNameAsGiven": "bulgur",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "polenta",
+    "foodNameAsGiven": "polenta",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "egg_noodles",
+    "foodNameAsGiven": "egg noodles",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "rice_noodles",
+    "foodNameAsGiven": "rice noodles",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical cooked serving"
+  },
+  {
+    "foodId": "sweet_potato",
+    "foodNameAsGiven": "sweet potato",
+    "unit": null,
+    "size": null,
+    "grams": 130,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "garlic",
+    "foodNameAsGiven": "garlic",
+    "unit": null,
+    "size": null,
+    "grams": 3,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "spring_onion",
+    "foodNameAsGiven": "spring onion",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "leek",
+    "foodNameAsGiven": "leek",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item weight"
+  },
+  {
+    "foodId": "orange",
+    "foodNameAsGiven": "orange",
+    "unit": null,
+    "size": null,
+    "grams": 130,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "grapefruit",
+    "foodNameAsGiven": "grapefruit",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "grapes",
+    "foodNameAsGiven": "grapes",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "pear",
+    "foodNameAsGiven": "pear",
+    "unit": null,
+    "size": null,
+    "grams": 170,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "pineapple",
+    "foodNameAsGiven": "pineapple",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "mango",
+    "foodNameAsGiven": "mango",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "kiwi_fruit",
+    "foodNameAsGiven": "kiwi fruit",
+    "unit": null,
+    "size": null,
+    "grams": 70,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "melon",
+    "foodNameAsGiven": "melon",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "watermelon",
+    "foodNameAsGiven": "watermelon",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "strawberry",
+    "foodNameAsGiven": "strawberry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "blueberries",
+    "foodNameAsGiven": "blueberries",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "raspberry",
+    "foodNameAsGiven": "raspberry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "blackberry",
+    "foodNameAsGiven": "blackberry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "cherry",
+    "foodNameAsGiven": "cherry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "clementine",
+    "foodNameAsGiven": "clementine",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "mandarin",
+    "foodNameAsGiven": "mandarin",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "pomegranate",
+    "foodNameAsGiven": "pomegranate",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "fig",
+    "foodNameAsGiven": "fig",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "date",
+    "foodNameAsGiven": "date",
+    "unit": null,
+    "size": null,
+    "grams": 8,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "apricot",
+    "foodNameAsGiven": "apricot",
+    "unit": null,
+    "size": null,
+    "grams": 35,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "nectarine",
+    "foodNameAsGiven": "nectarine",
+    "unit": null,
+    "size": null,
+    "grams": 140,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "guava",
+    "foodNameAsGiven": "guava",
+    "unit": null,
+    "size": null,
+    "grams": 90,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "papaya",
+    "foodNameAsGiven": "papaya",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "passion_fruit",
+    "foodNameAsGiven": "passion fruit",
+    "unit": null,
+    "size": null,
+    "grams": 18,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "lychee",
+    "foodNameAsGiven": "lychee",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "persimmon",
+    "foodNameAsGiven": "persimmon",
+    "unit": null,
+    "size": null,
+    "grams": 170,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "dragon_fruit",
+    "foodNameAsGiven": "dragon fruit",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "blackcurrant",
+    "foodNameAsGiven": "blackcurrant",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "cranberry",
+    "foodNameAsGiven": "cranberry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "gooseberry",
+    "foodNameAsGiven": "gooseberry",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/handful weight"
+  },
+  {
+    "foodId": "baked_beans",
+    "foodNameAsGiven": "baked beans",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical half-can serving"
+  },
+  {
+    "foodId": "black_beans",
+    "foodNameAsGiven": "black beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cannellini_beans",
+    "foodNameAsGiven": "cannellini beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "red_kidney_beans",
+    "foodNameAsGiven": "red kidney beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "butter_beans",
+    "foodNameAsGiven": "butter beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "white_beans",
+    "foodNameAsGiven": "white beans",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "split_peas",
+    "foodNameAsGiven": "split peas",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chickpeas",
+    "foodNameAsGiven": "chickpeas",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "brown_lentils",
+    "foodNameAsGiven": "brown lentils",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "green_lentils",
+    "foodNameAsGiven": "green lentils",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "red_lentils",
+    "foodNameAsGiven": "red lentils",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "edamame",
+    "foodNameAsGiven": "edamame",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tofu",
+    "foodNameAsGiven": "tofu",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tempeh",
+    "foodNameAsGiven": "tempeh",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "hummus",
+    "foodNameAsGiven": "hummus",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "almonds",
+    "foodNameAsGiven": "almonds",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "cashews",
+    "foodNameAsGiven": "cashews",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "walnuts",
+    "foodNameAsGiven": "walnuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "peanuts",
+    "foodNameAsGiven": "peanuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "pistachios",
+    "foodNameAsGiven": "pistachios",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "hazelnuts",
+    "foodNameAsGiven": "hazelnuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "brazil_nuts",
+    "foodNameAsGiven": "brazil nuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "pecans",
+    "foodNameAsGiven": "pecans",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "macadamia_nuts",
+    "foodNameAsGiven": "macadamia nuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical snack/handful portion"
+  },
+  {
+    "foodId": "espresso",
+    "foodNameAsGiven": "espresso",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "double_espresso",
+    "foodNameAsGiven": "double espresso",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "americano",
+    "foodNameAsGiven": "americano",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "cappuccino",
+    "foodNameAsGiven": "cappuccino",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "latte",
+    "foodNameAsGiven": "latte",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "flat_white",
+    "foodNameAsGiven": "flat white",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "mocha",
+    "foodNameAsGiven": "mocha",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical serving size for this drink"
+  },
+  {
+    "foodId": "instant_coffee",
+    "foodNameAsGiven": "instant coffee",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "green_tea",
+    "foodNameAsGiven": "green tea",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "herbal_tea",
+    "foodNameAsGiven": "herbal tea",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "fruit_tea",
+    "foodNameAsGiven": "fruit tea",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "apple_juice",
+    "foodNameAsGiven": "apple juice",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical glass"
+  },
+  {
+    "foodId": "orange_juice",
+    "foodNameAsGiven": "orange juice",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical glass"
+  },
+  {
+    "foodId": "grapefruit_juice",
+    "foodNameAsGiven": "grapefruit juice",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical glass"
+  },
+  {
+    "foodId": "tomato_juice",
+    "foodNameAsGiven": "tomato juice",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical glass"
+  },
+  {
+    "foodId": "multivitamin_juice",
+    "foodNameAsGiven": "multivitamin juice",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical glass"
+  },
+  {
+    "foodId": "coca_cola",
+    "foodNameAsGiven": "Coca-Cola",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "cola",
+    "foodNameAsGiven": "cola",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "coke_zero",
+    "foodNameAsGiven": "Coke Zero",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "diet_coke",
+    "foodNameAsGiven": "Diet Coke",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "lemonade",
+    "foodNameAsGiven": "lemonade",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "orange_soda",
+    "foodNameAsGiven": "orange soda",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "lemon_lime_soda",
+    "foodNameAsGiven": "lemon-lime soda",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "tonic_water",
+    "foodNameAsGiven": "tonic water",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "energy_drink",
+    "foodNameAsGiven": "energy drink",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical can/glass serving"
+  },
+  {
+    "foodId": "isotonic_drink",
+    "foodNameAsGiven": "isotonic drink",
+    "unit": null,
+    "size": null,
+    "grams": 500,
+    "confidence": "medium",
+    "source": "typical bottle"
+  },
+  {
+    "foodId": "sports_drink",
+    "foodNameAsGiven": "sports drink",
+    "unit": null,
+    "size": null,
+    "grams": 500,
+    "confidence": "medium",
+    "source": "typical bottle"
+  },
+  {
+    "foodId": "mineral_water",
+    "foodNameAsGiven": "mineral water",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sparkling_water",
+    "foodNameAsGiven": "sparkling water",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "water",
+    "foodNameAsGiven": "water",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical glass volume assumed when no measurement is given at all -- since water is 0kcal this has no effect on nutrition totals, it only keeps a bare mention from blocking an otherwise-complete meal"
+  },
+  {
+    "foodId": "guacamole",
+    "foodNameAsGiven": "guacamole",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "fish_and_chips",
+    "foodNameAsGiven": "fish and chips",
+    "unit": null,
+    "size": null,
+    "grams": 400,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "kebab",
+    "foodNameAsGiven": "kebab",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "fried_chicken",
+    "foodNameAsGiven": "fried chicken",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "fried_rice",
+    "foodNameAsGiven": "fried rice",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "stir_fry",
+    "foodNameAsGiven": "stir fry",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "curry",
+    "foodNameAsGiven": "curry",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "chilli_con_carne",
+    "foodNameAsGiven": "chilli con carne",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "lasagne",
+    "foodNameAsGiven": "lasagne",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "spaghetti_bolognese",
+    "foodNameAsGiven": "spaghetti bolognese",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "risotto",
+    "foodNameAsGiven": "risotto",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "paella",
+    "foodNameAsGiven": "paella",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "sushi",
+    "foodNameAsGiven": "sushi",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "ramen",
+    "foodNameAsGiven": "ramen",
+    "unit": null,
+    "size": null,
+    "grams": 500,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "pho",
+    "foodNameAsGiven": "pho",
+    "unit": null,
+    "size": null,
+    "grams": 500,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "goulash",
+    "foodNameAsGiven": "goulash",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "stew",
+    "foodNameAsGiven": "stew",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "poke_bowl",
+    "foodNameAsGiven": "poke bowl",
+    "unit": null,
+    "size": null,
+    "grams": 400,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "falafel",
+    "foodNameAsGiven": "falafel",
+    "unit": null,
+    "size": null,
+    "grams": 90,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "hot_dog",
+    "foodNameAsGiven": "hot dog",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "caesar_salad",
+    "foodNameAsGiven": "Caesar salad",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "greek_salad",
+    "foodNameAsGiven": "Greek salad",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "tuna_salad",
+    "foodNameAsGiven": "tuna salad",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
+  },
+  {
+    "foodId": "gyros",
+    "foodNameAsGiven": "gyros",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "shawarma",
+    "foodNameAsGiven": "shawarma",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chicken_curry",
+    "foodNameAsGiven": "chicken curry",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "beef_curry",
+    "foodNameAsGiven": "beef curry",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cream_soup",
+    "foodNameAsGiven": "cream soup",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "tomato_soup",
+    "foodNameAsGiven": "tomato soup",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "vegetable_soup",
+    "foodNameAsGiven": "vegetable soup",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chicken_soup",
+    "foodNameAsGiven": "chicken soup",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pizza",
+    "foodNameAsGiven": "pizza",
+    "unit": "slice",
+    "size": null,
+    "grams": 110,
+    "confidence": "medium",
+    "source": "typical single slice from a medium pizza"
+  },
+  {
+    "foodId": "hamburger",
+    "foodNameAsGiven": "hamburger",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "typical single-item weight (matches the FoodEstimator migration assumption)"
+  },
+  {
+    "foodId": "cheeseburger",
+    "foodNameAsGiven": "cheeseburger",
+    "unit": null,
+    "size": null,
+    "grams": 160,
+    "confidence": "medium",
+    "source": "typical single-item weight (matches the FoodEstimator migration assumption)"
+  },
+  {
+    "foodId": "chicken_nuggets",
+    "foodNameAsGiven": "chicken nuggets",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single-item weight (matches the FoodEstimator migration assumption)"
+  },
+  {
+    "foodId": "fries",
+    "foodNameAsGiven": "fries",
+    "unit": null,
+    "size": null,
+    "grams": 115,
+    "confidence": "medium",
+    "source": "typical single-item weight (matches the FoodEstimator migration assumption)"
+  },
+  {
+    "foodId": "haddock",
+    "foodNameAsGiven": "haddock",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sardine",
+    "foodNameAsGiven": "sardine",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sea_bass",
+    "foodNameAsGiven": "sea bass",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "plaice",
+    "foodNameAsGiven": "plaice",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "biscuit",
+    "foodNameAsGiven": "biscuit",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "cookie",
+    "foodNameAsGiven": "cookie",
+    "unit": null,
+    "size": null,
+    "grams": 20,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "chocolate_bar",
+    "foodNameAsGiven": "chocolate bar",
+    "unit": null,
+    "size": null,
+    "grams": 45,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "milk_chocolate",
+    "foodNameAsGiven": "milk chocolate",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "dark_chocolate",
+    "foodNameAsGiven": "dark chocolate",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "white_chocolate",
+    "foodNameAsGiven": "white chocolate",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "ice_cream",
+    "foodNameAsGiven": "ice cream",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "doughnut",
+    "foodNameAsGiven": "doughnut",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "muffin",
+    "foodNameAsGiven": "muffin",
+    "unit": null,
+    "size": null,
+    "grams": 90,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "pancake",
+    "foodNameAsGiven": "pancake",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "waffle",
+    "foodNameAsGiven": "waffle",
+    "unit": null,
+    "size": null,
+    "grams": 75,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "popcorn",
+    "foodNameAsGiven": "popcorn",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "cereal_bar",
+    "foodNameAsGiven": "cereal bar",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "granola_bar",
+    "foodNameAsGiven": "granola bar",
+    "unit": null,
+    "size": null,
+    "grams": 35,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "protein_bar",
+    "foodNameAsGiven": "protein bar",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "cheesecake",
+    "foodNameAsGiven": "cheesecake",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "brownie",
+    "foodNameAsGiven": "brownie",
+    "unit": null,
+    "size": null,
+    "grams": 45,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "cupcake",
+    "foodNameAsGiven": "cupcake",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "sponge_cake",
+    "foodNameAsGiven": "sponge cake",
+    "unit": null,
+    "size": null,
+    "grams": 70,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "crepe",
+    "foodNameAsGiven": "crepe",
+    "unit": null,
+    "size": null,
+    "grams": 60,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "custard",
+    "foodNameAsGiven": "custard",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "pudding",
+    "foodNameAsGiven": "pudding",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "toffee",
+    "foodNameAsGiven": "toffee",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "caramel",
+    "foodNameAsGiven": "caramel",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "marshmallow",
+    "foodNameAsGiven": "marshmallow",
+    "unit": null,
+    "size": null,
+    "grams": 20,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "gummy_sweets",
+    "foodNameAsGiven": "gummy sweets",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "hard_candy",
+    "foodNameAsGiven": "hard candy",
+    "unit": null,
+    "size": null,
+    "grams": 10,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "sorbet",
+    "foodNameAsGiven": "sorbet",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "tortilla_chips",
+    "foodNameAsGiven": "tortilla chips",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical single item/portion weight"
+  },
+  {
+    "foodId": "salted_nuts",
+    "foodNameAsGiven": "salted nuts",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chicken_breast",
+    "foodNameAsGiven": "chicken breast",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chicken_thigh",
+    "foodNameAsGiven": "chicken thigh",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "mozzarella",
+    "foodNameAsGiven": "mozzarella",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "greek_yoghurt",
+    "foodNameAsGiven": "greek yoghurt",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "broccoli",
+    "foodNameAsGiven": "broccoli",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "cauliflower",
+    "foodNameAsGiven": "cauliflower",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "spinach",
+    "foodNameAsGiven": "spinach",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "kale",
+    "foodNameAsGiven": "kale",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "green_beans",
+    "foodNameAsGiven": "green beans",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "asparagus",
+    "foodNameAsGiven": "asparagus",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "courgette",
+    "foodNameAsGiven": "courgette",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "aubergine",
+    "foodNameAsGiven": "aubergine",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "pea",
+    "foodNameAsGiven": "pea",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "sweetcorn",
+    "foodNameAsGiven": "sweetcorn",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "beetroot",
+    "foodNameAsGiven": "beetroot",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "brussels_sprouts",
+    "foodNameAsGiven": "brussels sprouts",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "almonds",
+    "foodNameAsGiven": "almonds",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "cashews",
+    "foodNameAsGiven": "cashews",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "walnuts",
+    "foodNameAsGiven": "walnuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "peanuts",
+    "foodNameAsGiven": "peanuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "pistachios",
+    "foodNameAsGiven": "pistachios",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "hazelnuts",
+    "foodNameAsGiven": "hazelnuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "brazil_nuts",
+    "foodNameAsGiven": "brazil nuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "pecans",
+    "foodNameAsGiven": "pecans",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "macadamia_nuts",
+    "foodNameAsGiven": "macadamia nuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "salted_nuts",
+    "foodNameAsGiven": "salted nuts",
+    "unit": "handful",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium",
+    "source": "typical handful-of-nuts snack portion"
+  },
+  {
+    "foodId": "sandwich",
+    "foodNameAsGiven": "sandwich",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "rocket",
+    "foodNameAsGiven": "rocket",
+    "unit": null,
+    "size": null,
+    "grams": 80,
+    "confidence": "medium",
+    "source": "standard UK '5-a-day' vegetable portion (80g)"
   }
 ]

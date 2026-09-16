@@ -85,6 +85,55 @@ void main() {
       expect(r.quantity, 1); // no quantity token consumed
       expect(r.remainder, '0.5l beer'); // NOT "5l beer" / ".5l beer"
     });
+
+    group('compound cardinal+fraction ("X and a Y") -- built from the '
+        'cardinals/fractions tables, not a hardcoded phrase', () {
+      test('word cardinal + half', () {
+        final one = parseQuantity('one and a half eggs', lexicon);
+        expect(one.quantity, 1.5);
+        expect(one.remainder, 'eggs');
+        final two = parseQuantity('two and a half eggs', lexicon);
+        expect(two.quantity, 2.5);
+      });
+
+      test('digit cardinal + half', () {
+        final r = parseQuantity('1 and a half eggs', lexicon);
+        expect(r.quantity, 1.5);
+        expect(r.remainder, 'eggs');
+      });
+
+      test('quarter and three-quarters, not just half', () {
+        expect(parseQuantity('one and a quarter portions', lexicon).quantity, 1.25);
+        expect(parseQuantity('one and three quarters portions', lexicon).quantity, 1.75);
+      });
+
+      test('a bare "X and" with no fraction after it does not fire', () {
+        // "one and cheese" -- "and" here is a food separator, not part of a
+        // compound quantity, so parseQuantity should only claim "one".
+        final r = parseQuantity('one and cheese', lexicon);
+        expect(r.quantity, 1);
+        expect(r.remainder, 'and cheese');
+      });
+    });
+
+    group('word multipliers ("couple") -- lexicon.multipliers is now read', () {
+      test('bare "couple"', () {
+        final r = parseQuantity('couple of eggs', lexicon);
+        expect(r.quantity, 2);
+        expect(r.remainder, 'of eggs');
+      });
+
+      test('"a couple" as one phrase, not "a" + "couple" separately', () {
+        final r = parseQuantity('a couple of eggs', lexicon);
+        expect(r.quantity, 2);
+        expect(r.remainder, 'of eggs');
+      });
+
+      test('"double" and "triple"', () {
+        expect(parseQuantity('double cheeseburger', lexicon).quantity, 2);
+        expect(parseQuantity('triple cheeseburger', lexicon).quantity, 3);
+      });
+    });
   });
 
   group('parseMeasurement', () {

@@ -4,6 +4,7 @@ import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
+import * as foodCatalogue from './food_catalogue.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const publicDir = join(root, 'public');
@@ -14,6 +15,8 @@ const healthDataFile = join(process.env.DATA_DIR || join(root, 'data'), 'health-
 const settingsFile = join(process.env.DATA_DIR || join(root, 'data'), 'settings.json');
 const sessionsFile = join(process.env.DATA_DIR || join(root, 'data'), 'sessions.json');
 const activityLogFile = join(process.env.DATA_DIR || join(root, 'data'), 'activity-log.json');
+const mediaDir = join(process.env.DATA_DIR || join(root, 'data'), 'media');
+const MAX_MEDIA_BYTES = 6_000_000;
 const MAX_ACTIVITY_ENTRIES = 500;
 const port = Number(process.env.PORT || 8787);
 const initialAdminUser = process.env.INITIAL_ADMIN_USER || 'admin';
@@ -71,6 +74,17 @@ const logActivity = async (session, message) => {
 const json = (res, status, body) => {
   res.writeHead(status, {'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store'});
   res.end(JSON.stringify(body));
+};
+const localWebOrigin = origin => /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin || '');
+const allowLocalWebApp = (req, res) => {
+  const origin = req.headers.origin;
+  if (!localWebOrigin(origin)) return false;
+  res.setHeader('access-control-allow-origin', origin);
+  res.setHeader('vary', 'Origin');
+  res.setHeader('access-control-allow-methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('access-control-allow-headers', 'Authorization, Content-Type');
+  res.setHeader('access-control-allow-private-network', 'true');
+  return true;
 };
 const sessionFor = req => {
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
@@ -131,7 +145,32 @@ const saveAppUsers = async users => {
   await mkdir(dirname(appUsersFile), {recursive: true});
   await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
 };
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], createdAt: user.createdAt});
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], googleLinked: user.googleLinked === true, createdAt: user.createdAt});
+const syncInvitesFile = join(process.env.DATA_DIR || join(root, 'data'), 'sync-invites.json');
+const loadSyncInvites = async () => {
+  try { return JSON.parse(await readFile(syncInvitesFile, 'utf8')).invites || []; }
+  catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+};
+const saveSyncInvites = async invites => {
+  await mkdir(dirname(syncInvitesFile), {recursive: true});
+  await writeFile(syncInvitesFile, JSON.stringify({invites}, null, 2), {mode: 0o600});
+};
+// A pending invite is only ever shown to its two participants, so it's safe
+// to resolve their name/email for display here.
+const publicInvite = (invite, users) => {
+  const from = users.find(item => item.id === invite.fromUserId);
+  const to = users.find(item => item.id === invite.toUserId);
+  return {
+    id: invite.id,
+    fromUserId: invite.fromUserId,
+    fromName: from?.name || '',
+    fromEmail: from?.email || '',
+    toUserId: invite.toUserId,
+    toName: to?.name || '',
+    toEmail: to?.email || '',
+    createdAt: invite.createdAt,
+  };
+};
 const loadServerSettings = async () => {
   try { return JSON.parse(await readFile(settingsFile, 'utf8')); }
   catch (error) { if (error.code === 'ENOENT') return {}; throw error; }
@@ -247,6 +286,11 @@ async function aiVision(kind, imageBase64, mimeType) {
 }
 
 const server = createServer(async (req, res) => {
+  const localWebAllowed = allowLocalWebApp(req, res);
+  if (req.method === 'OPTIONS') {
+    res.writeHead(localWebAllowed ? 204 : 403, {'cache-control': 'no-store'});
+    return res.end();
+  }
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, {ok: true});
@@ -273,6 +317,52 @@ const server = createServer(async (req, res) => {
       appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
       return json(res, 200, {token, user: publicAppUser(user)});
     }
+    if (req.method === 'POST' && url.pathname === '/api/v1/auth/google') {
+      const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
+      if (!googleClientId) return json(res, 501, {error: 'Google sign-in is not configured on this server'});
+      const {idToken} = await readBody(req);
+      if (!idToken) return json(res, 400, {error: 'Missing Google ID token'});
+      let payload;
+      try {
+        const verifyResponse = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
+        );
+        if (!verifyResponse.ok) return json(res, 401, {error: 'Could not verify Google sign-in'});
+        payload = await verifyResponse.json();
+      } catch (error) {
+        return json(res, 502, {error: 'Could not reach Google to verify sign-in'});
+      }
+      // The token must have been issued FOR this app's own client ID, not
+      // just any Google sign-in anywhere -- otherwise a token minted for a
+      // different app would also be accepted here.
+      if (payload.aud !== googleClientId) return json(res, 401, {error: 'Google sign-in token was not issued for this app'});
+      if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+        return json(res, 401, {error: 'Google account email is not verified'});
+      }
+      const normalEmail = String(payload.email || '').trim().toLowerCase();
+      if (!validEmail(normalEmail)) return json(res, 401, {error: 'Google account has no usable email'});
+      const users = await loadAppUsers();
+      let user = users.find(item => item.email === normalEmail);
+      if (!user) {
+        user = {
+          id: randomUUID(), email: normalEmail, name: String(payload.name || '').trim().slice(0, 60),
+          role: 'user', blocked: false, privateSync: false, aiEnabled: false,
+          // A Google-linked account signs in via Google only -- this hash
+          // never matches any password, so /auth/login can't be used for it.
+          passwordHash: await hashPassword(randomBytes(32).toString('hex')),
+          googleLinked: true, createdAt: new Date().toISOString(),
+        };
+        users.push(user);
+      } else if (user.blocked === true) {
+        return json(res, 403, {error: 'This account has been blocked'});
+      } else {
+        user.googleLinked = true;
+      }
+      await saveAppUsers(users);
+      const token = randomBytes(32).toString('hex');
+      appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
+      return json(res, 200, {token, user: publicAppUser(user)});
+    }
     if (url.pathname.startsWith('/api/v1/auth/')) {
       const appSession = appSessionFor(req);
       if (!appSession) return json(res, 401, {error: 'Unauthorized'});
@@ -283,26 +373,114 @@ const server = createServer(async (req, res) => {
       if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
         appSessions.delete(appSession.token); return json(res, 200, {ok: true});
       }
-      if (req.method === 'GET' && url.pathname === '/api/v1/auth/users') {
-        const users = await loadAppUsers();
-        return json(res, 200, {
-          users: users
-            .filter(item => item.id !== appSession.userId && item.blocked !== true)
-            .map(item => ({id: item.id, name: item.name, email: item.email})),
-        });
-      }
-      if (req.method === 'PATCH' && url.pathname === '/api/v1/auth/link') {
-        const {linkedUserIds, entrySyncEnabled} = await readBody(req);
+      if (req.method === 'POST' && url.pathname === '/api/v1/auth/password') {
+        const {currentPassword, newPassword} = await readBody(req);
+        if (!validPassword(newPassword)) return json(res, 400, {error: 'New password must be at least 8 characters'});
         const users = await loadAppUsers();
         const user = users.find(item => item.id === appSession.userId);
         if (!user) return json(res, 401, {error: 'Account no longer exists'});
-        if (Array.isArray(linkedUserIds)) {
-          const validIds = new Set(users.map(item => item.id));
-          user.linkedUserIds = linkedUserIds.filter(id => typeof id === 'string' && validIds.has(id) && id !== user.id);
+        if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+          return json(res, 401, {error: 'Current password is incorrect'});
         }
+        user.passwordHash = await hashPassword(newPassword);
+        await saveAppUsers(users);
+        return json(res, 200, {ok: true});
+      }
+      if (req.method === 'PATCH' && url.pathname === '/api/v1/auth/link') {
+        const {entrySyncEnabled} = await readBody(req);
+        const users = await loadAppUsers();
+        const user = users.find(item => item.id === appSession.userId);
+        if (!user) return json(res, 401, {error: 'Account no longer exists'});
         if (typeof entrySyncEnabled === 'boolean') user.entrySyncEnabled = entrySyncEnabled;
         await saveAppUsers(users);
         return json(res, 200, {user: publicAppUser(user)});
+      }
+      // Only people you've mutually confirmed a sync invite with — never a
+      // directory of every registered account's email address.
+      if (req.method === 'GET' && url.pathname === '/api/v1/auth/link/partners') {
+        const users = await loadAppUsers();
+        const user = users.find(item => item.id === appSession.userId);
+        if (!user) return json(res, 401, {error: 'Account no longer exists'});
+        const partners = (user.linkedUserIds || [])
+          .map(id => users.find(item => item.id === id && item.blocked !== true))
+          .filter(Boolean)
+          .map(item => ({id: item.id, name: item.name, email: item.email}));
+        return json(res, 200, {partners});
+      }
+      if (req.method === 'GET' && url.pathname === '/api/v1/auth/link/invites') {
+        const users = await loadAppUsers();
+        const invites = await loadSyncInvites();
+        const incoming = invites.filter(item => item.toUserId === appSession.userId).map(item => publicInvite(item, users));
+        const outgoing = invites.filter(item => item.fromUserId === appSession.userId).map(item => publicInvite(item, users));
+        return json(res, 200, {incoming, outgoing});
+      }
+      if (req.method === 'POST' && url.pathname === '/api/v1/auth/link/invites') {
+        const {email} = await readBody(req);
+        const normalEmail = String(email || '').trim().toLowerCase();
+        if (!validEmail(normalEmail)) return json(res, 400, {error: 'Enter a valid email address'});
+        const users = await loadAppUsers();
+        const me = users.find(item => item.id === appSession.userId);
+        if (!me) return json(res, 401, {error: 'Account no longer exists'});
+        if (normalEmail === me.email) return json(res, 400, {error: 'You can’t invite yourself'});
+        const target = users.find(item => item.email === normalEmail && item.blocked !== true);
+        if (!target) return json(res, 404, {error: 'No account found for this email'});
+        if ((me.linkedUserIds || []).includes(target.id)) return json(res, 400, {error: 'You’re already linked with this person'});
+        const invites = await loadSyncInvites();
+        if (invites.some(item => item.fromUserId === me.id && item.toUserId === target.id)) {
+          return json(res, 400, {error: 'Invite already sent — waiting for them to confirm'});
+        }
+        // They already invited me — confirming mutually right away instead of
+        // leaving two redundant one-way invites pending.
+        const reverse = invites.find(item => item.fromUserId === target.id && item.toUserId === me.id);
+        if (reverse) {
+          me.linkedUserIds = [...new Set([...(me.linkedUserIds || []), target.id])];
+          target.linkedUserIds = [...new Set([...(target.linkedUserIds || []), me.id])];
+          await saveAppUsers(users);
+          await saveSyncInvites(invites.filter(item => item.id !== reverse.id));
+          return json(res, 200, {linked: true});
+        }
+        const invite = {id: randomUUID(), fromUserId: me.id, toUserId: target.id, createdAt: new Date().toISOString()};
+        invites.push(invite);
+        await saveSyncInvites(invites);
+        return json(res, 201, {invite: publicInvite(invite, users)});
+      }
+      if (req.method === 'POST' && /^\/api\/v1\/auth\/link\/invites\/[^/]+\/(accept|decline)$/.test(url.pathname)) {
+        const parts = url.pathname.split('/');
+        const id = parts[6];
+        const accept = parts[7] === 'accept';
+        const invites = await loadSyncInvites();
+        const invite = invites.find(item => item.id === id);
+        if (!invite || invite.toUserId !== appSession.userId) return json(res, 404, {error: 'Invite not found'});
+        if (accept) {
+          const users = await loadAppUsers();
+          const me = users.find(item => item.id === invite.toUserId);
+          const from = users.find(item => item.id === invite.fromUserId);
+          if (!me || !from) return json(res, 404, {error: 'Account no longer exists'});
+          me.linkedUserIds = [...new Set([...(me.linkedUserIds || []), from.id])];
+          from.linkedUserIds = [...new Set([...(from.linkedUserIds || []), me.id])];
+          await saveAppUsers(users);
+        }
+        await saveSyncInvites(invites.filter(item => item.id !== id));
+        return json(res, 200, {ok: true});
+      }
+      if (req.method === 'DELETE' && /^\/api\/v1\/auth\/link\/invites\/[^/]+$/.test(url.pathname)) {
+        const id = url.pathname.split('/')[6];
+        const invites = await loadSyncInvites();
+        const invite = invites.find(item => item.id === id);
+        if (!invite || invite.fromUserId !== appSession.userId) return json(res, 404, {error: 'Invite not found'});
+        await saveSyncInvites(invites.filter(item => item.id !== id));
+        return json(res, 200, {ok: true});
+      }
+      if (req.method === 'DELETE' && /^\/api\/v1\/auth\/link\/[^/]+$/.test(url.pathname)) {
+        const targetId = url.pathname.split('/')[5];
+        const users = await loadAppUsers();
+        const me = users.find(item => item.id === appSession.userId);
+        if (!me) return json(res, 401, {error: 'Account no longer exists'});
+        me.linkedUserIds = (me.linkedUserIds || []).filter(id => id !== targetId);
+        const target = users.find(item => item.id === targetId);
+        if (target) target.linkedUserIds = (target.linkedUserIds || []).filter(id => id !== me.id);
+        await saveAppUsers(users);
+        return json(res, 200, {user: publicAppUser(me)});
       }
       if (req.method === 'DELETE' && url.pathname === '/api/v1/auth/account') {
         const users = await loadAppUsers();
@@ -365,7 +543,13 @@ const server = createServer(async (req, res) => {
       }
       const data = await loadHealthData();
       const key = `daily_entries_${date}`;
-      const sharedEntry = {...entry, sharedFrom: user.name || user.email, sharedEntryId: randomUUID()};
+      // `photoPaths` is a filesystem path local to the sender's own device --
+      // it means nothing on the recipient's device and must never be
+      // propagated (see photoMediaIds / /api/v1/media, which is how a synced
+      // photo actually travels). Stripped here too as defense-in-depth, in
+      // case an older client still sends it.
+      const {photoPaths: _senderLocalPhotoPaths, ...entryWithoutLocalPaths} = entry;
+      const sharedEntry = {...entryWithoutLocalPaths, sharedFrom: user.name || user.email, sharedEntryId: randomUUID()};
       for (const targetId of targetIds) {
         const existing = data.users[targetId]?.payload || {};
         const dailyEntries = {...(existing.dailyEntries || {})};
@@ -376,6 +560,97 @@ const server = createServer(async (req, res) => {
       const targetNames = targetIds.map(id => { const t = users.find(item => item.id === id); return t?.name || t?.email || id; });
       await logActivity({username: user.name || user.email}, `${user.name || user.email} shared "${entry.name || 'an entry'}" with ${targetNames.join(', ')}`);
       return json(res, 200, {shared: targetIds});
+    }
+    // Backend-held photo storage for anything that crosses a device boundary
+    // (a synced/shared entry's attached photo, or a standalone day photo).
+    // The diary JSON itself only ever carries the returned id
+    // (photoMediaIds) -- never base64/bytes -- so payloads stay small; the
+    // actual bytes live here, fetched once per device and cached locally.
+    if (req.method === 'POST' && url.pathname === '/api/v1/media') {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      const {mimeType, dataBase64} = await readBody(req, 8_000_000);
+      const extForMime = {'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp'};
+      const ext = extForMime[mimeType];
+      if (!ext || !dataBase64 || typeof dataBase64 !== 'string') {
+        return json(res, 400, {error: 'A supported image and its data are required'});
+      }
+      const buffer = Buffer.from(dataBase64, 'base64');
+      if (buffer.length === 0 || buffer.length > MAX_MEDIA_BYTES) {
+        return json(res, 413, {error: 'Photo is too large'});
+      }
+      const id = randomUUID();
+      await mkdir(mediaDir, {recursive: true});
+      await writeFile(join(mediaDir, `${id}.${ext}`), buffer, {mode: 0o600});
+      await writeFile(
+        join(mediaDir, `${id}.meta.json`),
+        JSON.stringify({mimeType, ownerId: appSession.userId, createdAt: new Date().toISOString()}),
+        {mode: 0o600},
+      );
+      return json(res, 200, {id});
+    }
+    const mediaMatch = req.method === 'GET' ? url.pathname.match(/^\/api\/v1\/media\/([A-Za-z0-9-]+)$/) : null;
+    if (mediaMatch) {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      try {
+        const meta = JSON.parse(await readFile(join(mediaDir, `${mediaMatch[1]}.meta.json`), 'utf8'));
+        const ext = {'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp'}[meta.mimeType] || 'jpg';
+        const buffer = await readFile(join(mediaDir, `${mediaMatch[1]}.${ext}`));
+        res.writeHead(200, {
+          'content-type': meta.mimeType,
+          'cache-control': 'private, max-age=31536000, immutable',
+          'content-length': buffer.length,
+        });
+        return res.end(buffer);
+      } catch (error) {
+        if (error.code === 'ENOENT') return json(res, 404, {error: 'Photo not found'});
+        throw error;
+      }
+    }
+    // The global food catalogue -- built-in app data stays bundled in the
+    // app itself; this is the delta layer (admin imports + user
+    // contributions) every app instance can pull without an app-store
+    // release. Version/changes are unauthenticated (shared reference data,
+    // not personal); contributing requires a signed-in app account so
+    // additions carry real provenance.
+    if (req.method === 'GET' && url.pathname === '/api/v1/catalogue/version') {
+      const meta = await foodCatalogue.loadMeta();
+      return json(res, 200, {version: meta.version});
+    }
+    if (req.method === 'GET' && url.pathname === '/api/v1/catalogue/changes') {
+      const since = Number(url.searchParams.get('since') || '0');
+      const result = await foodCatalogue.getChangesSince(Number.isFinite(since) ? since : 0);
+      return json(res, 200, result);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/v1/catalogue/contribute') {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      const users = await loadAppUsers();
+      const user = users.find(item => item.id === appSession.userId);
+      if (!user || user.blocked === true) return json(res, 403, {error: 'Account access is blocked'});
+      const body = await readBody(req);
+      if (!String(body.name || '').trim()) return json(res, 400, {error: 'A food name is required'});
+      if (body.kcal == null || body.kcal === '') return json(res, 400, {error: 'Calories are required'});
+      const result = await foodCatalogue.contributeFood({
+        name: body.name,
+        locale: body.locale,
+        category: body.category,
+        kcal: body.kcal,
+        protein: body.protein,
+        carbs: body.carbs,
+        fat: body.fat,
+        fibre: body.fibre,
+        basis: body.basis,
+        servingAmount: body.servingAmount,
+        servingUnit: body.servingUnit,
+        createdBy: user.id,
+      });
+      if (result.status === 'invalid') return json(res, 400, {error: result.reason});
+      if (result.status === 'created') {
+        await logActivity({username: user.name || user.email}, `${user.name || user.email} contributed "${body.name}" to the global food catalogue`);
+      }
+      return json(res, 200, result);
     }
     if (url.pathname.startsWith('/api/v1/ai/')) {
       const appSession = appSessionFor(req);
@@ -639,6 +914,174 @@ const server = createServer(async (req, res) => {
       await saveUsers(users.filter(item => item.id !== userMatch[1]));
       for (const [token, item] of sessions) if (item.userId === userMatch[1]) sessions.delete(token);
       await logActivity(session, `${session.username} removed console user ${removedUser.username}`);
+      return json(res, 200, {ok: true});
+    }
+    // ---- Admin food-catalogue import/export (item 12) ----
+    // Every write here goes through food_catalogue.mjs's shared merge
+    // policy (classifyRow/applyRow) -- the SAME functions the app's user
+    // "add this food" contribution endpoint uses -- so there is one trust
+    // hierarchy and one version/change-log, not a second system.
+    if (req.method === 'GET' && url.pathname === '/admin/api/catalogue') {
+      const catalogue = await foodCatalogue.loadCatalogue();
+      const query = foodCatalogue.normalizeText(url.searchParams.get('query') || '');
+      const trustFilter = url.searchParams.get('trust');
+      const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
+      const pageSize = 50;
+      let filtered = catalogue;
+      if (trustFilter) filtered = filtered.filter(item => item.trust === trustFilter);
+      if (query) {
+        filtered = filtered.filter(item => {
+          const names = [item.names?.en, item.names?.pl, ...(item.aliases?.en || []), ...(item.aliases?.pl || [])].filter(Boolean);
+          return names.some(name => foodCatalogue.normalizeText(name).includes(query));
+        });
+      }
+      const meta = await foodCatalogue.loadMeta();
+      return json(res, 200, {
+        version: meta.version,
+        total: filtered.length,
+        page,
+        pageSize,
+        foods: filtered.slice((page - 1) * pageSize, page * pageSize),
+      });
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/catalogue/export') {
+      const format = url.searchParams.get('format') || 'csv';
+      const catalogue = await foodCatalogue.loadCatalogue();
+      const {contentType, body} = foodCatalogue.exportCatalogueRows(catalogue, format);
+      res.writeHead(200, {
+        'content-type': contentType,
+        'content-disposition': `attachment; filename="a2-food-catalogue.${format}"`,
+        'cache-control': 'no-store',
+      });
+      return res.end(body);
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/catalogue/import-profiles') {
+      return json(res, 200, {profiles: await foodCatalogue.loadImportProfiles()});
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/catalogue/import-profiles') {
+      const {name, mapping, source, trust, defaultBasis} = await readBody(req);
+      if (!String(name || '').trim()) return json(res, 400, {error: 'A profile name is required'});
+      const profiles = await foodCatalogue.loadImportProfiles();
+      const existingIndex = profiles.findIndex(p => p.name === name);
+      const profile = {name: String(name).trim(), mapping: mapping || {}, source: source || '', trust: trust || 'admin', defaultBasis: defaultBasis || 'per100g'};
+      if (existingIndex >= 0) profiles[existingIndex] = profile; else profiles.push(profile);
+      await foodCatalogue.saveImportProfiles(profiles);
+      await logActivity(session, `${session.username} saved import profile "${profile.name}"`);
+      return json(res, 200, {profiles});
+    }
+    if (req.method === 'GET' && url.pathname === '/admin/api/catalogue/imports') {
+      const batches = await foodCatalogue.loadImportBatches();
+      // Snapshots (`before`) can be large -- the list view never needs them.
+      return json(res, 200, {batches: batches.map(({before, ...rest}) => rest).reverse()});
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/catalogue/import/preview') {
+      const {format, filename, contentBase64, mapping: explicitMapping, source, trust, defaultBasis} = await readBody(req, 30_000_000);
+      if (!['csv', 'xlsx', 'json'].includes(format)) return json(res, 400, {error: 'format must be csv, xlsx or json'});
+      if (!contentBase64) return json(res, 400, {error: 'No file content received'});
+      let parsed;
+      try {
+        const buffer = Buffer.from(contentBase64, 'base64');
+        parsed = foodCatalogue.parseUploadedFile(buffer, format);
+      } catch (error) {
+        return json(res, 400, {error: `Could not read this file: ${error.message}`});
+      }
+      if (!parsed.rows.length) return json(res, 400, {error: 'No rows found in this file'});
+      const mapping = explicitMapping && Object.keys(explicitMapping).length
+        ? explicitMapping
+        : foodCatalogue.guessColumnMapping(parsed.headers);
+      const mappedRows = parsed.rows.map(raw => foodCatalogue.mapRow(raw, mapping, {trust: trust || 'admin', source: source || filename, defaultBasis}));
+      const catalogue = await foodCatalogue.loadCatalogue();
+      const {summary, rows} = foodCatalogue.classifyImportRows(mappedRows, catalogue);
+      const previewId = foodCatalogue.storePreview({mappedRows, source: source || filename, filename});
+      // Full detail for a bounded sample keeps the response reasonable for
+      // datasets with thousands of rows; the counts above already cover all
+      // of them, and the conflict/suggested/invalid rows most worth a
+      // human's attention are prioritised into that sample first.
+      const priority = ['conflict', 'suggested-match', 'invalid', 'matched-update', 'duplicate-in-file', 'matched-alias-only', 'matched-nochange', 'new'];
+      const sample = [...rows].sort((a, b) => priority.indexOf(a.action) - priority.indexOf(b.action)).slice(0, 300);
+      return json(res, 200, {
+        previewId,
+        detectedColumns: parsed.headers,
+        mapping,
+        summary,
+        sampleRows: sample,
+      });
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/catalogue/import/confirm') {
+      const {previewId, decisions = {}, defaultConflictAction = 'skip'} = await readBody(req);
+      const preview = foodCatalogue.getPreview(previewId);
+      if (!preview) return json(res, 404, {error: 'This preview has expired -- please re-upload and preview again'});
+      const catalogue = await foodCatalogue.loadCatalogue();
+      const touchedIds = [];
+      const beforeById = {};
+      const createdIds = [];
+      const counts = {created: 0, updated: 0, aliasesMerged: 0, kept: 0, skipped: 0, noChange: 0};
+      preview.mappedRows.forEach((record, index) => {
+        const classification = foodCatalogue.classifyRow(record, catalogue);
+        let decision = decisions[index] || decisions[String(index)];
+        if (!decision) {
+          decision = classification.action === 'conflict' || classification.action === 'suggested-match'
+            ? defaultConflictAction
+            : classification.action;
+        }
+        const result = foodCatalogue.applyRow(record, catalogue, {decision});
+        if (result.id) {
+          touchedIds.push(result.id);
+          if (result.before && !(result.id in beforeById)) beforeById[result.id] = result.before;
+          if (!result.before && result.action === 'created' && !createdIds.includes(result.id)) {
+            beforeById[result.id] = null;
+            createdIds.push(result.id);
+          }
+        }
+        if (result.action === 'created') counts.created += 1;
+        else if (result.action === 'updated') counts.updated += 1;
+        else if (result.action === 'aliases-merged') counts.aliasesMerged += 1;
+        else if (result.action === 'kept') counts.kept += 1;
+        else if (result.action === 'nochange') counts.noChange += 1;
+        else counts.skipped += 1;
+      });
+      await foodCatalogue.saveCatalogue(catalogue);
+      const version = await foodCatalogue.bumpVersion(touchedIds);
+      const batch = {
+        id: randomUUID(),
+        importedAt: new Date().toISOString(),
+        importedBy: session.username,
+        source: preview.source,
+        filename: preview.filename,
+        version,
+        counts,
+        touchedIds: [...new Set(touchedIds)],
+        before: beforeById,
+      };
+      const batches = await foodCatalogue.loadImportBatches();
+      batches.push(batch);
+      await foodCatalogue.saveImportBatches(batches);
+      foodCatalogue.deletePreview(previewId);
+      await logActivity(session, `${session.username} imported "${preview.filename}" -- ${counts.created} added, ${counts.updated} updated, ${counts.aliasesMerged} alias merges`);
+      const {before, ...batchSummary} = batch;
+      return json(res, 200, {batch: batchSummary});
+    }
+    const rollbackMatch = url.pathname.match(/^\/admin\/api\/catalogue\/imports\/([^/]+)\/rollback$/);
+    if (rollbackMatch && req.method === 'POST') {
+      const batches = await foodCatalogue.loadImportBatches();
+      const batch = batches.find(item => item.id === rollbackMatch[1]);
+      if (!batch) return json(res, 404, {error: 'Import batch not found'});
+      if (batch.rolledBackAt) return json(res, 400, {error: 'This import was already rolled back'});
+      const catalogue = await foodCatalogue.loadCatalogue();
+      const remaining = [];
+      const restoredIds = [];
+      for (const item of catalogue) {
+        if (!(item.id in batch.before)) { remaining.push(item); continue; }
+        const snapshot = batch.before[item.id];
+        if (snapshot === null) { restoredIds.push(item.id); continue; } // was created by this batch -- remove it
+        remaining.push(snapshot); // restore its pre-import state
+        restoredIds.push(item.id);
+      }
+      await foodCatalogue.saveCatalogue(remaining);
+      await foodCatalogue.bumpVersion(restoredIds, 'rollback');
+      batch.rolledBackAt = new Date().toISOString();
+      await foodCatalogue.saveImportBatches(batches);
+      await logActivity(session, `${session.username} rolled back the "${batch.filename}" import`);
       return json(res, 200, {ok: true});
     }
     if (['GET', 'HEAD'].includes(req.method) && (url.pathname === '/' || url.pathname === '/admin')) {

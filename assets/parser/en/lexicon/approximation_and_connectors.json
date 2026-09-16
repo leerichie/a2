@@ -31,5 +31,21 @@
     "a",
     "an",
     "of"
+  ],
+  "activity_filler_words": [
+    "played",
+    "play",
+    "playing",
+    "did",
+    "doing",
+    "went",
+    "go",
+    "going",
+    "for",
+    "in",
+    "a",
+    "an",
+    "of",
+    "the"
   ]
 }
