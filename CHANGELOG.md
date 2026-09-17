@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0+41 — 2026-09-17
+
+- Fixed `pubspec.yaml`'s package name field having been corrupted to
+  `fluttername:` instead of `name:`, which blocked `flutter analyze` and any
+  fresh dependency resolution (`flutter pub get` alone didn't surface it,
+  since it can succeed off a stale lockfile) from working at all on a clean
+  checkout. Verified clean afterwards: `flutter analyze` (0 issues) and the
+  full test suite (503 tests) both pass.
+
 ## 1.0.0+40 — 2026-09-16
 
 - Fixed Android release builds failing during R8 shrinking because the ML Kit
