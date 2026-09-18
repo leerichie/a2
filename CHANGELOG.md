@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0+47 — 2026-09-18
+
+- Fixed AI food/exercise/photo estimates never actually working: the code
+  read a field (`output_text`) that only the official OpenAI SDK computes
+  client-side, not something the API itself returns — every AI call has
+  silently failed since this was built, always falling through to "please
+  clarify" instead. Also switched the default model from `gpt-5` to
+  `gpt-4o-mini`: this exact endpoint (a strict-JSON-schema structured
+  extraction, no need for deep reasoning) reliably had `gpt-5` reason
+  indefinitely without ever producing an answer, regardless of reasoning
+  effort or output-token budget, whereas `gpt-4o-mini` answers correctly
+  in 1-2 seconds — a large speed win on top of fixing the real bug.
+  Verified end to end against the live server: English and Polish food
+  descriptions and an exercise description all now resolve correctly and
+  fast.
+
 ## 1.0.0+46 — 2026-09-18
 
 - Fixed AI food/exercise estimates being very slow: the model was running
