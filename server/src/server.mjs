@@ -252,6 +252,13 @@ async function aiDescribe(kind, text) {
         ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise. Set servingGrams to 0 for exercise.'
         : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal. Also return servingGrams: the total realistic weight in grams of the portion your calorie/protein/carb figures describe (summed across every item if there are several), so those figures can be recorded on a per-100g basis later.',
       input: text,
+      // This is a single structured-extraction call (fill in a fixed JSON
+      // shape), not a task that benefits from extended chain-of-thought --
+      // gpt-5's default reasoning effort made even a short phrase take
+      // many seconds, which is far too slow for something the user is
+      // waiting on inline while adding a meal. Minimal effort keeps it
+      // fast while still being accurate enough for a nutrition estimate.
+      reasoning: {effort: 'minimal'},
       text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
     }),
   });
@@ -279,6 +286,11 @@ async function aiVision(kind, imageBase64, mimeType) {
           {type: 'input_image', image_url: `data:${mimeType};base64,${imageBase64}`},
         ],
       }],
+      // 'low' rather than aiDescribe's 'minimal' -- reading a label/photo
+      // benefits a little more from reasoning than plain text extraction,
+      // but the default effort was still far slower than this inline flow
+      // can tolerate.
+      reasoning: {effort: 'low'},
       text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
     }),
   });

@@ -5563,24 +5563,37 @@ class _AddMealSheetState extends State<AddMealSheet> {
     final items = <FoodParseItem>[];
     final unresolvedTexts = <String>[];
     try {
-      for (final item in localResult.items) {
+      // Every incomplete item/unresolved span local couldn't handle is
+      // independent of every other one, so their AI calls run concurrently
+      // (Future.wait) rather than one after another -- a sentence with two
+      // unrecognized dishes previously meant two AI round trips back to
+      // back, doubling the wait for no reason.
+      final itemResolutions = await Future.wait(
+        localResult.items.map(
+          (item) => item.confidence == ParseConfidence.incomplete
+              ? aiResolveComponent(_phraseForItem(item))
+              : Future<List<FoodParseItem>?>.value(null),
+        ),
+      );
+      for (var i = 0; i < localResult.items.length; i++) {
+        final item = localResult.items[i];
         if (item.confidence != ParseConfidence.incomplete) {
           items.add(item);
-          continue;
-        }
-        final resolved = await aiResolveComponent(_phraseForItem(item));
-        if (resolved != null) {
-          items.addAll(resolved);
+        } else if (itemResolutions[i] != null) {
+          items.addAll(itemResolutions[i]!);
         } else {
           items.add(item);
         }
       }
-      for (final span in localResult.unresolved) {
-        final resolved = await aiResolveComponent(span.text);
+      final spanResolutions = await Future.wait(
+        localResult.unresolved.map((span) => aiResolveComponent(span.text)),
+      );
+      for (var i = 0; i < localResult.unresolved.length; i++) {
+        final resolved = spanResolutions[i];
         if (resolved != null) {
           items.addAll(resolved);
         } else {
-          unresolvedTexts.add(span.text);
+          unresolvedTexts.add(localResult.unresolved[i].text);
         }
       }
     } finally {
@@ -8164,7 +8177,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+45';
+  String installedVersion = '1.0.0+46';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;

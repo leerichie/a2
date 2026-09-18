@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0+46 — 2026-09-18
+
+- Fixed AI food/exercise estimates being very slow: the model was running
+  at its default (extended) reasoning effort for a simple structured
+  extraction task, and a description with two unrecognized items made two
+  such slow calls back to back. Reasoning effort is now set explicitly low
+  for both text estimates and photo/label reading, and multiple
+  unrecognized components in one description now resolve concurrently
+  instead of one after another.
+
 ## 1.0.0+45 — 2026-09-18
 
 - Fixed six-a-side-style football aliases ("5 a side", "five a side")
