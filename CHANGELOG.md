@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.0+42 — 2026-09-18
+
+- Fixed a silent edit/delete failure: editing or deleting a diary entry
+  matched it back into the live list by object identity, so a background
+  sync reload firing while the edit sheet was open (every 20s) made the
+  save quietly no-op with no error shown. `FoodEntry` now has real value
+  equality.
+- Prepared/composite dishes mentioned with no quantity ("egg paste",
+  "chicken curry", "carbonara", ...) now get a real standard-portion
+  estimate instead of asking for manual calories every time: either
+  borrowed from an already-real close relative (chicken/beef curry from
+  curry, gyros/shawarma from kebab) or composed from real ingredient data
+  via a new recipe mechanism (egg salad = 1 boiled egg + 1 tsp mayonnaise +
+  a sprinkle of chives). Nothing at the dish level is invented -- every
+  number traces back to an ingredient the app already trusted, or a
+  dedicated real reference value for carbonara following the same
+  convention already used for the other prepared dishes in this dataset.
+- Added standalone "chives" (previously only reachable inside "cottage
+  cheese with chives") with real nutrition data, and a "slice" portion rule
+  for generic "cheese" (previously only the no-unit default worked).
+
 ## 1.0.0+41 — 2026-09-17
 
 - Fixed `pubspec.yaml`'s package name field having been corrupted to
