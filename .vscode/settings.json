@@ -1,0 +1,5 @@
+{
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.autobuild.enabled": false
+}
