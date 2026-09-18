@@ -66,54 +66,48 @@ void main() {
     });
   });
 
-  // Drinks migrated from FoodEstimator's `drinks` map (per 100ml). No
-  // bare-mention default is added for spirits/wine -- container sizes
-  // (shot/double/glass/bottle) vary too widely to guess. Beer is the
-  // deliberate exception (2026-09-18): unlike a "wine"/"whisky" mention, a
-  // bare beer/piwo mention defaults like cola's can/glass serving does --
-  // see its own group below.
+  // Drinks migrated from FoodEstimator's `drinks` map (per 100ml). Originally
+  // shipped with NO bare-mention default for any of them (1.0.0+29 -- the
+  // old universal "25ml x count" measure was deliberately not carried
+  // forward, since a single container size can't safely represent every
+  // possible pour). Reversed by explicit product decision on 2026-09-18:
+  // every alcoholic drink now defaults to a real standard serving size
+  // (beer/wine to a typical bottle/glass, spirits to a standard single
+  // measure), the same way non-alcoholic drinks like cola already did --
+  // an explicit ml/count amount always overrides it at high confidence.
   const migratedDrinks = {
-    'whisky': 220, 'vodka': 220, 'gin': 220, 'rum': 220, 'wine': 83,
+    'whisky': (220, 25.0), 'vodka': (220, 25.0), 'gin': (220, 25.0),
+    'rum': (220, 25.0), 'wine': (83, 150.0), 'beer': (43, 500.0),
   };
 
-  group('drinks have real nutrient data but no invented default measure', () {
-    migratedDrinks.forEach((id, kcalPer100ml) {
-      test('bare "$id" has nutrient data available but stays incomplete '
-          '(no measure given, no default invented)', () {
+  group('every alcoholic drink defaults to a real standard serving size', () {
+    migratedDrinks.forEach((id, spec) {
+      final (kcalPer100ml, defaultMl) = spec;
+      test('bare "$id" resolves via its standard serving, not blocked', () {
         final item = parser.parse(id).items.single;
-        expect(item.canonicalId, id);
-        expect(item.grams, null, reason: id);
-        expect(item.confidence, ParseConfidence.incomplete, reason: id);
+        expect(item.canonicalId, id, reason: id);
+        expect(item.grams, defaultMl, reason: id);
+        expect(item.confidence, ParseConfidence.medium, reason: id);
+        expect(
+          item.nutrition!.kcal,
+          closeTo(kcalPer100ml * defaultMl / 100, 0.01),
+          reason: id,
+        );
       });
 
-      test('an explicit ml amount for "$id" resolves at high confidence', () {
+      test('a bare count ("1 $id") resolves the same way', () {
+        final item = parser.parse('1 $id').items.single;
+        expect(item.canonicalId, id, reason: id);
+        expect(item.grams, defaultMl, reason: id);
+      });
+
+      test('an explicit ml amount for "$id" overrides the default '
+          'at high confidence', () {
         final item = parser.parse('250ml $id').items.single;
         expect(item.grams, 250, reason: id);
         expect(item.nutrition!.kcal, closeTo(kcalPer100ml * 2.5, 0.05), reason: id);
         expect(item.confidence, ParseConfidence.high, reason: id);
       });
-    });
-  });
-
-  // Beer is the deliberate exception to "no alcohol default" above --
-  // explicit product decision 2026-09-18: a bare beer/piwo mention should
-  // resolve like a can of cola does, since (unlike wine/spirits) it's
-  // near-universally a single ~500ml bottle/can.
-  group('beer opts back into a bare-mention default, unlike other alcohol', () {
-    test('bare "beer" resolves via a typical bottle/can serving', () {
-      final item = parser.parse('beer').items.single;
-      expect(item.canonicalId, 'beer');
-      expect(item.grams, 500);
-      expect(item.confidence, ParseConfidence.medium);
-      expect(item.nutrition!.kcal, closeTo(43 * 5, 0.01));
-    });
-
-    test('a bare count ("1 beer") still resolves the same way, not blocked',
-        () {
-      final item = parser.parse('1 beer').items.single;
-      expect(item.canonicalId, 'beer');
-      expect(item.grams, 500);
-      expect(item.confidence, ParseConfidence.medium);
     });
   });
 

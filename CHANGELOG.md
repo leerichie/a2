@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0+49 — 2026-09-18
+
+- Extended beer's new default-serving behaviour to every other alcoholic
+  drink: wine now defaults to a standard glass (150ml), whisky/vodka/gin/
+  rum to a standard single measure (25ml) — a bare mention or plain count
+  ("wine", "1 whisky") resolves immediately instead of asking for a
+  measure, in both English and Polish. An explicit ml amount still always
+  overrides the default.
+
 ## 1.0.0+48 — 2026-09-18
 
 - Added generic Polish "surówka"/"surówki"/"surówkę" (a raw vegetable side

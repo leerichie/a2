@@ -2210,7 +2210,52 @@
     "size": null,
     "grams": 500,
     "confidence": "medium",
-    "source": "typical bottle/can serving -- explicit product decision 2026-09-18: unlike wine/spirits (which stay measure-required, container sizes vary too widely to default), a bare beer/piwo mention should resolve like a can of cola does"
+    "source": "typical bottle/can serving -- explicit product decision 2026-09-18: a bare beer/piwo mention resolves like a can of cola does"
+  },
+  {
+    "foodId": "wine",
+    "foodNameAsGiven": "wine",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium",
+    "source": "standard single glass serving (150ml) -- explicit product decision 2026-09-18, extending the beer default to every alcoholic drink"
+  },
+  {
+    "foodId": "whisky",
+    "foodNameAsGiven": "whisky",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "standard single spirit measure (25ml) -- explicit product decision 2026-09-18"
+  },
+  {
+    "foodId": "vodka",
+    "foodNameAsGiven": "vodka",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "standard single spirit measure (25ml) -- explicit product decision 2026-09-18"
+  },
+  {
+    "foodId": "gin",
+    "foodNameAsGiven": "gin",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "standard single spirit measure (25ml) -- explicit product decision 2026-09-18"
+  },
+  {
+    "foodId": "rum",
+    "foodNameAsGiven": "rum",
+    "unit": null,
+    "size": null,
+    "grams": 25,
+    "confidence": "medium",
+    "source": "standard single spirit measure (25ml) -- explicit product decision 2026-09-18"
   },
   {
     "foodId": "coke_zero",

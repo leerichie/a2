@@ -226,13 +226,9 @@ void main() {
       });
     });
 
-    test('"wine" (a drink) still has no bare-mention default -- the old '
-        '25ml-universal-measure assumption is not carried forward', () {
-      final item = parser.parse('wine').items.single;
-      expect(item.canonicalId, 'wine');
-      expect(item.grams, null);
-      expect(item.confidence, ParseConfidence.incomplete);
-    });
+    // Wine's bare-mention default (and every other alcoholic drink's) is
+    // covered in test/parser/migration_coverage_test.dart, which also
+    // documents the 2026-09-18 policy reversal that added it.
 
     test('generic "chicken" is never silently narrowed to chicken breast', () {
       final item = parser.parse('chicken').items.single;
