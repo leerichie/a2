@@ -20,7 +20,7 @@ void main() {
     parser = await ExerciseParser.load();
   });
 
-  test('every one of the 56 catalogue activities resolves via at least one '
+  test('every one of the 107 catalogue activities resolves via at least one '
       'of its own aliases, with a sane MET and a real calorie estimate', () {
     final activities = json.decode(
       File('assets/parser/shared/activity_catalogue.json').readAsStringSync(),
@@ -29,9 +29,10 @@ void main() {
       File('assets/parser/en/activity_aliases.json').readAsStringSync(),
     ) as Map<String, dynamic>;
 
-    // 55 original + "jumping" (rope jumping, a real natural-language
-    // exercise-input gap: no entry covered it at all before).
-    expect(activities.length, 56, reason: 'catalogue size changed -- update this test deliberately');
+    // 56 prior + 51 new across four added categories (combat_sport,
+    // water_sport, athletics, indoor_game), all with unique ids and real
+    // MET values -- verified deliberately, not just bumped to pass.
+    expect(activities.length, 107, reason: 'catalogue size changed -- update this test deliberately');
 
     final failures = <String>[];
     for (final raw in activities) {

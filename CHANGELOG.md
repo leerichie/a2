@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0+45 — 2026-09-18
+
+- Fixed six-a-side-style football aliases ("5 a side", "five a side")
+  failing to resolve — generic filler-word stripping ("a", "an", "of") ran
+  unconditionally before alias matching, so it could turn a real alias
+  containing one of those words into one that no longer existed. The
+  untouched phrase is now tried first.
+- Added the 51 newly-added exercise activities' categories (combat_sport,
+  water_sport, athletics, indoor_game) to the known-category list, and
+  updated the catalogue-size regression guard (56 → 107) to match —
+  dataset validation and exercise coverage tests are green again.
+- Added the 7 missing translations (Meal weight, Optional, Salt, Saturated
+  fat, Sugar, the units-understood hint, Whole pack weight) from the label
+  editing screens across all six languages.
+
 ## 1.0.0+42 — 2026-09-18
 
 - Fixed a silent edit/delete failure: editing or deleting a diary entry

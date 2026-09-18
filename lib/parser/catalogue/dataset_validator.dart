@@ -1,8 +1,9 @@
 import 'alias_index.dart';
 
 const knownActivityCategories = {
-  'cycling', 'daily_activity', 'dance', 'fitness', 'gym', 'outdoor',
-  'racket_sport', 'running', 'swimming', 'team_sport', 'tennis', 'walking',
+  'athletics', 'combat_sport', 'cycling', 'daily_activity', 'dance',
+  'fitness', 'gym', 'indoor_game', 'outdoor', 'racket_sport', 'running',
+  'swimming', 'team_sport', 'tennis', 'walking', 'water_sport',
   'winter_sport',
 };
 

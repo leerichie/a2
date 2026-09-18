@@ -113,12 +113,22 @@ class ExerciseParser {
   ExerciseParseItem parse(String input, {required double? bodyWeightKg}) {
     final normalized = normalizeParserText(input);
     final quantity = parseExerciseQuantity(normalized, lexicon);
-    var remaining = correctSpelling(quantity.remainder, vocabulary);
-    remaining = removeFillerWords(remaining, lexicon.activityFillerWords);
-    remaining = remaining.trim();
+    final corrected = correctSpelling(quantity.remainder, vocabulary).trim();
+    final remaining =
+        removeFillerWords(corrected, lexicon.activityFillerWords).trim();
 
-    var resolution = resolveActivity(remaining, catalogue, aliasIndex,
+    // Try the phrase before filler words are stripped first -- some real
+    // aliases ("5 a side") are themselves built from filler words like "a",
+    // so stripping unconditionally can turn a valid alias ("5 a side") into
+    // one that no longer exists ("5 side"). Only fall back to the
+    // filler-stripped phrase (needed for "played tennis" -> "tennis", etc.)
+    // when the untouched phrase doesn't resolve on its own.
+    var resolution = resolveActivity(corrected, catalogue, aliasIndex,
         personalAliases: personalAliases, locale: locale);
+    if (resolution.entry == null) {
+      resolution = resolveActivity(remaining, catalogue, aliasIndex,
+          personalAliases: personalAliases, locale: locale);
+    }
 
     var minutes = quantity.minutes;
     var approximate = quantity.approximate;
