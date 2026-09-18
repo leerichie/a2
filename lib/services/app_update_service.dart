@@ -43,12 +43,11 @@ class AppUpdateService {
       final appDataRaw = jsonData[_appKey];
       if (appDataRaw is! Map<String, dynamic>) return;
 
-      // The feed's "latestVersion" sometimes carries a "+build" suffix; only
-      // the plain semantic version is meaningful for display.
-      final latestVersion = (appDataRaw['latestVersion'] ?? '')
-          .toString()
-          .split('+')
-          .first;
+      // Show the full "X.Y.Z+B" string -- the semantic version alone
+      // barely ever changes release to release, so the build number is
+      // what actually lets the user tell releases apart and confirm which
+      // one they're being offered.
+      final latestVersion = (appDataRaw['latestVersion'] ?? '').toString();
       final latestBuild = appDataRaw['latestBuild'] is int
           ? appDataRaw['latestBuild'] as int
           : int.tryParse('${appDataRaw['latestBuild']}') ?? 0;
