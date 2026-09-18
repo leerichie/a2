@@ -315,6 +315,9 @@
   "chilli_sauce": [
     "sos chili"
   ],
+  "chives": [
+    "szczypiorek"
+  ],
   "chocolate_bar": [
     "baton czekoladowy"
   ],
@@ -479,6 +482,11 @@
   ],
   "egg_noodles": [
     "makaron jajeczny"
+  ],
+  "egg_salad": [
+    "pasta jajeczna",
+    "pasta z jajek",
+    "pasta jajowa"
   ],
   "egg_white": [
     "białko jaja"

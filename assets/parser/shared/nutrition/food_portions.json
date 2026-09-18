@@ -160,6 +160,15 @@
     "confidence": "medium"
   },
   {
+    "foodId": "tuna",
+    "foodNameAsGiven": "tin of tuna",
+    "unit": "can",
+    "size": null,
+    "grams": 170,
+    "confidence": "medium",
+    "source": "Standard tuna tin/can size in Polish shops, per user confirmation."
+  },
+  {
     "foodId": "cod",
     "foodNameAsGiven": "cod",
     "unit": null,
@@ -198,6 +207,23 @@
     "size": null,
     "grams": 30,
     "confidence": "medium"
+  },
+  {
+    "foodId": "cheese",
+    "foodNameAsGiven": "cheese",
+    "unit": "slice",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "carbonara",
+    "foodNameAsGiven": "carbonara",
+    "unit": null,
+    "size": null,
+    "grams": 350,
+    "confidence": "medium",
+    "source": "typical takeaway/homemade serving"
   },
   {
     "foodId": "avocado",
@@ -1519,6 +1545,15 @@
     "grams": 3,
     "confidence": "medium",
     "source": "typical single item weight"
+  },
+  {
+    "foodId": "chives",
+    "foodNameAsGiven": "chives",
+    "unit": null,
+    "size": null,
+    "grams": 3,
+    "confidence": "medium",
+    "source": "typical garnish sprinkle"
   },
   {
     "foodId": "spring_onion",

@@ -46,12 +46,13 @@ class ExerciseParser {
   }) async {
     final catalogue = await ActivityCatalogue.load(locale: locale, reader: reader);
     final lexicon = await Lexicon.load(locale: locale, reader: reader);
+    // See FoodParser.load for why this no longer throws: a colliding
+    // overlay/contributed alias must never take the whole parser down --
+    // AliasIndex.build's first-registration-wins rule (bundled entries
+    // listed first, above) already keeps bundled/trusted data authoritative.
     final aliasIndex = AliasIndex.build({
       for (final e in catalogue.entries) e.id: [...e.aliases, e.canonical],
     });
-    if (aliasIndex.collisions.isNotEmpty) {
-      throw StateError('Activity alias collisions: ${aliasIndex.collisions}');
-    }
     final vocabulary = buildVocabulary([
       for (final e in catalogue.entries) ...[...e.aliases, e.canonical],
       ...lexicon.timeUnitByAlias.keys,

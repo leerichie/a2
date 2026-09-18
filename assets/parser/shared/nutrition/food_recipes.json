@@ -1,0 +1,11 @@
+[
+  {
+    "foodId": "egg_salad",
+    "ingredients": [
+      { "foodId": "boiled_egg", "quantity": 1, "unit": null },
+      { "foodId": "mayonnaise", "quantity": 1, "unit": "teaspoon" },
+      { "foodId": "chives", "quantity": 1, "unit": null }
+    ],
+    "source": "default composition: one boiled egg mashed with a teaspoon of mayonnaise and a sprinkle of chives -- the app's real per-ingredient data, combined at a typical bare-mention serving."
+  }
+]

@@ -352,6 +352,10 @@
     "chili sauce",
     "chilli sauce"
   ],
+  "chives": [
+    "chives",
+    "chive"
+  ],
   "chocolate_bar": [
     "chocolate bar"
   ],
@@ -545,6 +549,12 @@
   ],
   "egg_noodles": [
     "egg noodles"
+  ],
+  "egg_salad": [
+    "egg salad",
+    "egg mayo",
+    "egg spread",
+    "egg paste"
   ],
   "egg_white": [
     "egg white"

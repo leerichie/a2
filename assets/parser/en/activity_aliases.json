@@ -8,6 +8,7 @@
   "brisk_walking": [
     "brisk walking",
     "fast walk",
+    "fitness walking",
     "power walk"
   ],
   "slow_walking": [
@@ -21,6 +22,10 @@
     "jogging"
   ],
   "running": [
+    "distance run",
+    "half marathon",
+    "marathon",
+    "road race",
     "run",
     "running"
   ],
@@ -48,6 +53,7 @@
   "singles_tennis": [
     "singles",
     "singles tennis",
+    "tennis",
     "tennis singles"
   ],
   "doubles_tennis": [
@@ -69,11 +75,14 @@
     "lifting weights",
     "strength training",
     "weight training",
+    "weightlifting",
     "weights"
   ],
   "vigorous_weight_training": [
     "heavy lifting",
     "heavy weights",
+    "power lifting",
+    "powerlifting",
     "vigorous weight training"
   ],
   "bodyweight_training": [
@@ -114,20 +123,44 @@
     "spinning"
   ],
   "easy_swimming": [
-    "breaststroke",
+    "backstroke",
     "easy swimming",
     "slow swimming"
   ],
   "lap_swimming": [
+    "crawl",
+    "freestyle",
+    "front crawl",
     "lap swimming",
+    "open water swimming",
+    "swimming",
+    "swimming freestyle",
+    "swimming front crawl",
     "swimming laps"
   ],
   "vigorous_swimming": [
     "fast swimming",
     "vigorous swimming"
   ],
+  "breaststroke_swimming": [
+    "breast stroke",
+    "breaststroke",
+    "swimming breaststroke"
+  ],
+  "butterfly_swimming": [
+    "butterfly",
+    "butterfly stroke",
+    "fly stroke",
+    "swimming butterfly"
+  ],
   "football": [
+    "5 a side",
+    "5-a-side",
+    "five a side",
     "football",
+    "futsal",
+    "indoor football",
+    "small sided football",
     "soccer"
   ],
   "basketball": [
@@ -140,11 +173,18 @@
     "handball"
   ],
   "rugby": [
-    "rugby"
+    "fifteens rugby",
+    "rugby",
+    "rugby fifteens",
+    "rugby league",
+    "rugby sevens",
+    "rugby union",
+    "sevens rugby"
   ],
   "skiing": [
     "downhill skiing",
-    "skiing"
+    "skiing",
+    "slalom"
   ],
   "cross_country_skiing": [
     "cross-country skiing",
@@ -181,17 +221,86 @@
     "hill walking",
     "uphill walk",
     "uphill walking",
-    "walking hills"
+    "walk uphill",
+    "walking hills",
+    "walking uphill"
+  ],
+  "downhill_walking": [
+    "downhill walk",
+    "downhill walking",
+    "walk downhill",
+    "walking downhill"
+  ],
+  "run_walk_intervals": [
+    "interval running and walking",
+    "interval walk and run",
+    "jog walk intervals",
+    "run and walk intervals",
+    "run walk intervals",
+    "run/walk intervals",
+    "walk run intervals",
+    "walking and running intervals"
   ],
   "climbing": [
     "climbing",
+    "mountain climbing",
     "rock climbing"
   ],
   "horse_riding": [
     "cross country riding",
+    "equestrian",
     "horse riding",
     "horse riding cross country",
     "horseback riding"
+  ],
+  "horse_riding_walk": [
+    "horse riding walk",
+    "horse walking",
+    "riding walk",
+    "walk horse riding"
+  ],
+  "horse_riding_trot": [
+    "dressage",
+    "horse riding trot",
+    "posting trot",
+    "riding trot",
+    "rising trot",
+    "sitting trot",
+    "trot horse riding",
+    "trotting"
+  ],
+  "horse_riding_canter": [
+    "canter",
+    "cantering",
+    "canter horse riding",
+    "horse riding canter",
+    "riding canter"
+  ],
+  "horse_riding_gallop": [
+    "gallop",
+    "gallop horse riding",
+    "galloping",
+    "horse racing",
+    "horse riding gallop",
+    "riding gallop"
+  ],
+  "horse_jumping": [
+    "horse jumping",
+    "jumping fences",
+    "jumping horse",
+    "show jumping"
+  ],
+  "horse_groundwork": [
+    "ground work",
+    "groundwork",
+    "handling horse",
+    "horse ground work",
+    "horse groundwork",
+    "horse training",
+    "leading horse",
+    "lungeing",
+    "lunging",
+    "natural horsemanship"
   ],
   "gardening": [
     "garden work",
@@ -236,5 +345,197 @@
     "rope jumping",
     "skipping",
     "skipping rope"
+  ],
+  "martial_arts": [
+    "aikido",
+    "judo",
+    "jujitsu",
+    "karate",
+    "kickboxing",
+    "martial arts",
+    "tae kwon do",
+    "taekwondo"
+  ],
+  "boxing": [
+    "boxing",
+    "punching bag",
+    "shadow boxing"
+  ],
+  "wrestling": [
+    "sumo wrestling",
+    "wrestling"
+  ],
+  "fencing": [
+    "fencing"
+  ],
+  "racquetball": [
+    "racket ball",
+    "racquetball"
+  ],
+  "baseball": [
+    "baseball",
+    "softball",
+    "wiffle ball"
+  ],
+  "field_hockey": [
+    "field hockey",
+    "hurling"
+  ],
+  "ice_hockey": [
+    "ice hockey"
+  ],
+  "lacrosse": [
+    "lacrosse"
+  ],
+  "dodgeball": [
+    "dodge ball",
+    "dodgeball"
+  ],
+  "cricket": [
+    "cricket",
+    "cricket franchise",
+    "franchise cricket",
+    "odi cricket",
+    "one day international",
+    "t20",
+    "t20 cricket",
+    "test cricket",
+    "test match cricket"
+  ],
+  "american_football": [
+    "american football",
+    "flag football",
+    "gridiron football"
+  ],
+  "beach_volleyball": [
+    "beach volleyball"
+  ],
+  "water_polo": [
+    "water polo"
+  ],
+  "canoeing": [
+    "canoeing"
+  ],
+  "rowing_boat": [
+    "rowing",
+    "sculling"
+  ],
+  "sailing": [
+    "sailing",
+    "wind surfing",
+    "windsurfing",
+    "yachting"
+  ],
+  "surfing": [
+    "surfing"
+  ],
+  "water_skiing": [
+    "water skiing"
+  ],
+  "snorkeling": [
+    "shark diving",
+    "skin diving",
+    "snorkeling",
+    "snorkelling"
+  ],
+  "jet_skiing": [
+    "jet skiing",
+    "wave running"
+  ],
+  "ice_skating": [
+    "ice dancing",
+    "ice skating"
+  ],
+  "inline_skating": [
+    "in-line skating",
+    "inline skating",
+    "roller skating",
+    "rollerblading"
+  ],
+  "sledding_tobogganing": [
+    "luge",
+    "sledding",
+    "tobogganing"
+  ],
+  "skateboarding": [
+    "skateboarding"
+  ],
+  "track_field_throwing": [
+    "discus",
+    "discus throw",
+    "hammer throw",
+    "javelin throw",
+    "shot put"
+  ],
+  "track_field_jumping": [
+    "high jump",
+    "high jumping",
+    "long jump",
+    "pole vault",
+    "triple jump"
+  ],
+  "race_walking": [
+    "race walk",
+    "race walking"
+  ],
+  "athletics_general": [
+    "athletics",
+    "field and track",
+    "track",
+    "track and field"
+  ],
+  "golf": [
+    "golf"
+  ],
+  "lawn_games": [
+    "bocce",
+    "croquet",
+    "horseshoes",
+    "lawn bowling",
+    "shuffleboard"
+  ],
+  "billiards": [
+    "billiards",
+    "pool"
+  ],
+  "archery": [
+    "archery",
+    "skeet shooting",
+    "target shooting"
+  ],
+  "curling": [
+    "curling"
+  ],
+  "bowling": [
+    "bowling",
+    "ten-pin bowling",
+    "tenpin bowling"
+  ],
+  "gymnastics": [
+    "gymnastics"
+  ],
+  "fishing": [
+    "fishing",
+    "fly fishing"
+  ],
+  "hunting": [
+    "hunting"
+  ],
+  "kayaking": [
+    "kayaking"
+  ],
+  "ski_jumping": [
+    "ski jump",
+    "ski jumping"
+  ],
+  "cross_country_running": [
+    "cross country",
+    "cross country meet",
+    "cross country race",
+    "cross country running",
+    "xc",
+    "xc meet",
+    "xc race",
+    "xc running"
   ]
 }

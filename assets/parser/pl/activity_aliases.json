@@ -4,9 +4,46 @@
     "jazdy konnej",
     "konno"
   ],
+  "horse_riding_walk": [
+    "jazda stępem",
+    "stęp"
+  ],
+  "horse_riding_trot": [
+    "jazda kłusem",
+    "kłus"
+  ],
+  "horse_riding_canter": [
+    "galop",
+    "jazda galopem"
+  ],
+  "horse_riding_gallop": [
+    "cwał",
+    "jazda cwałem"
+  ],
+  "horse_jumping": [
+    "skoki konne",
+    "skoki przez przeszkody"
+  ],
+  "horse_groundwork": [
+    "praca z ziemi",
+    "trening z ziemi"
+  ],
   "walking": [
     "spacer",
     "chodzenie"
+  ],
+  "hill_walking": [
+    "marsz pod górę",
+    "spacer pod górę"
+  ],
+  "downhill_walking": [
+    "marsz w dół",
+    "spacer w dół",
+    "spacer z górki"
+  ],
+  "run_walk_intervals": [
+    "interwały bieg marsz",
+    "marszobieg"
   ],
   "singles_tennis": [
     "tenis singlowy",
@@ -20,13 +57,256 @@
     "ping pong"
   ],
   "easy_swimming": [
-    "spokojne plywanie",
-    "wolne plywanie"
+    "spokojne pływanie",
+    "wolne pływanie",
+    "styl grzbietowy"
   ],
   "lap_swimming": [
-    "plywanie na okrazenia"
+    "pływanie na okrążenia",
+    "kraul"
   ],
   "vigorous_swimming": [
-    "szybkie plywanie"
+    "szybkie pływanie"
+  ],
+  "breaststroke_swimming": [
+    "żabka",
+    "styl klasyczny"
+  ],
+  "butterfly_swimming": [
+    "motylek",
+    "styl motylkowy"
+  ],
+  "football": [
+    "futbol",
+    "futsal",
+    "gra w piłkę nożną",
+    "piłka nożna",
+    "piłka nożna halowa",
+    "piłkarski"
+  ],
+  "basketball": [
+    "koszykówka"
+  ],
+  "volleyball": [
+    "siatkówka"
+  ],
+  "handball": [
+    "piłka ręczna"
+  ],
+  "badminton": [
+    "badminton"
+  ],
+  "squash": [
+    "squash"
+  ],
+  "moderate_cycling": [
+    "jazda na rowerze",
+    "kolarstwo"
+  ],
+  "easy_cycling": [
+    "spokojna jazda na rowerze"
+  ],
+  "vigorous_cycling": [
+    "szybka jazda na rowerze"
+  ],
+  "jogging": [
+    "truchtanie"
+  ],
+  "running": [
+    "bieg",
+    "bieganie"
+  ],
+  "fast_running": [
+    "sprint",
+    "szybki bieg"
+  ],
+  "weight_training": [
+    "podnoszenie ciężarów",
+    "trening siłowy"
+  ],
+  "hiking": [
+    "trekking",
+    "wędrówka"
+  ],
+  "climbing": [
+    "wspinaczka",
+    "wspinaczka górska"
+  ],
+  "skiing": [
+    "jazda na nartach",
+    "narciarstwo"
+  ],
+  "cross_country_skiing": [
+    "biegi narciarskie",
+    "narciarstwo biegowe"
+  ],
+  "snowboarding": [
+    "jazda na snowboardzie",
+    "snowboard"
+  ],
+  "yoga": [
+    "joga"
+  ],
+  "dancing": [
+    "taniec",
+    "tańczenie"
+  ],
+  "gardening": [
+    "ogrodnictwo",
+    "praca w ogrodzie"
+  ],
+  "ski_jumping": [
+    "skok narciarski",
+    "skoki narciarskie"
+  ],
+  "martial_arts": [
+    "aikido",
+    "judo",
+    "karate",
+    "kickboxing",
+    "sztuki walki",
+    "taekwondo"
+  ],
+  "boxing": [
+    "boks"
+  ],
+  "wrestling": [
+    "sumo",
+    "zapasy"
+  ],
+  "fencing": [
+    "szermierka"
+  ],
+  "racquetball": [
+    "racquetball"
+  ],
+  "baseball": [
+    "baseball",
+    "softball"
+  ],
+  "field_hockey": [
+    "hokej na trawie"
+  ],
+  "ice_hockey": [
+    "hokej na lodzie"
+  ],
+  "lacrosse": [
+    "lacrosse"
+  ],
+  "dodgeball": [
+    "dwa ognie",
+    "zbijak"
+  ],
+  "cricket": [
+    "krykiet"
+  ],
+  "american_football": [
+    "futbol amerykański"
+  ],
+  "beach_volleyball": [
+    "siatkówka plażowa"
+  ],
+  "water_polo": [
+    "piłka wodna"
+  ],
+  "canoeing": [
+    "kajakarstwo kanadyjskie",
+    "kanadyjka",
+    "spływ kajakowy"
+  ],
+  "rowing_boat": [
+    "wiosłowanie",
+    "wioślarstwo"
+  ],
+  "sailing": [
+    "żeglarstwo",
+    "żeglowanie"
+  ],
+  "surfing": [
+    "surfing"
+  ],
+  "water_skiing": [
+    "narty wodne"
+  ],
+  "snorkeling": [
+    "nurkowanie",
+    "nurkowanie z rurką"
+  ],
+  "jet_skiing": [
+    "skuter wodny"
+  ],
+  "ice_skating": [
+    "jazda na łyżwach",
+    "łyżwiarstwo",
+    "łyżwiarstwo figurowe"
+  ],
+  "inline_skating": [
+    "jazda na rolkach",
+    "rolki",
+    "łyżworolki"
+  ],
+  "sledding_tobogganing": [
+    "saneczkarstwo",
+    "sanki"
+  ],
+  "skateboarding": [
+    "deskorolka",
+    "jazda na deskorolce"
+  ],
+  "track_field_throwing": [
+    "pchnięcie kulą",
+    "rzut dyskiem",
+    "rzut młotem",
+    "rzut oszczepem"
+  ],
+  "track_field_jumping": [
+    "skok o tyczce",
+    "skok w dal",
+    "skok wzwyż",
+    "trójskok"
+  ],
+  "race_walking": [
+    "chód sportowy"
+  ],
+  "athletics_general": [
+    "lekkoatletyka"
+  ],
+  "golf": [
+    "golf"
+  ],
+  "lawn_games": [
+    "bule",
+    "kręgle plenerowe"
+  ],
+  "billiards": [
+    "bilard"
+  ],
+  "archery": [
+    "łucznictwo"
+  ],
+  "curling": [
+    "curling"
+  ],
+  "bowling": [
+    "kręgielnia",
+    "kręgle"
+  ],
+  "gymnastics": [
+    "gimnastyka"
+  ],
+  "fishing": [
+    "wędkarstwo",
+    "łowienie ryb"
+  ],
+  "hunting": [
+    "polowanie"
+  ],
+  "kayaking": [
+    "kajak",
+    "kajakarstwo"
+  ],
+  "cross_country_running": [
+    "bieg przełajowy",
+    "przełaj"
   ]
 }

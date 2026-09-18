@@ -561,6 +561,11 @@
     "category": "sauce_condiment_fat"
   },
   {
+    "id": "chives",
+    "canonical": "chives",
+    "category": "vegetable"
+  },
+  {
     "id": "chocolate_bar",
     "canonical": "chocolate bar",
     "category": "snack_dessert"
@@ -830,6 +835,11 @@
     "id": "egg_noodles",
     "canonical": "egg noodles",
     "category": "grain_bakery"
+  },
+  {
+    "id": "egg_salad",
+    "canonical": "egg salad",
+    "category": "prepared_meal"
   },
   {
     "id": "egg_white",

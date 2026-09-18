@@ -17,6 +17,13 @@ class AliasIndex {
   final Map<String, String> _byAlias;
   final List<AliasCollision> collisions;
 
+  // First registration wins a given alias -- callers that want trusted/
+  // bundled data to always beat a later-merged overlay/contributed entry
+  // (see FoodParser.load, ExerciseParser.load) get that for free just by
+  // listing bundled entries first, with no separate resolution step. A
+  // collision is still recorded either way (see `collisions`) so dataset
+  // validation can catch it, but the index itself never depends on
+  // iteration order silently reassigning an already-claimed word.
   static AliasIndex build(Map<String, List<String>> aliasesById) {
     final byAlias = <String, String>{};
     final seenBy = <String, Set<String>>{};
@@ -24,7 +31,7 @@ class AliasIndex {
       for (final alias in entry.value) {
         final key = normalizeAlias(alias);
         seenBy.putIfAbsent(key, () => {}).add(entry.key);
-        byAlias[key] = entry.key;
+        byAlias.putIfAbsent(key, () => entry.key);
       }
     }
     final collisions = [

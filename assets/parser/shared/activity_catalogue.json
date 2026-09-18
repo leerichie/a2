@@ -189,6 +189,20 @@
     "met": 9.8
   },
   {
+    "id": "breaststroke_swimming",
+    "canonical": "breaststroke",
+    "category": "swimming",
+    "intensity": "vigorous",
+    "met": 10.3
+  },
+  {
+    "id": "butterfly_swimming",
+    "canonical": "butterfly",
+    "category": "swimming",
+    "intensity": "vigorous",
+    "met": 13.8
+  },
+  {
     "id": "football",
     "canonical": "football",
     "category": "team_sport",
@@ -315,6 +329,62 @@
     "met": 5.5
   },
   {
+    "id": "horse_riding_walk",
+    "canonical": "horse riding walk",
+    "category": "outdoor",
+    "intensity": "light",
+    "met": 3.0
+  },
+  {
+    "id": "horse_riding_trot",
+    "canonical": "horse riding trot",
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 6.5
+  },
+  {
+    "id": "horse_riding_canter",
+    "canonical": "horse riding canter",
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 7.5
+  },
+  {
+    "id": "horse_riding_gallop",
+    "canonical": "horse riding gallop",
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 9.0
+  },
+  {
+    "id": "horse_jumping",
+    "canonical": "horse jumping",
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 9.5
+  },
+  {
+    "id": "horse_groundwork",
+    "canonical": "horse groundwork",
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 3.5
+  },
+  {
+    "id": "downhill_walking",
+    "canonical": "downhill walking",
+    "category": "walking",
+    "intensity": "moderate",
+    "met": 3.8
+  },
+  {
+    "id": "run_walk_intervals",
+    "canonical": "run/walk intervals",
+    "category": "running",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
     "id": "gardening",
     "canonical": "gardening",
     "category": "daily_activity",
@@ -390,5 +460,292 @@
     "category": "fitness",
     "intensity": "vigorous",
     "met": 8.8
+  },
+  {
+    "id": "martial_arts",
+    "canonical": "martial arts",
+    "category": "combat_sport",
+    "intensity": "vigorous",
+    "met": 10.3
+  },
+  {
+    "id": "boxing",
+    "canonical": "boxing",
+    "category": "combat_sport",
+    "intensity": "vigorous",
+    "met": 7.8
+  },
+  {
+    "id": "wrestling",
+    "canonical": "wrestling",
+    "category": "combat_sport",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "fencing",
+    "canonical": "fencing",
+    "category": "combat_sport",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "racquetball",
+    "canonical": "racquetball",
+    "category": "racket_sport",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "baseball",
+    "canonical": "baseball",
+    "category": "team_sport",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "field_hockey",
+    "canonical": "field hockey",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 7.8
+  },
+  {
+    "id": "ice_hockey",
+    "canonical": "ice hockey",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "lacrosse",
+    "canonical": "lacrosse",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "dodgeball",
+    "canonical": "dodgeball",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "cricket",
+    "canonical": "cricket",
+    "category": "team_sport",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "american_football",
+    "canonical": "American football",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "beach_volleyball",
+    "canonical": "beach volleyball",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 8.0
+  },
+  {
+    "id": "water_polo",
+    "canonical": "water polo",
+    "category": "team_sport",
+    "intensity": "vigorous",
+    "met": 10.0
+  },
+  {
+    "id": "canoeing",
+    "canonical": "canoeing",
+    "category": "water_sport",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "rowing_boat",
+    "canonical": "rowing (boat)",
+    "category": "water_sport",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "sailing",
+    "canonical": "sailing",
+    "category": "water_sport",
+    "intensity": "light",
+    "met": 3.0
+  },
+  {
+    "id": "surfing",
+    "canonical": "surfing",
+    "category": "water_sport",
+    "intensity": "light",
+    "met": 3.0
+  },
+  {
+    "id": "water_skiing",
+    "canonical": "water skiing",
+    "category": "water_sport",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
+    "id": "snorkeling",
+    "canonical": "snorkeling",
+    "category": "water_sport",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "jet_skiing",
+    "canonical": "jet skiing",
+    "category": "water_sport",
+    "intensity": "light",
+    "met": 3.5
+  },
+  {
+    "id": "ice_skating",
+    "canonical": "ice skating",
+    "category": "winter_sport",
+    "intensity": "moderate",
+    "met": 5.5
+  },
+  {
+    "id": "inline_skating",
+    "canonical": "inline skating",
+    "category": "outdoor",
+    "intensity": "vigorous",
+    "met": 7.5
+  },
+  {
+    "id": "sledding_tobogganing",
+    "canonical": "sledding",
+    "category": "winter_sport",
+    "intensity": "vigorous",
+    "met": 7.0
+  },
+  {
+    "id": "skateboarding",
+    "canonical": "skateboarding",
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "track_field_throwing",
+    "canonical": "track and field throwing",
+    "category": "athletics",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "track_field_jumping",
+    "canonical": "track and field jumping",
+    "category": "athletics",
+    "intensity": "vigorous",
+    "met": 6.0
+  },
+  {
+    "id": "race_walking",
+    "canonical": "race walking",
+    "category": "walking",
+    "intensity": "vigorous",
+    "met": 6.5
+  },
+  {
+    "id": "athletics_general",
+    "canonical": "track and field",
+    "category": "athletics",
+    "intensity": "moderate",
+    "met": 6.0
+  },
+  {
+    "id": "golf",
+    "canonical": "golf",
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 4.3
+  },
+  {
+    "id": "lawn_games",
+    "canonical": "lawn games",
+    "category": "outdoor",
+    "intensity": "light",
+    "met": 2.7
+  },
+  {
+    "id": "billiards",
+    "canonical": "billiards",
+    "category": "indoor_game",
+    "intensity": "light",
+    "met": 2.5
+  },
+  {
+    "id": "archery",
+    "canonical": "archery",
+    "category": "outdoor",
+    "intensity": "light",
+    "met": 3.5
+  },
+  {
+    "id": "curling",
+    "canonical": "curling",
+    "category": "winter_sport",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "bowling",
+    "canonical": "bowling",
+    "category": "indoor_game",
+    "intensity": "light",
+    "met": 3.8
+  },
+  {
+    "id": "gymnastics",
+    "canonical": "gymnastics",
+    "category": "fitness",
+    "intensity": "moderate",
+    "met": 4.0
+  },
+  {
+    "id": "fishing",
+    "canonical": "fishing",
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 3.5
+  },
+  {
+    "id": "hunting",
+    "canonical": "hunting",
+    "category": "outdoor",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "kayaking",
+    "canonical": "kayaking",
+    "category": "water_sport",
+    "intensity": "moderate",
+    "met": 5.0
+  },
+  {
+    "id": "ski_jumping",
+    "canonical": "ski jumping",
+    "category": "winter_sport",
+    "intensity": "moderate",
+    "met": 5.3
+  },
+  {
+    "id": "cross_country_running",
+    "canonical": "cross country running",
+    "category": "running",
+    "intensity": "vigorous",
+    "met": 9.0
   }
 ]

@@ -3560,6 +3560,15 @@
     "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
   },
   {
+    "foodId": "carbonara",
+    "kcalPer100g": 190,
+    "proteinPer100g": 7,
+    "carbsPer100g": 20,
+    "fatPer100g": 9,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (typical prepared dish, per 100g)"
+  },
+  {
     "foodId": "spinach",
     "kcalPer100g": 23,
     "proteinPer100g": 2.9,
@@ -3604,6 +3613,15 @@
     "carbsPer100g": 7.3,
     "fatPer100g": 0.2,
     "fibrePer100g": 2.6,
+    "source": "generic standard nutrition reference (raw, per 100g)"
+  },
+  {
+    "foodId": "chives",
+    "kcalPer100g": 30,
+    "proteinPer100g": 3.3,
+    "carbsPer100g": 4.4,
+    "fatPer100g": 0.7,
+    "fibrePer100g": 2.5,
     "source": "generic standard nutrition reference (raw, per 100g)"
   },
   {

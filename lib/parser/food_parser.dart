@@ -6,6 +6,7 @@ import 'catalogue/lexicon.dart';
 import 'catalogue/local_overlay.dart';
 import 'catalogue/nutrition_catalogue.dart';
 import 'catalogue/portion_catalogue.dart';
+import 'catalogue/recipe_catalogue.dart';
 import 'models/food_parse_item.dart';
 import 'models/nutrient_totals.dart';
 import 'models/unresolved_span.dart';
@@ -112,12 +113,106 @@ class FoodParser {
             confidence: 'medium',
           ),
     ]);
+
+    // A prepared/composite dish with no nutrient record of its own (and no
+    // genericParent to borrow from -- see `catalogue` above) can still get
+    // a real bare-mention default: compose one from a typical recipe of
+    // already-real ingredients (see food_recipes.json), the same real per-
+    // ingredient data any explicitly-spelled-out sentence already uses. If
+    // any listed ingredient is itself missing nutrient/portion data, the
+    // whole recipe is skipped rather than guessing a partial total -- this
+    // only ever fills a genuine gap, never invents a number.
+    final recipes = await RecipeCatalogue.load(reader: reader);
+    final catalogueById = {for (final e in catalogue.entries) e.id: e};
+    final recipeNutrients = <String, NutrientRecord>{};
+    final recipePortions = <PortionRule>[];
+    for (final recipe in recipes.recipes) {
+      if (nutrition.forFoodId(recipe.foodId) != null) continue;
+      final parent = catalogueById[recipe.foodId]?.genericParent;
+      if (parent != null && nutrition.forFoodId(parent) != null) continue;
+
+      var totalGrams = 0.0;
+      var totalKcal = 0.0;
+      var totalProtein = 0.0;
+      var totalCarbs = 0.0;
+      double? totalFat;
+      double? totalFibre;
+      var complete = true;
+      for (final ingredient in recipe.ingredients) {
+        final record = nutrition.forFoodId(ingredient.foodId);
+        // Same fallback order as a real sentence gets in _parseSegment: a
+        // food-specific portion rule first, then the standard-volume
+        // conversion (teaspoon/tablespoon/...) shared by any food -- e.g.
+        // mayonnaise only has its own "tablespoon" rule, so "1 teaspoon
+        // mayonnaise" in a recipe has to resolve the same way a user
+        // typing that phrase directly would.
+        final rule = portions.lookup(foodId: ingredient.foodId, unit: ingredient.unit);
+        final gramsPerUnit = rule?.grams ?? (ingredient.unit == null
+            ? null
+            : genericVolume.lookup(ingredient.unit!)?.ml);
+        if (record == null || gramsPerUnit == null) {
+          complete = false;
+          break;
+        }
+        final grams = gramsPerUnit * ingredient.quantity;
+        final factor = grams / 100.0;
+        totalGrams += grams;
+        totalKcal += record.kcalPer100g * factor;
+        totalProtein += record.proteinPer100g * factor;
+        totalCarbs += record.carbsPer100g * factor;
+        if (record.fatPer100g != null) {
+          totalFat = (totalFat ?? 0) + record.fatPer100g! * factor;
+        }
+        if (record.fibrePer100g != null) {
+          totalFibre = (totalFibre ?? 0) + record.fibrePer100g! * factor;
+        }
+      }
+      if (!complete || totalGrams <= 0) continue;
+
+      recipeNutrients[recipe.foodId] = NutrientRecord(
+        foodId: recipe.foodId,
+        kcalPer100g: totalKcal / totalGrams * 100,
+        proteinPer100g: totalProtein / totalGrams * 100,
+        carbsPer100g: totalCarbs / totalGrams * 100,
+        fatPer100g: totalFat == null ? null : totalFat / totalGrams * 100,
+        fibrePer100g: totalFibre == null ? null : totalFibre / totalGrams * 100,
+        source: recipe.source ?? 'derived from default recipe composition',
+      );
+      recipePortions.add(PortionRule(
+        foodId: recipe.foodId,
+        foodNameAsGiven: catalogueById[recipe.foodId]?.canonical ?? recipe.foodId,
+        unit: null,
+        size: null,
+        grams: totalGrams,
+        // A composed default, not a food-specific measurement someone
+        // actually recorded -- deliberately lower confidence than a real
+        // authored portion rule (see deriveFoodConfidence).
+        confidence: 'low',
+      ));
+    }
+    final nutritionWithRecipes = NutritionCatalogue({
+      for (final e in catalogue.entries)
+        if (nutrition.forFoodId(e.id) != null) e.id: nutrition.forFoodId(e.id)!,
+      ...recipeNutrients,
+    });
+    final portionsWithRecipes = PortionCatalogue([
+      ...portions.rules,
+      ...recipePortions,
+    ]);
+    // Bundled entries are listed first (see `catalogue` above), and
+    // AliasIndex.build resolves a collision by first registration -- so a
+    // synced/contributed overlay food that happens to reuse a bundled
+    // word (a bad global-catalogue contribution, a personal "add this
+    // food" that collides with something already in the app) never wins
+    // and, critically, never takes the whole parser down: this used to
+    // throw here, which meant one bad word anywhere in a user's synced
+    // catalogue permanently broke adding ANY food for them, with no
+    // recovery short of clearing app data. Dataset-quality checks for the
+    // BUNDLED catalogue alone still run separately (see
+    // test/parser/alias_collision_test.dart), unaffected by this.
     final aliasIndex = AliasIndex.build({
       for (final e in catalogue.entries) e.id: [...e.aliases, e.canonical],
     });
-    if (aliasIndex.collisions.isNotEmpty) {
-      throw StateError('Food alias collisions: ${aliasIndex.collisions}');
-    }
     final vocabulary = buildVocabulary([
       for (final e in catalogue.entries) ...[...e.aliases, e.canonical],
       ...lexicon.unitByAlias.keys,
@@ -136,8 +231,8 @@ class FoodParser {
       catalogue: catalogue,
       aliasIndex: aliasIndex,
       lexicon: lexicon,
-      nutrition: nutrition,
-      portions: portions,
+      nutrition: nutritionWithRecipes,
+      portions: portionsWithRecipes,
       drinkContainers: drinkContainers,
       genericVolume: genericVolume,
       vocabulary: vocabulary,
