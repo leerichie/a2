@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0+48 — 2026-09-18
+
+- Added generic Polish "surówka"/"surówki"/"surówkę" (a raw vegetable side
+  salad/slaw — previously only the specific compound "surówka coleslaw"
+  matched anything) resolving to the existing coleslaw data.
+- Beer/piwo now resolves to a standard bottle/can serving even with no
+  measure given ("piwo", "1 piwo"), matching how cola already behaves —
+  an explicit exception to the "no default for alcohol" rule, which still
+  applies to wine and spirits (their container sizes vary too widely to
+  guess safely).
+
 ## 1.0.0+47 — 2026-09-18
 
 - Fixed AI food/exercise/photo estimates never actually working: the code

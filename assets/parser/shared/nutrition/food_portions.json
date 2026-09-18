@@ -2204,6 +2204,15 @@
     "source": "typical can/glass serving"
   },
   {
+    "foodId": "beer",
+    "foodNameAsGiven": "beer",
+    "unit": null,
+    "size": null,
+    "grams": 500,
+    "confidence": "medium",
+    "source": "typical bottle/can serving -- explicit product decision 2026-09-18: unlike wine/spirits (which stay measure-required, container sizes vary too widely to default), a bare beer/piwo mention should resolve like a can of cola does"
+  },
+  {
     "foodId": "coke_zero",
     "foodNameAsGiven": "Coke Zero",
     "unit": null,

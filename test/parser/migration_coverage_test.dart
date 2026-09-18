@@ -67,10 +67,13 @@ void main() {
   });
 
   // Drinks migrated from FoodEstimator's `drinks` map (per 100ml). No
-  // bare-mention default is added for any of them -- the old universal
-  // "25ml x count" measure is deliberately not carried forward.
+  // bare-mention default is added for spirits/wine -- container sizes
+  // (shot/double/glass/bottle) vary too widely to guess. Beer is the
+  // deliberate exception (2026-09-18): unlike a "wine"/"whisky" mention, a
+  // bare beer/piwo mention defaults like cola's can/glass serving does --
+  // see its own group below.
   const migratedDrinks = {
-    'whisky': 220, 'vodka': 220, 'gin': 220, 'rum': 220, 'wine': 83, 'beer': 43,
+    'whisky': 220, 'vodka': 220, 'gin': 220, 'rum': 220, 'wine': 83,
   };
 
   group('drinks have real nutrient data but no invented default measure', () {
@@ -89,6 +92,28 @@ void main() {
         expect(item.nutrition!.kcal, closeTo(kcalPer100ml * 2.5, 0.05), reason: id);
         expect(item.confidence, ParseConfidence.high, reason: id);
       });
+    });
+  });
+
+  // Beer is the deliberate exception to "no alcohol default" above --
+  // explicit product decision 2026-09-18: a bare beer/piwo mention should
+  // resolve like a can of cola does, since (unlike wine/spirits) it's
+  // near-universally a single ~500ml bottle/can.
+  group('beer opts back into a bare-mention default, unlike other alcohol', () {
+    test('bare "beer" resolves via a typical bottle/can serving', () {
+      final item = parser.parse('beer').items.single;
+      expect(item.canonicalId, 'beer');
+      expect(item.grams, 500);
+      expect(item.confidence, ParseConfidence.medium);
+      expect(item.nutrition!.kcal, closeTo(43 * 5, 0.01));
+    });
+
+    test('a bare count ("1 beer") still resolves the same way, not blocked',
+        () {
+      final item = parser.parse('1 beer').items.single;
+      expect(item.canonicalId, 'beer');
+      expect(item.grams, 500);
+      expect(item.confidence, ParseConfidence.medium);
     });
   });
 
