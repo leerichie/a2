@@ -3,6 +3,7 @@ import 'catalogue/activity_catalogue.dart';
 import 'catalogue/alias_index.dart';
 import 'catalogue/asset_reader.dart';
 import 'catalogue/lexicon.dart';
+import 'catalogue/local_exercise_overlay.dart';
 import 'models/exercise_parse_item.dart';
 import 'models/parse_confidence.dart';
 import 'pipeline/activity_resolver.dart';
@@ -44,8 +45,35 @@ class ExerciseParser {
     AssetReader reader = defaultAssetReader,
     PersonalAliasRepository? personalAliases,
   }) async {
-    final catalogue = await ActivityCatalogue.load(locale: locale, reader: reader);
+    final bundledCatalogue = await ActivityCatalogue.load(locale: locale, reader: reader);
     final lexicon = await Lexicon.load(locale: locale, reader: reader);
+
+    // The local overlay (activities AI has identified on this device, plus
+    // anything synced down from the backend's global exercise catalogue --
+    // see ExerciseCatalogueSyncService) is merged in ADDITIVELY here: it
+    // can only fill a gap (an id the bundled catalogue doesn't already
+    // have), never override bundled/trusted data -- mirrors FoodParser.load
+    // exactly.
+    final overlay = await LocalExerciseCatalogueOverlay.load();
+    final bundledIds = bundledCatalogue.entries.map((e) => e.id).toSet();
+    final newOverlayEntries = overlay.entries.where((e) => !bundledIds.contains(e.id));
+    final catalogue = ActivityCatalogue([
+      ...bundledCatalogue.entries,
+      for (final o in newOverlayEntries)
+        ActivityCatalogueEntry(
+          id: o.id,
+          canonical: o.canonical,
+          category: o.category ?? 'other',
+          // Standard MET intensity bands (light/moderate/vigorous) --
+          // descriptive only, never used in the calorie math itself (see
+          // entry.met below), so deriving it from AI's own MET isn't
+          // inventing a nutrition/portion figure, just labelling one.
+          intensity: o.met < 3 ? 'light' : (o.met < 6 ? 'moderate' : 'vigorous'),
+          met: o.met,
+          aliases: [...o.aliasesEn, ...o.aliasesPl],
+        ),
+    ]);
+
     // See FoodParser.load for why this no longer throws: a colliding
     // overlay/contributed alias must never take the whole parser down --
     // AliasIndex.build's first-registration-wins rule (bundled entries

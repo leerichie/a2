@@ -19,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'l10n.dart';
 import 'parser/catalogue/activity_catalogue.dart';
+import 'parser/catalogue/local_exercise_overlay.dart';
 import 'parser/catalogue/local_overlay.dart';
 import 'parser/exercise_parser.dart';
 import 'parser/food_parser.dart';
@@ -502,6 +503,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   int waterTargetMl = 2000;
   bool entrySyncAvailable = false;
   String accountName = '';
+  bool accountAiEnabled = false;
   // Real MET for a brisk walk, read once from the shared activity catalogue
   // (never invented) for the daily nudge's exercise-duration suggestion.
   double walkMet = 4.8;
@@ -644,6 +646,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     // Fire-and-forget: the app already has a working local catalogue, this
     // just quietly picks up whatever's new since last time.
     unawaited(const CatalogueSyncService().sync(defaultServerUrl));
+    unawaited(const ExerciseCatalogueSyncService().sync(defaultServerUrl));
     try {
       final enabled = await const AccountService().refreshAccount(
         defaultServerUrl,
@@ -675,7 +678,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         ? const <String, dynamic>{}
         : jsonDecode(raw) as Map<String, dynamic>;
     final name = (user['name'] as String? ?? '').trim();
-    if (mounted) setState(() => accountName = name);
+    final aiEnabled = user['aiEnabled'] == true;
+    if (mounted) {
+      setState(() {
+        accountName = name;
+        accountAiEnabled = aiEnabled;
+      });
+    }
   }
 
   // Any attached photo must reach the backend BEFORE the entry itself is
@@ -860,6 +869,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         onImported: _loadImports,
         dailyTarget: dailyTarget,
         dietStyle: dietStyle,
+        aiEnabled: accountAiEnabled,
         onPlanChanged: (value) => setState(() {
           dailyTarget = value.target;
           dietStyle = value.style;
@@ -3847,6 +3857,33 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
   String _activityLabel(ExerciseParser p, String id) =>
       p.catalogue.entries.firstWhere((e) => e.id == id).canonical;
 
+  // Writes an AI-derived MET for an activity local truly didn't recognize
+  // into the SAME shared catalogue ExerciseCatalogueSyncService pulls from
+  // -- mirrors _AddMealSheetState._contributeAiFood. Best-effort: a
+  // failure here just means this one activity stays AI-only a bit longer,
+  // never blocks logging the entry.
+  Future<void> _contributeAiActivity(String name, double met) async {
+    try {
+      final overlay = await LocalExerciseCatalogueOverlay.load();
+      await overlay.upsert(
+        OverlayExerciseEntry(
+          id: OverlayExerciseEntry.idFor(name),
+          canonical: name,
+          met: met,
+          source: 'ai',
+        ),
+      );
+      await const ExerciseCatalogueSyncService().contribute(
+        defaultServerUrl,
+        name: name,
+        met: met,
+        locale: widget.locale,
+      );
+    } catch (_) {
+      // Offline or the server is unreachable -- stays AI-only for now.
+    }
+  }
+
   Future<void> _addExercise() async {
     final text = description.text.trim();
     if (text.isEmpty) return;
@@ -3875,6 +3912,25 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
           text: text,
         );
         aiCalories = aiResult.calories;
+        // Teach the global activity catalogue about this one, the same way
+        // the food AI-fallback does (see _AddMealSheetState._addToDay) --
+        // but only when a real MET can be derived from AI's own calorie
+        // figure divided by a KNOWN duration and body weight. Without both,
+        // there is no honest way to turn "N kcal for this session" into a
+        // duration/weight-independent MET, so it's left AI-only rather
+        // than guessing one.
+        final minutes = result.durationMinutes;
+        final weightKg = widget.bodyWeightKg;
+        if (minutes != null &&
+            minutes > 0 &&
+            weightKg != null &&
+            weightKg > 0 &&
+            aiResult.calories > 0) {
+          final met = aiResult.calories / (weightKg * (minutes / 60));
+          if (met > 0 && met <= 25) {
+            unawaited(_contributeAiActivity(aiResult.name, met));
+          }
+        }
       } catch (_) {
         // Falls through to the "unresolved" notice below.
       } finally {
@@ -5397,6 +5453,41 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
   }
 
+  // Writes an AI-resolved item local truly didn't know into the SAME
+  // shared catalogue the manual "Add new food" sheet contributes to (see
+  // CatalogueSyncService.contribute), on AI's own real servingGrams basis
+  // -- never a guessed weight. Best-effort: a failure here just means this
+  // one item stays AI-only a bit longer, never blocks logging the entry.
+  Future<void> _contributeAiFood(NutritionEstimate aiResult) async {
+    try {
+      final overlay = await LocalCatalogueOverlay.load();
+      await overlay.upsert(
+        OverlayFoodEntry(
+          id: OverlayFoodEntry.idFor(aiResult.name),
+          canonical: aiResult.name,
+          kcalPer100g: aiResult.calories * 100 / aiResult.servingGrams,
+          proteinPer100g: aiResult.protein * 100 / aiResult.servingGrams,
+          carbsPer100g: aiResult.carbs * 100 / aiResult.servingGrams,
+          servingAmount: aiResult.servingGrams,
+          servingUnit: 'g',
+          source: 'ai',
+        ),
+      );
+      await const CatalogueSyncService().contribute(
+        defaultServerUrl,
+        name: aiResult.name,
+        kcal: aiResult.calories.toDouble(),
+        protein: aiResult.protein.toDouble(),
+        carbs: aiResult.carbs.toDouble(),
+        servingAmount: aiResult.servingGrams,
+        servingUnit: 'g',
+        locale: widget.locale,
+      );
+    } catch (_) {
+      // Offline or the server is unreachable -- stays AI-only for now.
+    }
+  }
+
   Future<void> _addToDay() async {
     final text = description.text.trim();
     final water = WaterIntakeParser.parse(text);
@@ -5442,6 +5533,15 @@ class _AddMealSheetState extends State<AddMealSheet> {
         );
         final reResolved = localParser.parse(aiResult.name);
         if (_isFullyResolvedFood(reResolved)) return reResolved.items;
+        // Local truly has no entry for this one (re-parsing AI's own
+        // canonical name still didn't resolve it) -- teach the global
+        // catalogue about it now, using AI's own servingGrams so the
+        // per-100g figures are real, not a guessed weight. Every other
+        // phone picks this up next time CatalogueSyncService.sync() runs,
+        // the same path the manual "Add new food" entry uses.
+        if (aiResult.servingGrams > 0) {
+          unawaited(_contributeAiFood(aiResult));
+        }
         return [
           FoodParseItem(
             quantity: 1,
@@ -7476,9 +7576,16 @@ class GoogleAuthService {
 }
 
 class NutritionEstimate {
-  const NutritionEstimate(this.name, this.calories, this.protein, this.carbs);
+  const NutritionEstimate(
+    this.name,
+    this.calories,
+    this.protein,
+    this.carbs,
+    this.servingGrams,
+  );
   final String name;
   final int calories, protein, carbs;
+  final double servingGrams;
 }
 
 class LinkedUser {
@@ -7633,6 +7740,108 @@ class CatalogueSyncService {
           .timeout(const Duration(seconds: 15));
     } catch (_) {
       // Stays a local-only food until the next successful sync attempt.
+    }
+  }
+}
+
+// Exercise counterpart of CatalogueSyncService: pulls new/changed
+// activities from the backend's global exercise catalogue into the SAME
+// local overlay AI-resolved activities write to (see
+// lib/parser/catalogue/local_exercise_overlay.dart). Best-effort and safe
+// to call often, mirroring the food sync exactly.
+class ExerciseCatalogueSyncService {
+  const ExerciseCatalogueSyncService();
+
+  Future<void> sync(String serverUrl) async {
+    try {
+      final localVersion = await LocalExerciseCatalogueOverlay.loadVersion();
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      final versionResponse = await http
+          .get(Uri.parse('$base/api/v1/exercise-catalogue/version'))
+          .timeout(const Duration(seconds: 10));
+      if (versionResponse.statusCode != 200) return;
+      final remoteVersion =
+          (jsonDecode(versionResponse.body) as Map<String, dynamic>)['version']
+              as int;
+      if (remoteVersion <= localVersion) return;
+      final changesResponse = await http
+          .get(
+            Uri.parse(
+              '$base/api/v1/exercise-catalogue/changes?since=$localVersion',
+            ),
+          )
+          .timeout(const Duration(seconds: 20));
+      if (changesResponse.statusCode != 200) return;
+      final body = jsonDecode(changesResponse.body) as Map<String, dynamic>;
+      final activities = (body['activities'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      var overlay = await LocalExerciseCatalogueOverlay.load();
+      for (final activity in activities) {
+        final entry = _validate(activity);
+        // A record that fails basic sanity checks is simply skipped, never
+        // accepted as-is -- one bad record from the network can't corrupt
+        // the working local catalogue.
+        if (entry != null) overlay = await overlay.upsert(entry);
+      }
+      await LocalExerciseCatalogueOverlay.saveVersion(remoteVersion);
+    } catch (_) {
+      // Offline or the server is unreachable -- the app keeps working with
+      // whatever catalogue it already has.
+    }
+  }
+
+  OverlayExerciseEntry? _validate(Map<String, dynamic> activity) {
+    final id = activity['id'] as String?;
+    final names = activity['names'] as Map<String, dynamic>?;
+    final name = (names?['en'] as String?) ?? (names?['pl'] as String?);
+    final met = (activity['met'] as num?)?.toDouble();
+    if (id == null || name == null || name.trim().isEmpty) return null;
+    if (met == null || met <= 0 || met > 25) return null;
+    final aliases = activity['aliases'] as Map<String, dynamic>?;
+    return OverlayExerciseEntry(
+      id: 'global_$id',
+      canonical: name.trim(),
+      category: activity['category'] as String?,
+      aliasesEn: (aliases?['en'] as List?)?.cast<String>() ?? const [],
+      aliasesPl: (aliases?['pl'] as List?)?.cast<String>() ?? const [],
+      met: met,
+      source: (activity['source'] as String?) ?? 'global catalogue',
+    );
+  }
+
+  // Sends a locally AI-identified activity to the backend as a global
+  // catalogue contribution. Best-effort, fire-and-forget from the caller's
+  // point of view -- the activity is already usable locally regardless of
+  // whether this succeeds (see _AddExerciseSheetState._contributeAiActivity).
+  Future<void> contribute(
+    String serverUrl, {
+    required String name,
+    String? category,
+    required double met,
+    String locale = 'en',
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('account_token');
+      if (token == null) return;
+      final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      await http
+          .post(
+            Uri.parse('$base/api/v1/exercise-catalogue/contribute'),
+            headers: {
+              'content-type': 'application/json',
+              'authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'name': name,
+              'category': category,
+              'met': met,
+              'locale': locale,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+    } catch (_) {
+      // Stays a local-only activity until the next successful sync attempt.
     }
   }
 }
@@ -7910,6 +8119,7 @@ class AiService {
     ((body['calories'] as num?) ?? 0).round(),
     ((body['protein'] as num?) ?? 0).round(),
     ((body['carbs'] as num?) ?? 0).round(),
+    ((body['servingGrams'] as num?) ?? 0).toDouble(),
   );
 }
 
@@ -7921,6 +8131,7 @@ class ProfilePage extends StatefulWidget {
     required this.onImported,
     required this.dailyTarget,
     required this.dietStyle,
+    required this.aiEnabled,
     required this.onPlanChanged,
     required this.onBodyChanged,
     required this.onSignedOut,
@@ -7930,6 +8141,7 @@ class ProfilePage extends StatefulWidget {
   final VoidCallback onImported;
   final int dailyTarget;
   final String dietStyle;
+  final bool aiEnabled;
   final ValueChanged<DietPlan> onPlanChanged;
   final ValueChanged<BodyProfile> onBodyChanged;
   final VoidCallback onSignedOut;
@@ -7955,7 +8167,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String installedVersion = '1.0.0+41';
   String? accountEmail;
   bool accountPrivateSync = false;
-  bool accountAiEnabled = false;
+  late bool accountAiEnabled = widget.aiEnabled;
   bool accountIsAdmin = false;
   bool accountGoogleLinked = false;
   bool entrySyncEnabled = false;
@@ -8002,6 +8214,9 @@ class _ProfilePageState extends State<ProfilePage> {
           style: widget.dietStyle,
         ),
       );
+    }
+    if (widget.aiEnabled != oldWidget.aiEnabled) {
+      setState(() => accountAiEnabled = widget.aiEnabled);
     }
   }
 

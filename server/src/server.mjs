@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import * as foodCatalogue from './food_catalogue.mjs';
+import * as exerciseCatalogue from './exercise_catalogue.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const publicDir = join(root, 'public');
@@ -233,8 +234,9 @@ const NUTRITION_SCHEMA = {
     calories: {type: 'number'},
     protein: {type: 'number'},
     carbs: {type: 'number'},
+    servingGrams: {type: 'number'},
   },
-  required: ['name', 'calories', 'protein', 'carbs'],
+  required: ['name', 'calories', 'protein', 'carbs', 'servingGrams'],
 };
 
 async function aiDescribe(kind, text) {
@@ -247,8 +249,8 @@ async function aiDescribe(kind, text) {
       model,
       store: false,
       instructions: kind === 'exercise'
-        ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise.'
-        : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal.',
+        ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise. Set servingGrams to 0 for exercise.'
+        : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal. Also return servingGrams: the total realistic weight in grams of the portion your calorie/protein/carb figures describe (summed across every item if there are several), so those figures can be recorded on a per-100g basis later.',
       input: text,
       text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
     }),
@@ -268,8 +270,8 @@ async function aiVision(kind, imageBase64, mimeType) {
       model,
       store: false,
       instructions: kind === 'label_photo'
-        ? 'Read the nutrition facts label shown in the photo and extract calories, protein and carbohydrates for one serving. If a value is unreadable, estimate conservatively rather than inventing false precision.'
-        : 'Identify the food or drink shown in the photo and estimate its nutrition for the visible portion. Never invent false precision.',
+        ? 'Read the nutrition facts label shown in the photo and extract calories, protein and carbohydrates for one serving. If a value is unreadable, estimate conservatively rather than inventing false precision. Also read or estimate servingGrams: the weight in grams of the one serving the label describes.'
+        : 'Identify the food or drink shown in the photo and estimate its nutrition for the visible portion. Never invent false precision. Also return servingGrams: the realistic weight in grams of the visible portion your figures describe.',
       input: [{
         role: 'user',
         content: [
@@ -649,6 +651,41 @@ const server = createServer(async (req, res) => {
       if (result.status === 'invalid') return json(res, 400, {error: result.reason});
       if (result.status === 'created') {
         await logActivity({username: user.name || user.email}, `${user.name || user.email} contributed "${body.name}" to the global food catalogue`);
+      }
+      return json(res, 200, result);
+    }
+    // The global exercise-activity catalogue -- same delta-layer role as
+    // the food catalogue above, but activities only ever arrive one at a
+    // time (an AI-derived MET for something local didn't recognize), never
+    // via bulk admin import.
+    if (req.method === 'GET' && url.pathname === '/api/v1/exercise-catalogue/version') {
+      const meta = await exerciseCatalogue.loadMeta();
+      return json(res, 200, {version: meta.version});
+    }
+    if (req.method === 'GET' && url.pathname === '/api/v1/exercise-catalogue/changes') {
+      const since = Number(url.searchParams.get('since') || '0');
+      const result = await exerciseCatalogue.getChangesSince(Number.isFinite(since) ? since : 0);
+      return json(res, 200, result);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/v1/exercise-catalogue/contribute') {
+      const appSession = appSessionFor(req);
+      if (!appSession) return json(res, 401, {error: 'Unauthorized'});
+      const users = await loadAppUsers();
+      const user = users.find(item => item.id === appSession.userId);
+      if (!user || user.blocked === true) return json(res, 403, {error: 'Account access is blocked'});
+      const body = await readBody(req);
+      if (!String(body.name || '').trim()) return json(res, 400, {error: 'An activity name is required'});
+      if (body.met == null || body.met === '') return json(res, 400, {error: 'A MET value is required'});
+      const result = await exerciseCatalogue.contributeActivity({
+        name: body.name,
+        locale: body.locale,
+        category: body.category,
+        met: body.met,
+        createdBy: user.id,
+      });
+      if (result.status === 'invalid') return json(res, 400, {error: result.reason});
+      if (result.status === 'created') {
+        await logActivity({username: user.name || user.email}, `${user.name || user.email} contributed "${body.name}" to the global exercise catalogue`);
       }
       return json(res, 200, result);
     }

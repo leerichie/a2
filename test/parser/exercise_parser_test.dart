@@ -1,6 +1,7 @@
 import 'package:a2/parser/exercise_parser.dart';
 import 'package:a2/parser/models/parse_confidence.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -8,6 +9,7 @@ void main() {
   const weight = 70.0;
 
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
     parser = await ExerciseParser.load();
   });
 
