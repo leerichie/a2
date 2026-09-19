@@ -1556,5 +1556,47 @@
   "yoghurt": [
     "jogurt",
     "jogurtu"
+  ],
+  "cornflakes": [
+    "płatki kukurydziane",
+    "płatki śniadaniowe kukurydziane"
+  ],
+  "muesli": [
+    "muesli"
+  ],
+  "granola": [
+    "granola"
+  ],
+  "honey": [
+    "miód"
+  ],
+  "peanut_butter": [
+    "masło orzechowe"
+  ],
+  "chocolate_spread": [
+    "nutella",
+    "krem czekoladowy",
+    "pasta czekoladowa",
+    "krem czekoladowo-orzechowy"
+  ],
+  "marmalade": [
+    "marmolada"
+  ],
+  "jam": [
+    "dżem",
+    "dżem truskawkowy",
+    "dżem malinowy"
+  ],
+  "kopytka": [
+    "kopytka"
+  ],
+  "sour_cucumber": [
+    "ogórek kiszony",
+    "ogórki kiszone",
+    "kiszony ogórek"
+  ],
+  "yellow_cheese": [
+    "żółty ser",
+    "ser żółty"
   ]
 }

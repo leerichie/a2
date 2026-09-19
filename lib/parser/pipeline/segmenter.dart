@@ -1,5 +1,6 @@
 import '../catalogue/alias_index.dart';
 import '../catalogue/lexicon.dart';
+import 'measurement_parser.dart';
 
 final _wordSplit = RegExp(r'\s+');
 final _digit = RegExp(r'^\d+(?:\.\d+)?$');
@@ -76,8 +77,15 @@ List<String> _splitOnStandaloneWith(String text, AliasIndex aliasIndex) {
   final trimmed = text.trim();
   if (trimmed.isEmpty) return const [];
   // Already a known whole dish name ("burger with cheese",
-  // "cottage cheese with chives") -- don't tear it apart.
+  // "cottage cheese with chives") -- don't tear it apart. Checked both with
+  // the text as-is AND with a leading exact measurement peeled off first
+  // ("100g cottage cheese with chives"), since otherwise the "100g" prefix
+  // stops the whole-phrase alias lookup from ever matching and this falls
+  // through to being wrongly split into "100g cottage cheese" + "chives".
   if (aliasIndex.resolve(trimmed) != null) return [trimmed];
+  if (aliasIndex.resolve(parseMeasurement(trimmed).remainder) != null) {
+    return [trimmed];
+  }
 
   final words = trimmed.split(_wordSplit).where((w) => w.isNotEmpty).toList();
   final withIndex = words.indexOf('with');

@@ -1814,5 +1814,52 @@
   "sandwich": [
     "sandwich",
     "tuna sandwich"
+  ],
+  "cornflakes": [
+    "cornflakes",
+    "corn flakes",
+    "corn flake cereal"
+  ],
+  "muesli": [
+    "muesli"
+  ],
+  "granola": [
+    "granola"
+  ],
+  "honey": [
+    "honey"
+  ],
+  "peanut_butter": [
+    "peanut butter"
+  ],
+  "chocolate_spread": [
+    "nutella",
+    "chocolate spread",
+    "hazelnut spread",
+    "chocolate hazelnut spread"
+  ],
+  "marmalade": [
+    "marmalade",
+    "orange marmalade"
+  ],
+  "jam": [
+    "jam",
+    "strawberry jam",
+    "raspberry jam",
+    "fruit jam",
+    "conserve"
+  ],
+  "kopytka": [
+    "kopytka",
+    "polish potato dumplings"
+  ],
+  "sour_cucumber": [
+    "fermented pickled cucumber",
+    "fermented cucumber",
+    "sour pickle",
+    "dill pickle"
+  ],
+  "yellow_cheese": [
+    "yellow cheese"
   ]
 }

@@ -2794,5 +2794,63 @@
     "id": "sandwich",
     "canonical": "sandwich",
     "category": "prepared_meal"
+  },
+  {
+    "id": "cornflakes",
+    "canonical": "cornflakes",
+    "category": "grain"
+  },
+  {
+    "id": "muesli",
+    "canonical": "muesli",
+    "category": "grain"
+  },
+  {
+    "id": "granola",
+    "canonical": "granola",
+    "category": "grain"
+  },
+  {
+    "id": "honey",
+    "canonical": "honey",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "peanut_butter",
+    "canonical": "peanut butter",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "chocolate_spread",
+    "canonical": "chocolate hazelnut spread",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "marmalade",
+    "canonical": "marmalade",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "jam",
+    "canonical": "jam",
+    "category": "sauce_condiment_fat"
+  },
+  {
+    "id": "kopytka",
+    "canonical": "kopytka",
+    "category": "prepared_food",
+    "region": "Europe/Poland"
+  },
+  {
+    "id": "sour_cucumber",
+    "canonical": "fermented pickled cucumber",
+    "category": "vegetable",
+    "genericParent": "gherkin"
+  },
+  {
+    "id": "yellow_cheese",
+    "canonical": "yellow cheese",
+    "category": "dairy_alternative",
+    "genericParent": "cheese"
   }
 ]

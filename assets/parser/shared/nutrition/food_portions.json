@@ -3225,5 +3225,261 @@
     "grams": 80,
     "confidence": "medium",
     "source": "standard UK '5-a-day' vegetable portion (80g)"
+  },
+  {
+    "foodId": "cornflakes",
+    "foodNameAsGiven": "cornflakes",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "muesli",
+    "foodNameAsGiven": "muesli",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "granola",
+    "foodNameAsGiven": "granola",
+    "unit": null,
+    "size": null,
+    "grams": 40,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "honey",
+    "foodNameAsGiven": "honey",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "honey",
+    "foodNameAsGiven": "honey",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 21,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "peanut_butter",
+    "foodNameAsGiven": "peanut butter",
+    "unit": null,
+    "size": null,
+    "grams": 16,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "peanut_butter",
+    "foodNameAsGiven": "peanut butter",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 16,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chocolate_spread",
+    "foodNameAsGiven": "chocolate hazelnut spread",
+    "unit": null,
+    "size": null,
+    "grams": 20,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "chocolate_spread",
+    "foodNameAsGiven": "chocolate hazelnut spread",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 20,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "marmalade",
+    "foodNameAsGiven": "marmalade",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "marmalade",
+    "foodNameAsGiven": "marmalade",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 20,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "jam",
+    "foodNameAsGiven": "jam",
+    "unit": null,
+    "size": null,
+    "grams": 15,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "jam",
+    "foodNameAsGiven": "jam",
+    "unit": "tablespoon",
+    "size": "standard",
+    "grams": 20,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "kopytka",
+    "foodNameAsGiven": "kopytka",
+    "unit": null,
+    "size": null,
+    "grams": 200,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "sour_cucumber",
+    "foodNameAsGiven": "fermented pickled cucumber",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "yellow_cheese",
+    "foodNameAsGiven": "yellow cheese",
+    "unit": null,
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "yellow_cheese",
+    "foodNameAsGiven": "yellow cheese",
+    "unit": "slice",
+    "size": null,
+    "grams": 30,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "barley_groats",
+    "foodNameAsGiven": "barley groats",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "barszcz",
+    "foodNameAsGiven": "barszcz",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "bigos",
+    "foodNameAsGiven": "bigos",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "black_pudding",
+    "foodNameAsGiven": "black pudding",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "breaded_pork_cutlet",
+    "foodNameAsGiven": "breaded pork cutlet",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "cottage_cheese_with_chives",
+    "foodNameAsGiven": "cottage cheese with chives",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "flaki",
+    "foodNameAsGiven": "flaki",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "go_bki",
+    "foodNameAsGiven": "golabki",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "kabanos_sausage",
+    "foodNameAsGiven": "kabanos sausage",
+    "unit": null,
+    "size": null,
+    "grams": 50,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "millet_groats",
+    "foodNameAsGiven": "millet groats",
+    "unit": null,
+    "size": null,
+    "grams": 150,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "minced_meat_cutlet",
+    "foodNameAsGiven": "minced meat cutlet",
+    "unit": null,
+    "size": null,
+    "grams": 120,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "mizeria",
+    "foodNameAsGiven": "mizeria",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "pierogi",
+    "foodNameAsGiven": "pierogi",
+    "unit": null,
+    "size": null,
+    "grams": 250,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "ros",
+    "foodNameAsGiven": "rosol",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
+  },
+  {
+    "foodId": "urek",
+    "foodNameAsGiven": "zurek",
+    "unit": null,
+    "size": null,
+    "grams": 300,
+    "confidence": "medium"
   }
 ]

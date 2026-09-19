@@ -4236,5 +4236,221 @@
     "fatPer100g": null,
     "fibrePer100g": null,
     "source": "FoodEstimator.foods['yoghurt']"
+  },
+  {
+    "foodId": "cornflakes",
+    "kcalPer100g": 357,
+    "proteinPer100g": 7.5,
+    "carbsPer100g": 84,
+    "fatPer100g": 0.9,
+    "fibrePer100g": 3,
+    "source": "generic standard nutrition reference (corn flakes cereal, per 100g)"
+  },
+  {
+    "foodId": "muesli",
+    "kcalPer100g": 360,
+    "proteinPer100g": 10,
+    "carbsPer100g": 66,
+    "fatPer100g": 6,
+    "fibrePer100g": 8,
+    "source": "generic standard nutrition reference (muesli, per 100g)"
+  },
+  {
+    "foodId": "granola",
+    "kcalPer100g": 471,
+    "proteinPer100g": 10,
+    "carbsPer100g": 64,
+    "fatPer100g": 20,
+    "fibrePer100g": 7,
+    "source": "generic standard nutrition reference (granola, per 100g)"
+  },
+  {
+    "foodId": "honey",
+    "kcalPer100g": 304,
+    "proteinPer100g": 0.3,
+    "carbsPer100g": 82.4,
+    "fatPer100g": 0,
+    "fibrePer100g": 0.2,
+    "source": "generic standard nutrition reference (honey, per 100g)"
+  },
+  {
+    "foodId": "peanut_butter",
+    "kcalPer100g": 588,
+    "proteinPer100g": 25,
+    "carbsPer100g": 20,
+    "fatPer100g": 50,
+    "fibrePer100g": 6,
+    "source": "generic standard nutrition reference (peanut butter, per 100g)"
+  },
+  {
+    "foodId": "chocolate_spread",
+    "kcalPer100g": 539,
+    "proteinPer100g": 6,
+    "carbsPer100g": 57,
+    "fatPer100g": 31,
+    "fibrePer100g": 3.4,
+    "source": "generic standard nutrition reference (chocolate hazelnut spread, per 100g)"
+  },
+  {
+    "foodId": "marmalade",
+    "kcalPer100g": 260,
+    "proteinPer100g": 0.1,
+    "carbsPer100g": 69,
+    "fatPer100g": 0,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (orange marmalade, per 100g)"
+  },
+  {
+    "foodId": "jam",
+    "kcalPer100g": 250,
+    "proteinPer100g": 0.4,
+    "carbsPer100g": 62,
+    "fatPer100g": 0.1,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (fruit jam, per 100g)"
+  },
+  {
+    "foodId": "kopytka",
+    "kcalPer100g": 150,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 30,
+    "fatPer100g": 1.5,
+    "fibrePer100g": 1.2,
+    "source": "generic standard nutrition reference (kopytka, Polish potato dumplings, per 100g)"
+  },
+  {
+    "foodId": "barley_groats",
+    "kcalPer100g": 123,
+    "proteinPer100g": 2.3,
+    "carbsPer100g": 28.2,
+    "fatPer100g": 0.4,
+    "fibrePer100g": 3.8,
+    "source": "generic standard nutrition reference (cooked barley groats, per 100g)"
+  },
+  {
+    "foodId": "barszcz",
+    "kcalPer100g": 30,
+    "proteinPer100g": 1.0,
+    "carbsPer100g": 6.0,
+    "fatPer100g": 0.3,
+    "fibrePer100g": 1.5,
+    "source": "generic standard nutrition reference (clear beetroot soup, per 100g)"
+  },
+  {
+    "foodId": "bigos",
+    "kcalPer100g": 130,
+    "proteinPer100g": 8,
+    "carbsPer100g": 6,
+    "fatPer100g": 8,
+    "fibrePer100g": 2.5,
+    "source": "generic standard nutrition reference (bigos hunter's stew, per 100g)"
+  },
+  {
+    "foodId": "black_pudding",
+    "kcalPer100g": 297,
+    "proteinPer100g": 13,
+    "carbsPer100g": 15,
+    "fatPer100g": 22,
+    "fibrePer100g": 1,
+    "source": "generic standard nutrition reference (black pudding/blood sausage, per 100g)"
+  },
+  {
+    "foodId": "breaded_pork_cutlet",
+    "kcalPer100g": 250,
+    "proteinPer100g": 20,
+    "carbsPer100g": 10,
+    "fatPer100g": 15,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (breaded fried pork cutlet, per 100g)"
+  },
+  {
+    "foodId": "cottage_cheese_with_chives",
+    "kcalPer100g": 110,
+    "proteinPer100g": 12,
+    "carbsPer100g": 3.5,
+    "fatPer100g": 5,
+    "fibrePer100g": 0.3,
+    "source": "generic standard nutrition reference (cottage cheese with chives, per 100g)"
+  },
+  {
+    "foodId": "flaki",
+    "kcalPer100g": 70,
+    "proteinPer100g": 7,
+    "carbsPer100g": 4,
+    "fatPer100g": 3,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (tripe soup, per 100g)"
+  },
+  {
+    "foodId": "go_bki",
+    "kcalPer100g": 120,
+    "proteinPer100g": 7,
+    "carbsPer100g": 12,
+    "fatPer100g": 5,
+    "fibrePer100g": 1.5,
+    "source": "generic standard nutrition reference (golabki/stuffed cabbage rolls, per 100g)"
+  },
+  {
+    "foodId": "kabanos_sausage",
+    "kcalPer100g": 400,
+    "proteinPer100g": 22,
+    "carbsPer100g": 1,
+    "fatPer100g": 34,
+    "fibrePer100g": 0,
+    "source": "generic standard nutrition reference (kabanos dry sausage, per 100g)"
+  },
+  {
+    "foodId": "millet_groats",
+    "kcalPer100g": 119,
+    "proteinPer100g": 3.5,
+    "carbsPer100g": 23.7,
+    "fatPer100g": 1.0,
+    "fibrePer100g": 1.3,
+    "source": "generic standard nutrition reference (cooked millet groats, per 100g)"
+  },
+  {
+    "foodId": "minced_meat_cutlet",
+    "kcalPer100g": 220,
+    "proteinPer100g": 16,
+    "carbsPer100g": 8,
+    "fatPer100g": 14,
+    "fibrePer100g": 0.5,
+    "source": "generic standard nutrition reference (minced meat cutlet, per 100g)"
+  },
+  {
+    "foodId": "mizeria",
+    "kcalPer100g": 45,
+    "proteinPer100g": 1.5,
+    "carbsPer100g": 4,
+    "fatPer100g": 2.5,
+    "fibrePer100g": 0.8,
+    "source": "generic standard nutrition reference (mizeria cucumber-sour cream salad, per 100g)"
+  },
+  {
+    "foodId": "pierogi",
+    "kcalPer100g": 200,
+    "proteinPer100g": 6,
+    "carbsPer100g": 30,
+    "fatPer100g": 6,
+    "fibrePer100g": 1.5,
+    "source": "generic standard nutrition reference (pierogi, mixed filling average, per 100g)"
+  },
+  {
+    "foodId": "ros",
+    "kcalPer100g": 35,
+    "proteinPer100g": 3,
+    "carbsPer100g": 3,
+    "fatPer100g": 1.2,
+    "fibrePer100g": 0.3,
+    "source": "generic standard nutrition reference (rosol chicken broth with noodles, per 100g)"
+  },
+  {
+    "foodId": "urek",
+    "kcalPer100g": 75,
+    "proteinPer100g": 4,
+    "carbsPer100g": 6,
+    "fatPer100g": 4,
+    "fibrePer100g": 0.8,
+    "source": "generic standard nutrition reference (zurek sour rye soup, per 100g)"
   }
 ]

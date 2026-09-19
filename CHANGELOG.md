@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.0.0+51 — 2026-09-19
+
+- Fixed a real overcounting bug found while testing the new "Ask AI" recipe
+  flow: a "bowl of cornflakes with milk, toast with strawberry jam" entry
+  came out ~150 kcal too high because neither "cornflakes" nor "jam" existed
+  in the local food catalogue at all, so a bare "strawberry jam" mention
+  fell through to a per-fragment AI guess with no context that it was a
+  thin spread on toast — AI assumed something like a third of a jar
+  (400g/250 kcal). Added real, local catalogue entries (nutrition + typical
+  portion sizes) for cornflakes, muesli, granola, honey, peanut butter,
+  chocolate spread/Nutella, marmalade, and jam, in both English and Polish
+  — these now resolve instantly and correctly offline, no AI needed.
+- Found and fixed a much bigger latent gap while auditing Polish food
+  coverage: 15 common Polish dishes (pierogi, bigos, barszcz, żurek, rosół,
+  gołąbki, flaki, kotlet schabowy, and others) were already "recognized" by
+  the parser but had ZERO nutrition or portion data behind them — every
+  single mention silently needed an AI call, forever, and could never
+  resolve locally. All 15 now have real nutrition data and portion sizes.
+  Also added kopytka, fermented pickled cucumber (ogórek kiszony, distinct
+  from vinegar gherkins), and a generic "yellow cheese" (żółty ser) entry.
+- Fixed a segmenter bug that could split a known compound dish name (e.g.
+  "cottage cheese with chives") into two unrelated foods whenever an exact
+  gram amount was typed in front of it (e.g. "100g cottage cheese with
+  chives" wrongly became "100g cottage cheese" + a bare mention of
+  "chives"). Found via the parser's own coverage tests once this dish
+  finally had real nutrition data to check against.
+- "Mashed" now joins "boiled" as a recognized preparation word, so "mashed
+  potato" resolves the same way "boiled potato" already did.
+
 ## 1.0.0+50 — 2026-09-19
 
 - Added an explicit "Ask AI to work this out" option to Add food/drink and

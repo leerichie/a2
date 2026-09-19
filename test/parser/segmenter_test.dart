@@ -65,4 +65,42 @@ void main() {
       expect(segmentPhrases('cheese and', lexicon, aliasIndex), ['cheese']);
     });
   });
+
+  group('a known compound dish name containing "with" is not torn apart', () {
+    final compoundAliasIndex = AliasIndex.build({
+      'cottage_cheese_with_chives': ['cottage cheese with chives'],
+    });
+
+    test('the bare compound name is kept as one segment', () {
+      expect(
+        segmentPhrases('cottage cheese with chives', lexicon, compoundAliasIndex),
+        ['cottage cheese with chives'],
+      );
+    });
+
+    // Regression: an exact gram measurement glued to the front used to stop
+    // the whole-phrase alias lookup from ever matching (the alias index only
+    // has "cottage cheese with chives", not "100g cottage cheese with
+    // chives"), so this silently fell through to being split on "with" into
+    // "100g cottage cheese" + "chives" -- two unrelated foods instead of one
+    // dish. Caught by test/parser/coverage_matrix_test.dart once this dish
+    // finally got real nutrition data to check against.
+    test('the same compound name with a leading gram measurement is also kept whole', () {
+      expect(
+        segmentPhrases('100g cottage cheese with chives', lexicon, compoundAliasIndex),
+        ['100g cottage cheese with chives'],
+      );
+      expect(
+        segmentPhrases('250 g cottage cheese with chives', lexicon, compoundAliasIndex),
+        ['250 g cottage cheese with chives'],
+      );
+    });
+
+    test('an unrecognized "X with Y" phrase still splits normally', () {
+      expect(
+        segmentPhrases('chicken with rice', lexicon, compoundAliasIndex),
+        ['chicken', 'rice'],
+      );
+    });
+  });
 }
