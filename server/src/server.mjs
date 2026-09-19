@@ -239,6 +239,27 @@ const NUTRITION_SCHEMA = {
   required: ['name', 'calories', 'protein', 'carbs', 'servingGrams'],
 };
 
+// For 'recipe' mode: the text describes a BATCH (a recipe yielding several
+// portions, a jug of several drinks, a workout made of several rounds) --
+// this asks the model to do the batch-total-then-divide math itself and
+// return one portion's worth, plus how many of those portions the text
+// says were actually consumed, so the app can offer an editable "how many
+// did you have?" step instead of guessing.
+const RECIPE_SCHEMA = {
+  type: 'object', additionalProperties: false,
+  properties: {
+    name: {type: 'string'},
+    totalPortions: {type: 'number'},
+    consumedPortions: {type: 'number'},
+    caloriesPerPortion: {type: 'number'},
+    proteinPerPortion: {type: 'number'},
+    carbsPerPortion: {type: 'number'},
+    fatPerPortion: {type: 'number'},
+    servingGramsPerPortion: {type: 'number'},
+  },
+  required: ['name', 'totalPortions', 'consumedPortions', 'caloriesPerPortion', 'proteinPerPortion', 'carbsPerPortion', 'fatPerPortion', 'servingGramsPerPortion'],
+};
+
 // `output_text` is a convenience property the official OpenAI SDK computes
 // client-side -- it is NOT a field the Responses API actually returns over
 // the wire, so a raw fetch() (as used here, with no SDK) never has it. The
@@ -251,20 +272,30 @@ function extractOutputText(result) {
   return message?.content?.find(part => part.type === 'output_text')?.text;
 }
 
-async function aiDescribe(kind, text) {
+const RECIPE_INSTRUCTIONS = {
+  exercise: 'The user describes a workout made of repeated rounds/sets/circuits (e.g. "5 rounds of burpees and squats, 40s each with 20s rest"). Work out totalPortions: the number of rounds/sets described. Work out consumedPortions: how many of those the user actually completed -- equal to totalPortions unless the text explicitly says they did fewer (e.g. "only managed 3 of the 5"). caloriesPerPortion is the realistic calories burned for ONE round of the described work, given typical effort. Be conservative and realistic, never invent false precision. proteinPerPortion, carbsPerPortion, fatPerPortion and servingGramsPerPortion are always 0 for exercise.',
+  food: 'The user describes a recipe or batch that yields multiple portions/servings (e.g. a recipe making 6 waffles, a jug of 4 cocktails), and may say how many of those portions they personally ate or drank. First work out the TOTAL nutrition of the entire batch from the listed ingredients/recipe, then divide by the number of portions the batch/recipe makes to get accurate per-portion figures -- do not just estimate one portion directly, do the batch-then-divide arithmetic. totalPortions is how many portions/servings/items the batch or recipe makes (e.g. 6 for "6 waffles", 4 for "4 cocktails"). consumedPortions is how many of those the text says were actually eaten/drunk (default to 1 if not stated). Give a short natural name for ONE portion (e.g. "Twaróg waffle"), not a description of the whole batch. Never invent false precision, but do the division carefully. servingGramsPerPortion is the realistic weight in grams of ONE portion.',
+};
+
+async function aiDescribe(kind, text, mode = 'single') {
   const {apiKey, model} = await getOpenAiCredentials();
   if (!apiKey) throw new Error('AI is not configured on this server');
+  const recipeMode = mode === 'recipe';
+  const schema = recipeMode ? RECIPE_SCHEMA : NUTRITION_SCHEMA;
+  const instructions = recipeMode
+    ? RECIPE_INSTRUCTIONS[kind === 'exercise' ? 'exercise' : 'food']
+    : kind === 'exercise'
+    ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise. Set servingGrams to 0 for exercise.'
+    : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal. Also return servingGrams: the total realistic weight in grams of the portion your calorie/protein/carb figures describe (summed across every item if there are several), so those figures can be recorded on a per-100g basis later.';
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {'authorization': `Bearer ${apiKey}`, 'content-type': 'application/json'},
     body: JSON.stringify({
       model,
       store: false,
-      instructions: kind === 'exercise'
-        ? 'Estimate calories burned for a described exercise session, given its duration. Be conservative and realistic, never invent false precision. Protein and carbs are always 0 for exercise. Set servingGrams to 0 for exercise.'
-        : 'Estimate total nutrition for the described food or drink. It may list several distinct items (e.g. a fast-food order or a multi-part meal) — recognise each one, including named branded/restaurant items, and return the SUM of calories, protein and carbs across all of them, not just one. Account for any stated quantities (e.g. "2x", "large"). Assume typical realistic portion sizes when a quantity is vague; never invent false precision, but also never underestimate a clearly multi-item meal. Also return servingGrams: the total realistic weight in grams of the portion your calorie/protein/carb figures describe (summed across every item if there are several), so those figures can be recorded on a per-100g basis later.',
+      instructions,
       input: text,
-      text: {format: {type: 'json_schema', name: 'nutrition_estimate', strict: true, schema: NUTRITION_SCHEMA}},
+      text: {format: {type: 'json_schema', name: recipeMode ? 'recipe_estimate' : 'nutrition_estimate', strict: true, schema}},
     }),
   });
   if (!response.ok) throw new Error(`AI request failed (${response.status})`);
@@ -720,12 +751,15 @@ const server = createServer(async (req, res) => {
       const {apiKey} = await getOpenAiCredentials();
       if (!apiKey) return json(res, 503, {error: 'AI is not configured on this server'});
       if (req.method === 'POST' && url.pathname === '/api/v1/ai/describe') {
-        const {kind, text} = await readBody(req);
+        const {kind, text, mode} = await readBody(req);
         if (!['food', 'drink', 'exercise'].includes(kind) || !text?.trim()) {
           return json(res, 400, {error: 'A kind and description are required'});
         }
+        if (mode !== undefined && mode !== 'single' && mode !== 'recipe') {
+          return json(res, 400, {error: 'Invalid mode'});
+        }
         try {
-          return json(res, 200, await aiDescribe(kind, text.trim()));
+          return json(res, 200, await aiDescribe(kind, text.trim(), mode || 'single'));
         } catch (error) {
           return json(res, 502, {error: error.message || 'AI request failed'});
         }

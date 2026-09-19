@@ -3983,6 +3983,61 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
     );
   }
 
+  // The explicit "Ask AI" entry point (item: recipe/batch understanding),
+  // exercise side: sends the WHOLE raw text to the "recipe" AI mode so a
+  // workout described as repeated rounds/sets (e.g. "5 rounds of burpees
+  // and squats, 40s each") gets calories-per-round plus how many rounds
+  // were actually done, instead of the local MET parser -- which has no
+  // concept of this at all -- just giving up. No catalogue contribution
+  // here: a reusable MET needs a fixed duration/weight relationship that a
+  // per-round description doesn't reliably give (same reasoning that
+  // already gates _contributeAiActivity above on a known duration/weight).
+  Future<void> _askAiForExerciseRecipe() async {
+    final text = description.text.trim();
+    if (text.isEmpty || busy) return;
+    setState(() {
+      busy = true;
+      notice = null;
+    });
+    PortionedNutritionEstimate? estimate;
+    try {
+      estimate = await const AiService().describeRecipe(
+        serverUrl: defaultServerUrl,
+        kind: 'exercise',
+        text: text,
+      );
+    } catch (_) {
+      // Falls through to the notice below.
+    }
+    if (!mounted) return;
+    setState(() => busy = false);
+    if (estimate == null) {
+      setState(
+        () => notice =
+            "AI couldn't work this out. Try rephrasing or add it manually.",
+      );
+      return;
+    }
+    final confirmed = await showModalBottomSheet<PortionedExerciseResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => PortionedExerciseConfirmSheet(estimate: estimate!),
+    );
+    if (confirmed == null || !mounted) return;
+    Navigator.pop(
+      context,
+      FoodEntry(
+        confirmed.name,
+        _clockTime(),
+        confirmed.totalCalories.round(),
+        0,
+        Icons.directions_run,
+        isExercise: true,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
@@ -4055,6 +4110,23 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
               ],
             ),
           ),
+        if (aiAvailable)
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: description,
+            builder: (context, value, _) => value.text.trim().isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: busy ? null : _askAiForExerciseRecipe,
+                        icon: const Icon(Icons.auto_awesome, size: 18),
+                        label: const LText('Ask AI to work this out'),
+                      ),
+                    ),
+                  ),
+          ),
         const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
@@ -4065,6 +4137,126 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
           ),
         ),
       ],
+    ),
+  );
+}
+
+// Confirmation step for the exercise "Ask AI" recipe/batch flow -- AI gives
+// calories for ONE round/set of a described workout plus how many rounds
+// it thinks were done; this lets the user see and adjust both before
+// anything is logged, the same "never trust AI blindly" principle as
+// AddFoodSheet's showQuantityField path on the food side.
+class PortionedExerciseResult {
+  const PortionedExerciseResult(this.name, this.totalCalories);
+  final String name;
+  final double totalCalories;
+}
+
+class PortionedExerciseConfirmSheet extends StatefulWidget {
+  const PortionedExerciseConfirmSheet({super.key, required this.estimate});
+  final PortionedNutritionEstimate estimate;
+  @override
+  State<PortionedExerciseConfirmSheet> createState() =>
+      _PortionedExerciseConfirmSheetState();
+}
+
+class _PortionedExerciseConfirmSheetState
+    extends State<PortionedExerciseConfirmSheet> {
+  late final name = TextEditingController(text: widget.estimate.name);
+  late final caloriesPerPortion = TextEditingController(
+    text: widget.estimate.caloriesPerPortion.round().toString(),
+  );
+  late final portions = TextEditingController(
+    text: widget.estimate.consumedPortions == widget.estimate.consumedPortions.roundToDouble()
+        ? widget.estimate.consumedPortions.toInt().toString()
+        : widget.estimate.consumedPortions.toString(),
+  );
+
+  @override
+  void dispose() {
+    name.dispose();
+    caloriesPerPortion.dispose();
+    portions.dispose();
+    super.dispose();
+  }
+
+  double _num(TextEditingController c) =>
+      double.tryParse(c.text.trim().replaceAll(',', '.')) ?? 0;
+
+  double get _totalCalories => _num(caloriesPerPortion) * _num(portions);
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: Container(
+      decoration: const BoxDecoration(
+        color: cream,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: SizedBox(width: 42, child: Divider(thickness: 4)),
+            ),
+            const SizedBox(height: 10),
+            const LText(
+              'Confirm AI estimate',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 18),
+            TextField(
+              controller: name,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(labelText: ui(context, 'Exercise name')),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: caloriesPerPortion,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: ui(context, 'Calories per round'),
+                suffixText: 'kcal',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: portions,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: ui(context, 'How many portions?'),
+              ),
+            ),
+            if (widget.estimate.totalPortions > 1) ...[
+              const SizedBox(height: 6),
+              LText(
+                '${ui(context, 'Makes about')} ${widget.estimate.totalPortions.round()} ${ui(context, 'portions in total')}',
+                style: const TextStyle(fontSize: 11, color: Colors.black54),
+              ),
+            ],
+            const SizedBox(height: 6),
+            LText(
+              '= ${_totalCalories.round()} kcal',
+              style: const TextStyle(fontWeight: FontWeight.w600, color: forest),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(
+                  context,
+                  PortionedExerciseResult(name.text.trim(), _totalCalories),
+                ),
+                child: const LText('Confirm'),
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
@@ -4139,6 +4331,9 @@ class AddFoodSheet extends StatefulWidget {
     this.defaultSaveToCatalogue = true,
     this.showPackWeightField = false,
     this.initialPackWeightGrams,
+    this.showQuantityField = false,
+    this.initialQuantity = 1,
+    this.totalPortionsHint,
   });
   final String suggestedName;
   final String locale;
@@ -4148,6 +4343,18 @@ class AddFoodSheet extends StatefulWidget {
   final double? initialSaturatedFat, initialSugar, initialFibre, initialSalt;
   final double? initialServingAmount;
   final String? initialServingUnit;
+  // Set by the AI "recipe/batch" flow (see AddMealSheet's "Ask AI" button):
+  // the fields above always describe ONE portion (what gets remembered to
+  // the catalogue below is always a single-portion basis), while this is
+  // "how many of those portions did you actually have" -- purely a
+  // multiplier applied to the returned AddFoodResult, never to what's saved
+  // to the food list. Off by default so every other caller of this sheet
+  // (manual "add new food", scanned-label confirmation) is unaffected.
+  final bool showQuantityField;
+  final double initialQuantity;
+  // How many portions the AI said the whole batch/recipe makes, just shown
+  // as an informational caption -- null hides it.
+  final double? totalPortionsHint;
   // Whether "save to my food list" starts checked -- off by default for a
   // scanned label (often a specific branded product), on by default for
   // an unresolved food the user is naming from scratch. Either way it's
@@ -4209,6 +4416,9 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
         ? ''
         : _formatNum(widget.initialPackWeightGrams!),
   );
+  late final quantity = TextEditingController(
+    text: _formatNum(widget.initialQuantity),
+  );
   late bool saveToCatalogue = widget.defaultSaveToCatalogue;
   String? error;
   bool saving = false;
@@ -4230,6 +4440,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     fibre.dispose();
     salt.dispose();
     packWeight.dispose();
+    quantity.dispose();
     super.dispose();
   }
 
@@ -4272,6 +4483,16 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     final unitGrams =
         _gramsPerUnit[servingUnit.text.trim().toLowerCase()] ?? 1.0;
     return pack / (amount * unitGrams);
+  }
+
+  // How many portions the user says they actually had -- 1 (no scaling)
+  // unless showQuantityField is on. Every field above this getter still
+  // describes ONE portion; this only scales what gets logged today, never
+  // what gets remembered to the catalogue.
+  double get _quantityFactor {
+    if (!widget.showQuantityField) return 1;
+    final q = _num(quantity);
+    return (q == null || q <= 0) ? 1 : q;
   }
 
   Future<void> _save() async {
@@ -4335,7 +4556,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
       );
     }
     if (mounted) {
-      final scale = _packScaleFactor;
+      final scale = _packScaleFactor * _quantityFactor;
       double? scaled(TextEditingController c) {
         final v = _num(c);
         return v == null ? null : v * scale;
@@ -4394,6 +4615,37 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(labelText: ui(context, 'Food name')),
             ),
+            if (widget.showQuantityField) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: quantity,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: ui(context, 'How many portions did you have?'),
+                ),
+              ),
+              if (widget.totalPortionsHint != null &&
+                  widget.totalPortionsHint! > 1) ...[
+                const SizedBox(height: 6),
+                LText(
+                  '${ui(context, 'Makes about')} ${_formatNum(widget.totalPortionsHint!)} ${ui(context, 'portions in total')}',
+                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                ),
+              ],
+              if (_quantityFactor != 1) ...[
+                const SizedBox(height: 6),
+                LText(
+                  '= ${_formatNum((_num(calories) ?? 0) * _quantityFactor)} kcal',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: forest,
+                  ),
+                ),
+              ],
+            ],
             const SizedBox(height: 12),
             Row(
               children: [
@@ -4403,7 +4655,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    onChanged: widget.showPackWeightField
+                    onChanged: widget.showPackWeightField || widget.showQuantityField
                         ? (_) => setState(() {})
                         : null,
                     decoration: InputDecoration(
@@ -4576,19 +4828,22 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
               ),
             ],
             const SizedBox(height: 8),
-            CheckboxListTile(
-              value: saveToCatalogue,
-              onChanged: (v) => setState(() => saveToCatalogue = v ?? false),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              dense: true,
-              title: const LText(
-                'Save to my food list for reuse',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              subtitle: const LText(
-                'Also shared so others can benefit',
-                style: TextStyle(fontSize: 11, color: Colors.black54),
+            Material(
+              type: MaterialType.transparency,
+              child: CheckboxListTile(
+                value: saveToCatalogue,
+                onChanged: (v) => setState(() => saveToCatalogue = v ?? false),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+                title: const LText(
+                  'Save to my food list for reuse',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                subtitle: const LText(
+                  'Also shared so others can benefit',
+                  style: TextStyle(fontSize: 11, color: Colors.black54),
+                ),
               ),
             ),
             if (error != null)
@@ -5488,6 +5743,80 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
   }
 
+  // The explicit "Ask AI" entry point (item: recipe/batch understanding):
+  // unlike _addToDay's per-component fallback, this sends the WHOLE raw
+  // text to a dedicated "recipe/batch" AI mode so a message like "I ate 1
+  // of the 6 waffles from this recipe: ..." gets proper batch-then-divide
+  // math instead of the local parser mistaking raw ingredients for eaten
+  // food. Always opens AddFoodSheet to confirm/edit before anything is
+  // saved -- AI's answer is never trusted blindly.
+  Future<void> _askAiForRecipe() async {
+    final text = description.text.trim();
+    if (text.isEmpty || busy) return;
+    setState(() {
+      busy = true;
+      notice = null;
+    });
+    PortionedNutritionEstimate? estimate;
+    try {
+      estimate = await const AiService().describeRecipe(
+        serverUrl: defaultServerUrl,
+        kind: 'food',
+        text: text,
+      );
+    } catch (_) {
+      // Falls through to the notice below.
+    }
+    if (!mounted) return;
+    setState(() => busy = false);
+    if (estimate == null) {
+      setState(
+        () => notice =
+            "AI couldn't work this out. Try rephrasing or add it manually.",
+      );
+      return;
+    }
+    final confirmed = await showModalBottomSheet<AddFoodResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddFoodSheet(
+        title: 'Confirm AI estimate',
+        suggestedName: estimate!.name,
+        initialCalories: estimate.caloriesPerPortion,
+        initialProtein: estimate.proteinPerPortion,
+        initialCarbs: estimate.carbsPerPortion,
+        initialFat: estimate.fatPerPortion,
+        initialServingAmount: estimate.servingGramsPerPortion > 0
+            ? estimate.servingGramsPerPortion
+            : 100,
+        initialServingUnit: 'g',
+        showQuantityField: true,
+        initialQuantity: estimate.consumedPortions,
+        totalPortionsHint: estimate.totalPortions,
+        locale: widget.locale,
+      ),
+    );
+    if (confirmed == null || !mounted) return;
+    Navigator.pop(
+      context,
+      FoodEntry(
+        confirmed.name,
+        _clockTime(),
+        confirmed.kcal.round(),
+        (confirmed.protein ?? 0).round(),
+        Icons.restaurant,
+        carbs: (confirmed.carbs ?? 0).round(),
+        weightGrams: confirmed.weightGrams,
+        fat: confirmed.fat,
+        saturatedFat: confirmed.saturatedFat,
+        sugar: confirmed.sugar,
+        fibre: confirmed.fibre,
+        salt: confirmed.salt,
+      ),
+    );
+  }
+
   Future<void> _addToDay() async {
     final text = description.text.trim();
     final water = WaterIntakeParser.parse(text);
@@ -5801,6 +6130,20 @@ class _AddMealSheetState extends State<AddMealSheet> {
                 ),
               ],
             ),
+            if (aiAvailable)
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: description,
+                builder: (context, value, _) => value.text.trim().isEmpty
+                    ? const SizedBox.shrink()
+                    : Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: busy ? null : _askAiForRecipe,
+                          icon: const Icon(Icons.auto_awesome, size: 18),
+                          label: const LText('Ask AI to work this out'),
+                        ),
+                      ),
+              ),
             if (notice != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -7601,6 +7944,30 @@ class NutritionEstimate {
   final double servingGrams;
 }
 
+// The result of asking AI to read a whole recipe/batch description (e.g.
+// "made 6 waffles, ate 1") and do the batch-total-then-divide math itself --
+// one portion's nutrition, how many portions the batch/workout makes, and
+// AI's best read of how many the user said they actually had. `totalPortions`
+// is always >= 1 and `consumedPortions` is always between 0 and
+// totalPortions inclusive, defensively clamped since these numbers come
+// straight from the model.
+class PortionedNutritionEstimate {
+  const PortionedNutritionEstimate(
+    this.name,
+    this.totalPortions,
+    this.consumedPortions,
+    this.caloriesPerPortion,
+    this.proteinPerPortion,
+    this.carbsPerPortion,
+    this.fatPerPortion,
+    this.servingGramsPerPortion,
+  );
+  final String name;
+  final double totalPortions, consumedPortions;
+  final double caloriesPerPortion, proteinPerPortion, carbsPerPortion;
+  final double fatPerPortion, servingGramsPerPortion;
+}
+
 class LinkedUser {
   const LinkedUser({required this.id, required this.name, required this.email});
   final String id, name, email;
@@ -8091,6 +8458,56 @@ class AiService {
     return _estimateFrom(body, fallbackName: text);
   }
 
+  // "Recipe/batch" mode: sends the WHOLE raw text (never just one unresolved
+  // phrase, unlike describe()) so AI can read a recipe that yields several
+  // portions, or a workout made of several rounds, and do the batch-then-
+  // divide math itself. Explicitly user-triggered (an "Ask AI" button), not
+  // part of the automatic per-component fallback in _addToDay/_addExercise.
+  Future<PortionedNutritionEstimate> describeRecipe({
+    required String serverUrl,
+    required String kind,
+    required String text,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in to use AI features');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/ai/describe'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'kind': kind, 'text': text, 'mode': 'recipe'}),
+        )
+        .timeout(const Duration(seconds: 25));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'AI request failed');
+    }
+    final totalPortions = ((body['totalPortions'] as num?) ?? 1)
+        .toDouble()
+        .clamp(1, double.infinity)
+        .toDouble();
+    final consumedPortions = ((body['consumedPortions'] as num?) ?? 1)
+        .toDouble()
+        .clamp(0, totalPortions)
+        .toDouble();
+    return PortionedNutritionEstimate(
+      (body['name'] as String?)?.trim().isNotEmpty == true
+          ? body['name'] as String
+          : text,
+      totalPortions,
+      consumedPortions,
+      ((body['caloriesPerPortion'] as num?) ?? 0).toDouble(),
+      ((body['proteinPerPortion'] as num?) ?? 0).toDouble(),
+      ((body['carbsPerPortion'] as num?) ?? 0).toDouble(),
+      ((body['fatPerPortion'] as num?) ?? 0).toDouble(),
+      ((body['servingGramsPerPortion'] as num?) ?? 0).toDouble(),
+    );
+  }
+
   Future<NutritionEstimate> analyzeImage({
     required String serverUrl,
     required String kind,
@@ -8177,7 +8594,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+49';
+  String installedVersion = '1.0.0+50';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;

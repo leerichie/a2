@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:a2/main.dart';
 import 'package:a2/l10n.dart';
+import 'package:a2/parser/catalogue/local_overlay.dart';
 import 'package:a2/parser/food_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -1006,4 +1007,71 @@ void main() {
     expect(MealCategory.detect('orange juice', false), 'Drinks');
     expect(MealCategory.detect('coffee', false), 'Drinks');
   });
+
+  testWidgets(
+    'AddFoodSheet quantity field scales what gets logged, never the '
+    'catalogue basis (the AI "recipe/batch" confirmation flow)',
+    (tester) async {
+      // AddFoodSheet has enough fields (esp. with showQuantityField on) that
+      // the "Confirm" button sits below the default 600pt-tall test surface
+      // -- give it real phone-sized room instead of scrolling to find it.
+      tester.view.physicalSize = const Size(400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      AddFoodResult? captured;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () async {
+                  captured = await showModalBottomSheet<AddFoodResult>(
+                    context: context,
+                    builder: (_) => const AddFoodSheet(
+                      title: 'Confirm AI estimate',
+                      suggestedName: 'Twaróg waffle',
+                      initialCalories: 100,
+                      initialProtein: 10,
+                      initialCarbs: 5,
+                      initialFat: 3,
+                      initialServingAmount: 50,
+                      initialServingUnit: 'g',
+                      showQuantityField: true,
+                      initialQuantity: 2,
+                      totalPortionsHint: 6,
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      // Today's logged entry is the per-portion figures times the quantity
+      // eaten (2 portions of a 100 kcal/10g protein portion).
+      expect(captured, isNotNull);
+      expect(captured!.kcal, 200);
+      expect(captured!.protein, 20);
+      expect(captured!.carbs, 10);
+      expect(captured!.fat, 6);
+      expect(captured!.weightGrams, 100);
+
+      // What's remembered for next time is always the single-portion basis,
+      // never multiplied by how many were eaten this time.
+      final overlay = await LocalCatalogueOverlay.load();
+      final entry = overlay.entries.firstWhere(
+        (e) => e.canonical == 'Twaróg waffle',
+      );
+      expect(entry.kcalPer100g, 100 * 100 / 50);
+      expect(entry.servingAmount, 50);
+    },
+  );
 }

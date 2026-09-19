@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0+50 — 2026-09-19
+
+- Added an explicit "Ask AI to work this out" option to Add food/drink and
+  Add exercise, for text neither the offline parser nor the normal AI
+  fallback can handle — specifically a recipe or batch that yields several
+  portions (e.g. "I ate 1 of the 6 waffles from this batter: 250g twaróg,
+  3 eggs, ...") or a workout made of repeated rounds/sets. The AI now
+  computes the batch's total nutrition/calories and divides by how many
+  portions/rounds it makes, then a confirmation screen lets you edit the
+  result and pick exactly how many portions you actually had before
+  anything is logged — recomputing the totals live. What gets remembered
+  for next time is always a single portion's nutrition (via the existing
+  food catalogue), never multiplied by how many were eaten this time.
+  Works in English and Polish (and the app's other languages), for any
+  food, drink, or exercise description, not just this one example.
+
 ## 1.0.0+49 — 2026-09-18
 
 - Extended beer's new default-serving behaviour to every other alcoholic
