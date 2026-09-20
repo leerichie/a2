@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'firebase_options.dart';
 import 'l10n.dart';
 import 'parser/catalogue/activity_catalogue.dart';
 import 'parser/catalogue/local_exercise_overlay.dart';
@@ -30,7 +32,21 @@ import 'parser/models/unresolved_span.dart';
 import 'parser/pipeline/text_folding.dart';
 import 'services/app_update_service.dart';
 
-void main() => runApp(const A2App());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Firebase becomes the shared A² identity provider (Apple/Google/email
+  // sign-in) per the platform plan -- it only ever authenticates who
+  // someone is. This app's own server remains the sole authority on
+  // module/licence/AI entitlements (see A2Shell/EntitlementService), so a
+  // failed Firebase init must never block using the app locally or with
+  // the existing account system.
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (error) {
+    debugPrint('[main] Firebase.initializeApp failed: $error');
+  }
+  runApp(const A2App());
+}
 
 /// Disabled for now — the standalone "little nudge" card was replaced by
 /// HeroCard's dynamic headline. Flip back to true to restore it.
@@ -8944,7 +8960,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+54';
+  String installedVersion = '1.0.0+55';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;

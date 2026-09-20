@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0+55 — 2026-09-20
+
+- Added the Firebase project and SDK wiring for the shared A² identity
+  layer (a new, dedicated `a2-platform` Firebase project — kept separate
+  from HorseVibe's own Firebase project). Firebase Core, Auth, and Sign
+  in with Apple are now integrated and confirmed initializing correctly
+  on a real iOS build. No sign-in UI yet — this is the plumbing only; the
+  existing email/password + linked-Google account system is completely
+  untouched and still the only way to sign in for now. Firebase never
+  decides what anyone can access — that stays with this app's own server
+  (see the 1.0.0+54 entitlements work).
+
 ## 1.0.0+54 — 2026-09-20
 
 - Foundation for A² becoming a shared platform shell, not just the Health

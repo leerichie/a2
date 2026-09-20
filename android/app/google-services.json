@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040775128375",
+    "project_id": "a2-platform",
+    "storage_bucket": "a2-platform.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040775128375:android:e835dfa2d553db928a26b2",
+        "android_client_info": {
+          "package_name": "com.aaniaashley.a2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGQJEXA1A5nX9GQaY3Ezq4WovPq05i6x8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
