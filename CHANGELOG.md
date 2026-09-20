@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0+60 — 2026-09-20
+
+- Fixed "Continue with Google" freezing on a blank page instead of
+  signing in. `google_sign_in` doesn't read Firebase's own config files
+  automatically — it needs its own OAuth client IDs passed explicitly,
+  which was missing entirely. Needed two different ones: this app's iOS
+  client (for the native flow to identify the app to Google at all) and
+  the "web" client as `serverClientId` on both platforms (without it,
+  the ID token Firebase gets back is scoped wrong and would be rejected
+  even if the sign-in itself completed). Affects both the sign-in screen
+  and "Link Google account" in Settings, since both share this code
+  path.
+
 ## 1.0.0+59 — 2026-09-20
 
 - Added a sign-out option to the A² dashboard itself (previously only

@@ -7868,6 +7868,25 @@ const defaultServerUrl = String.fromEnvironment(
 // codebase. The server needs the same client ID as GOOGLE_CLIENT_ID.
 const googleClientId = String.fromEnvironment('A2_GOOGLE_CLIENT_ID');
 
+// google_sign_in does NOT read Firebase's GoogleService-Info.plist/
+// google-services.json automatically -- it needs its own OAuth client IDs
+// passed explicitly to GoogleSignIn.instance.initialize(), or the native
+// sign-in flow can fail silently (observed as the in-app browser showing
+// a blank page and the app appearing to freeze, rather than a clean
+// error). Two different ids are needed for two different reasons:
+// - iosGoogleClientId: this app's own iOS OAuth client (from
+//   GoogleService-Info.plist's CLIENT_ID) -- identifies the app to
+//   Google on iOS.
+// - googleServerClientId: the WEB OAuth client (google-services.json's
+//   client_type: 3 entry), needed on BOTH platforms so the returned ID
+//   token's audience is one GoogleAuthProvider.credential()/Firebase
+//   will actually accept -- an ID token scoped to the Android/iOS client
+//   alone is rejected by Firebase.
+const iosGoogleClientId =
+    '1040775128375-j6hv1q0v0us3ecfdn3b32oif1nf4t13v.apps.googleusercontent.com';
+const googleServerClientId =
+    '1040775128375-lpbd0hupegagmdc8imghhehj1c2657cc.apps.googleusercontent.com';
+
 class AccountService {
   const AccountService();
 
@@ -9123,7 +9142,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+59';
+  String installedVersion = '1.0.0+60';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
@@ -11011,7 +11030,10 @@ class _AccountSheetState extends State<AccountSheet> {
       error = null;
     });
     try {
-      await GoogleSignIn.instance.initialize();
+      await GoogleSignIn.instance.initialize(
+        clientId: Platform.isIOS ? iosGoogleClientId : null,
+        serverClientId: googleServerClientId,
+      );
       final account = await GoogleSignIn.instance.authenticate();
       final googleIdToken = account.authentication.idToken;
       if (googleIdToken == null) {
@@ -11118,7 +11140,10 @@ class _AccountSheetState extends State<AccountSheet> {
       googleError = null;
     });
     try {
-      await GoogleSignIn.instance.initialize();
+      await GoogleSignIn.instance.initialize(
+        clientId: Platform.isIOS ? iosGoogleClientId : null,
+        serverClientId: googleServerClientId,
+      );
       final account = await GoogleSignIn.instance.authenticate();
       final googleIdToken = account.authentication.idToken;
       if (googleIdToken == null) {
