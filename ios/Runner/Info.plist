@@ -26,6 +26,19 @@
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist -- the
+					     redirect URL Google Sign-In calls back into the app on. -->
+					<string>com.googleusercontent.apps.1040775128375-j6hv1q0v0us3ecfdn3b32oif1nf4t13v</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSLocalNetworkUsageDescription</key>
 		<string>A2 connects to your private AA Cloud server to update and synchronise your data.</string>
 		<key>NSCameraUsageDescription</key>

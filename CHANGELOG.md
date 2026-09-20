@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0+58 — 2026-09-20
+
+- "Continue with Google" should now actually work: installed the
+  refreshed Firebase config files (now carrying real OAuth client IDs,
+  since the project's OAuth consent screen has been set up) and
+  registered the iOS URL scheme Google Sign-In calls back into the app
+  on. Confirmed the app still builds and launches cleanly with the new
+  config; the interactive Google account picker itself still needs a
+  real device/account to try.
+
 ## 1.0.0+57 — 2026-09-20
 
 - Fixed a real gap in the new A² dashboard: there was no way back to it
