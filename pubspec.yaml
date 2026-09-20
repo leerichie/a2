@@ -3,7 +3,7 @@ description: 'A friendly, local-first food and fitness companion.'
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+51
+version: 1.0.0+52
 
 environment:
   sdk: ^3.13.2

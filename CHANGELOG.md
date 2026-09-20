@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0+52 — 2026-09-20
+
+- The app's default server address is no longer a Tailscale-only IP
+  (`http://100.105.169.100:8094`) — it's now `https://api.ashleyrichards.tech`,
+  a real public HTTPS endpoint reaching the same backend via a Cloudflare
+  Tunnel from `aa-cloud-wp30`. Customer devices no longer need to be on the
+  Tailscale tailnet to use the app; verified end-to-end from a phone on
+  mobile data with Tailscale switched off. No server code changed — the
+  existing Node backend and its data are untouched, Cloudflare just
+  terminates TLS and tunnels to the same `localhost:8094` it always had.
+  Tailscale stays installed on the server for private SSH/admin access.
+  Override with `--dart-define=A2_SERVER_URL=...` for local/dev work.
+
 ## 1.0.0+51 — 2026-09-19
 
 - Fixed a real overcounting bug found while testing the new "Ask AI" recipe

@@ -7413,9 +7413,14 @@ class ContentUpdateService {
   }
 }
 
+// Public HTTPS endpoint (via Cloudflare Tunnel -> aa-cloud-wp30) as of
+// 2026-09-20 -- customer devices no longer need to be on the Tailscale
+// tailnet. Override with `--dart-define=A2_SERVER_URL=...` for local/dev
+// work against the old Tailscale address (http://100.105.169.100:8094) or
+// a local server instance.
 const defaultServerUrl = String.fromEnvironment(
   'A2_SERVER_URL',
-  defaultValue: 'http://100.105.169.100:8094',
+  defaultValue: 'https://api.ashleyrichards.tech',
 );
 
 // Set via --dart-define=A2_GOOGLE_CLIENT_ID=... at build time, once a Google
@@ -8594,7 +8599,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+51';
+  String installedVersion = '1.0.0+52';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
