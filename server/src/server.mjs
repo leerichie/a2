@@ -25,6 +25,95 @@ const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || '';
 const scrypt = promisify(scryptCallback);
 const sessions = new Map();
 const appSessions = new Map();
+
+// Rate limiting -- config centralized here (env-overridable), not scattered
+// as magic numbers through the route handlers. Windows are short and
+// counters simply expire and reset; there is deliberately no permanent or
+// long-duration lockout, since a per-email limit with no expiry would let
+// anyone lock a stranger out of their own account just by repeatedly
+// guessing their email with a wrong password.
+const RATE_LIMIT_CONFIG = {
+  loginPerIp: {
+    windowMs: Number(process.env.RATE_LIMIT_LOGIN_IP_WINDOW_MS) || 15 * 60 * 1000,
+    max: Number(process.env.RATE_LIMIT_LOGIN_IP_MAX) || 20,
+  },
+  loginPerEmail: {
+    windowMs: Number(process.env.RATE_LIMIT_LOGIN_EMAIL_WINDOW_MS) || 15 * 60 * 1000,
+    max: Number(process.env.RATE_LIMIT_LOGIN_EMAIL_MAX) || 8,
+  },
+  registerPerIp: {
+    windowMs: Number(process.env.RATE_LIMIT_REGISTER_IP_WINDOW_MS) || 60 * 60 * 1000,
+    max: Number(process.env.RATE_LIMIT_REGISTER_IP_MAX) || 6,
+  },
+};
+
+// The a2_default Docker network's own gateway address -- confirmed
+// empirically 2026-09-20 (see docker inspect a2_content / a disposable
+// echo-server test) to be the ONLY address hairpin (loopback-originated)
+// traffic can ever appear to come from at this container's socket layer.
+// cloudflared runs with --network host on the same physical box and
+// proxies to http://localhost:8094, so genuine Cloudflare Tunnel traffic
+// is indistinguishable from any other loopback-originated connection at
+// the TCP layer -- Docker's own port-publishing NAT rewrites it to this
+// gateway address. No real external caller (Tailscale, LAN, or anyone on
+// the public internet) can ever make their own connection originate from
+// Docker's internal gateway, so this is a safe, non-spoofable trust
+// boundary: only a request whose raw socket address is exactly this one
+// gets its client IP taken from Cloudflare's CF-Connecting-IP header.
+// Every other caller's own raw socket address is used instead, and any
+// CF-Connecting-IP header they send is ignored outright.
+const TRUSTED_PROXY_IP = process.env.TRUSTED_PROXY_IP || '172.22.0.1';
+
+const realClientIp = req => {
+  const socketIp = (req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  if (socketIp === TRUSTED_PROXY_IP) {
+    const cfIp = req.headers['cf-connecting-ip'];
+    if (typeof cfIp === 'string' && cfIp.trim()) return cfIp.trim();
+  }
+  return socketIp;
+};
+
+// Simple in-memory sliding-window counters, one Map entry per bucket key
+// (e.g. "login:ip:1.2.3.4" or "login:email:someone@example.com"). Not
+// shared across processes or restarts -- fine for this single-instance
+// deployment, and a restart resetting everyone's counters to zero is the
+// safe direction to fail in, never a lockout that outlives the thing that
+// caused it. Swept periodically (see setInterval below) so long-idle keys
+// don't accumulate forever.
+const rateLimitBuckets = new Map();
+const checkRateLimit = (bucketKey, {windowMs, max}) => {
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(bucketKey);
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(bucketKey, {count: 1, resetAt: now + windowMs});
+    return {limited: false};
+  }
+  bucket.count += 1;
+  if (bucket.count > max) {
+    return {limited: true, retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))};
+  }
+  return {limited: false};
+};
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, bucket] of rateLimitBuckets) if (bucket.resetAt <= now) rateLimitBuckets.delete(key);
+}, 10 * 60 * 1000).unref();
+// Returns a response and sets Retry-After if any of the given [bucketKey,
+// limitConfig] pairs is currently over its limit -- checks every pair
+// (rather than stopping at the first) so, e.g., a login attempt always
+// counts against both its IP and email buckets even if the IP one alone
+// would already have blocked it.
+const enforceRateLimit = (res, checks) => {
+  let worst = null;
+  for (const [bucketKey, limitConfig] of checks) {
+    const result = checkRateLimit(bucketKey, limitConfig);
+    if (result.limited && (!worst || result.retryAfterSeconds > worst.retryAfterSeconds)) worst = result;
+  }
+  if (!worst) return false;
+  res.setHeader('retry-after', String(worst.retryAfterSeconds));
+  json(res, 429, {error: 'Too many requests. Please try again later.'});
+  return true;
+};
 const loadPersistedSessions = async () => {
   try {
     const raw = JSON.parse(await readFile(sessionsFile, 'utf8'));
@@ -350,6 +439,8 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, {ok: true});
     if (req.method === 'POST' && url.pathname === '/api/v1/auth/register') {
+      const clientIp = realClientIp(req);
+      if (enforceRateLimit(res, [[`register:ip:${clientIp}`, RATE_LIMIT_CONFIG.registerPerIp]])) return;
       const {email, password, name = ''} = await readBody(req);
       const normalEmail = String(email || '').trim().toLowerCase();
       if (!validEmail(normalEmail)) return json(res, 400, {error: 'Enter a valid email address'});
@@ -363,9 +454,13 @@ const server = createServer(async (req, res) => {
       return json(res, 201, {token, user: publicAppUser(user)});
     }
     if (req.method === 'POST' && url.pathname === '/api/v1/auth/login') {
+      const clientIp = realClientIp(req);
+      if (enforceRateLimit(res, [[`login:ip:${clientIp}`, RATE_LIMIT_CONFIG.loginPerIp]])) return;
       const {email, password} = await readBody(req);
+      const normalEmail = String(email || '').trim().toLowerCase();
+      if (normalEmail && enforceRateLimit(res, [[`login:email:${normalEmail}`, RATE_LIMIT_CONFIG.loginPerEmail]])) return;
       const users = await loadAppUsers();
-      const user = users.find(item => item.email === String(email || '').trim().toLowerCase());
+      const user = users.find(item => item.email === normalEmail);
       if (!user || !(await verifyPassword(password, user.passwordHash))) return json(res, 401, {error: 'Incorrect email or password'});
       if (user.blocked === true) return json(res, 403, {error: 'This account has been blocked'});
       const token = randomBytes(32).toString('hex');
@@ -1199,7 +1294,11 @@ const server = createServer(async (req, res) => {
     }
     json(res, 404, {error: 'Not found'});
   } catch (error) {
-    json(res, 500, {error: error.message || 'Server error'});
+    // Full detail stays server-side only -- an unexpected exception's
+    // message could leak internal paths/state to a public, unauthenticated
+    // caller now that this server is reachable over the open internet.
+    console.error('[server] unhandled request error:', error);
+    json(res, 500, {error: 'Server error'});
   }
 });
 server.listen(port, '0.0.0.0', () => console.log(`a2 content server listening on ${port}`));
