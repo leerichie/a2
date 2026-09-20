@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0+54 — 2026-09-20
+
+- Foundation for A² becoming a shared platform shell, not just the Health
+  app. Signed-in accounts now land on a new A² dashboard that shows only
+  the modules that account is entitled to (never a locked/greyed-out
+  card for something it can't use) — Health is the first and currently
+  only module, reached by tapping its card, with all of its existing
+  functionality and data completely unchanged. A purely local (no
+  account) user's experience is untouched — straight into Health, no
+  dashboard, exactly as before.
+  Server: new per-user `moduleAccess`/`membership` fields (existing users
+  default to Health enabled, so nobody loses access), a module registry
+  with a global on/off switch per module, and `GET
+  /api/v1/auth/entitlements` returning exactly the modules an account can
+  use. Admin console gained module toggle buttons and a membership
+  selector per user, with membership deliberately kept independent of
+  module access — Platinum does not imply every module. AI access stays
+  its own separate toggle, unaffected by any of this.
+
 ## 1.0.0+53 — 2026-09-20
 
 - Fixed private sync silently failing to retry: `uploadLocalData` never

@@ -235,7 +235,34 @@ const saveAppUsers = async users => {
   await mkdir(dirname(appUsersFile), {recursive: true});
   await writeFile(appUsersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
 };
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], googleLinked: user.googleLinked === true, createdAt: user.createdAt});
+// The A² shell's module registry -- the platform-wide list of modules
+// that could exist, independent of which ones any given user is entitled
+// to. `globalEnabled: false` hides a module from EVERY user regardless of
+// their own per-user access, for staged rollouts (e.g. enabling something
+// for admin/test accounts only via moduleAccess while it's still globally
+// off for everyone else -- see defaultModuleAccess). Adding a future
+// module (HorseVibe, CrewPilot, ...) is meant to be exactly one new entry
+// here plus a per-user default in defaultModuleAccess, never a code
+// change to the entitlements route itself.
+const MODULE_REGISTRY = [
+  {
+    id: 'health',
+    name: 'A² Health',
+    description: 'Food, exercise, weight and photo tracking',
+    icon: 'health',
+    route: 'health',
+    globalEnabled: true,
+    minAppVersion: null,
+  },
+];
+// Existing accounts predate the moduleAccess field entirely -- this is the
+// fallback used everywhere a user record might not have one yet, so every
+// current Health user keeps working through the shell migration with no
+// admin action required. New modules default to false: being entitled to
+// Health says nothing about being entitled to something added later.
+const defaultModuleAccess = () => ({health: true});
+
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], googleLinked: user.googleLinked === true, createdAt: user.createdAt, membership: user.membership || 'basic', moduleAccess: {...defaultModuleAccess(), ...(user.moduleAccess || {})}});
 const syncInvitesFile = join(process.env.DATA_DIR || join(root, 'data'), 'sync-invites.json');
 const loadSyncInvites = async () => {
   try { return JSON.parse(await readFile(syncInvitesFile, 'utf8')).invites || []; }
@@ -519,6 +546,22 @@ const server = createServer(async (req, res) => {
       if (req.method === 'GET' && url.pathname === '/api/v1/auth/me') {
         const user = (await loadAppUsers()).find(item => item.id === appSession.userId);
         return user ? json(res, 200, {user: publicAppUser(user)}) : json(res, 401, {error: 'Account no longer exists'});
+      }
+      // The A² shell's dashboard renders exactly what this returns and
+      // nothing else -- a module absent from this list must not appear as
+      // a locked/greyed-out card, it must not appear at all. A module only
+      // shows when it's globally enabled AND this specific account has it
+      // switched on; membership level never implies module access on its
+      // own (see MODULE_REGISTRY/defaultModuleAccess above).
+      if (req.method === 'GET' && url.pathname === '/api/v1/auth/entitlements') {
+        const user = (await loadAppUsers()).find(item => item.id === appSession.userId);
+        if (!user) return json(res, 401, {error: 'Account no longer exists'});
+        if (user.blocked === true) return json(res, 403, {error: 'This account has been blocked'});
+        const moduleAccess = {...defaultModuleAccess(), ...(user.moduleAccess || {})};
+        const modules = MODULE_REGISTRY
+          .filter(module => module.globalEnabled && moduleAccess[module.id] === true)
+          .map(module => ({id: module.id, name: module.name, description: module.description, icon: module.icon, route: module.route}));
+        return json(res, 200, {membership: user.membership || 'basic', aiEnabled: user.aiEnabled === true, modules});
       }
       if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
         appSessions.delete(appSession.token); return json(res, 200, {ok: true});
@@ -918,6 +961,9 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/admin/api/app-users') {
       return json(res, 200, {users: (await loadAppUsers()).map(publicAppUser)});
     }
+    if (req.method === 'GET' && url.pathname === '/admin/api/modules') {
+      return json(res, 200, {modules: MODULE_REGISTRY});
+    }
     if (req.method === 'POST' && url.pathname === '/admin/api/app-users') {
       const {email, password, name = ''} = await readBody(req);
       const normalEmail = String(email || '').trim().toLowerCase();
@@ -940,6 +986,20 @@ const server = createServer(async (req, res) => {
       if (typeof changes.blocked === 'boolean') user.blocked = changes.blocked;
       if (typeof changes.privateSync === 'boolean') user.privateSync = changes.privateSync;
       if (typeof changes.aiEnabled === 'boolean') user.aiEnabled = changes.aiEnabled;
+      if (changes.moduleAccess && typeof changes.moduleAccess === 'object') {
+        const nextAccess = {...defaultModuleAccess(), ...(user.moduleAccess || {})};
+        for (const [moduleId, enabled] of Object.entries(changes.moduleAccess)) {
+          if (typeof enabled !== 'boolean' || !MODULE_REGISTRY.some(module => module.id === moduleId)) {
+            return json(res, 400, {error: `Unknown module or invalid value: ${moduleId}`});
+          }
+          nextAccess[moduleId] = enabled;
+        }
+        user.moduleAccess = nextAccess;
+      }
+      if (typeof changes.membership === 'string') {
+        if (!['basic', 'platinum'].includes(changes.membership)) return json(res, 400, {error: 'Invalid membership level'});
+        user.membership = changes.membership;
+      }
       if (typeof changes.role === 'string') {
         if (!['user', 'admin'].includes(changes.role)) return json(res, 400, {error: 'Role must be "user" or "admin"'});
         user.role = changes.role;
@@ -958,6 +1018,12 @@ const server = createServer(async (req, res) => {
       if (typeof changes.blocked === 'boolean') changeNotes.push(changes.blocked ? 'blocked' : 'unblocked');
       if (typeof changes.privateSync === 'boolean') changeNotes.push(`turned private sync ${changes.privateSync ? 'on' : 'off'} for`);
       if (typeof changes.aiEnabled === 'boolean') changeNotes.push(`turned AI ${changes.aiEnabled ? 'on' : 'off'} for`);
+      if (changes.moduleAccess && typeof changes.moduleAccess === 'object') {
+        for (const [moduleId, enabled] of Object.entries(changes.moduleAccess)) {
+          changeNotes.push(`turned the ${moduleId} module ${enabled ? 'on' : 'off'} for`);
+        }
+      }
+      if (typeof changes.membership === 'string') changeNotes.push(`set the membership level to ${changes.membership} for`);
       if (typeof changes.role === 'string') changeNotes.push(changes.role === 'admin' ? 'granted the app-admin role to' : 'removed the app-admin role from');
       if (typeof changes.password === 'string') changeNotes.push('reset the password for');
       if (changeNotes.length) await logActivity(session, `${session.username} ${changeNotes.join(', ')} ${user.email}`);

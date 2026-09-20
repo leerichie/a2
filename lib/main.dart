@@ -57,6 +57,13 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
   late bool onboarding = widget.startOnboarding;
   bool ready = false;
   bool signedOut = false;
+  // Whether to route through the A² shell dashboard at all -- a purely
+  // local (no account) user has no entitlements to speak of, so they go
+  // straight to Health exactly as before the shell existed. Re-evaluated
+  // in _restore(); see A2Shell's own known gap (documented on that class)
+  // for the one case this doesn't yet catch: signing IN for the first
+  // time from Settings mid-session, without restarting the app.
+  bool hasAccount = false;
   final _navigatorKey = GlobalKey<NavigatorState>();
   DateTime? _lastUpdateCheckAt;
   bool _updateCheckRunning = false;
@@ -107,6 +114,7 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
     setState(() {
       locale = Locale(prefs.getString('language') ?? 'en');
       onboarding = !(prefs.getBool('onboarding_complete') ?? false);
+      hasAccount = prefs.getString('account_token') != null;
       ready = true;
     });
   }
@@ -126,7 +134,14 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
 
   void _handleSignedOut() => setState(() => signedOut = true);
 
-  void _handleGateDismissed() => setState(() => signedOut = false);
+  Future<void> _handleGateDismissed() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      signedOut = false;
+      hasAccount = prefs.getString('account_token') != null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +195,12 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
                   onDismiss: _handleGateDismissed,
                 ),
               ),
+            )
+          : hasAccount
+          ? A2Shell(
+              locale: locale,
+              onLocale: _setLocale,
+              onSignedOut: _handleSignedOut,
             )
           : AppShell(
               locale: locale,
@@ -472,6 +493,295 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
             ),
             const DevBadge(),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+// A² module data model + fetch service -- the foundation of the A² shell:
+// one shared account, one dashboard, showing only the modules this
+// specific account is entitled to. An unentitled module is absent
+// entirely, never a locked/greyed-out card (see the server's
+// MODULE_REGISTRY/`/api/v1/auth/entitlements`). Health is the first (and
+// currently only) module; adding a future one (HorseVibe, CrewPilot, ...)
+// means a new server-side registry entry plus a case in
+// A2Shell._openModule, not a redesign of this screen. Module name/
+// description come from the server as dynamic content and are rendered
+// as plain Text, never LText/ui() -- same reasoning as user-entered food
+// names never being run through the translation table.
+class A2Module {
+  const A2Module({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.route,
+  });
+  final String id, name, description, icon, route;
+
+  factory A2Module.fromJson(Map<String, dynamic> json) => A2Module(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String? ?? '',
+    icon: json['icon'] as String? ?? '',
+    route: json['route'] as String? ?? json['id'] as String,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'icon': icon,
+    'route': route,
+  };
+}
+
+class A2Entitlements {
+  const A2Entitlements({
+    required this.membership,
+    required this.aiEnabled,
+    required this.modules,
+  });
+  final String membership;
+  final bool aiEnabled;
+  final List<A2Module> modules;
+
+  factory A2Entitlements.fromJson(Map<String, dynamic> json) =>
+      A2Entitlements(
+        membership: json['membership'] as String? ?? 'basic',
+        aiEnabled: json['aiEnabled'] == true,
+        modules: ((json['modules'] as List<dynamic>?) ?? const [])
+            .map((item) => A2Module.fromJson(item as Map<String, dynamic>))
+            .toList(),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'membership': membership,
+    'aiEnabled': aiEnabled,
+    'modules': modules.map((m) => m.toJson()).toList(),
+  };
+
+  // Migration-safe fallback for a brand-new install/cache miss: an
+  // existing Health user must never be locked out of the one module they
+  // already had just because the very first entitlements fetch hasn't
+  // landed yet (e.g. offline on first launch after an update).
+  static const fallback = A2Entitlements(
+    membership: 'basic',
+    aiEnabled: false,
+    modules: [
+      A2Module(
+        id: 'health',
+        name: 'A² Health',
+        description: '',
+        icon: 'health',
+        route: 'health',
+      ),
+    ],
+  );
+}
+
+class EntitlementService {
+  const EntitlementService();
+
+  static const _cacheKey = 'cached_entitlements';
+
+  // Network-first, cache-fallback: a live fetch keeps the dashboard
+  // accurate with whatever an admin just changed server-side, but a
+  // temporarily offline account must never be locked out of a module it
+  // already had -- see A2Entitlements.fallback for the one case where
+  // there's no cache at all yet.
+  Future<A2Entitlements> fetch(String serverUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) return A2Entitlements.fallback;
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$base/api/v1/auth/entitlements'),
+            headers: {'authorization': 'Bearer $token'},
+          )
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) {
+        throw Exception('Entitlements fetch failed');
+      }
+      final entitlements = A2Entitlements.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+      await prefs.setString(_cacheKey, jsonEncode(entitlements.toJson()));
+      return entitlements;
+    } catch (_) {
+      final cached = prefs.getString(_cacheKey);
+      if (cached != null) {
+        try {
+          return A2Entitlements.fromJson(
+            jsonDecode(cached) as Map<String, dynamic>,
+          );
+        } catch (_) {
+          // Fall through to the hard-coded fallback below.
+        }
+      }
+      return A2Entitlements.fallback;
+    }
+  }
+}
+
+// The A² shell: fetches this account's entitlements and shows a dashboard
+// of only the modules it can use. Health is the only real module today;
+// tapping its card replaces the dashboard with the existing, unmodified
+// AppShell. KNOWN GAP (v1 foundation, not yet solved): a user who signs
+// IN for the first time from Settings mid-session won't see this
+// dashboard until the app is restarted, since `hasAccount` is only
+// re-checked in _A2AppState._restore()/_handleGateDismissed(). Revisit
+// once there's a second real module and switching between them matters.
+class A2Shell extends StatefulWidget {
+  const A2Shell({
+    super.key,
+    required this.locale,
+    required this.onLocale,
+    required this.onSignedOut,
+  });
+  final Locale locale;
+  final ValueChanged<Locale> onLocale;
+  final VoidCallback onSignedOut;
+  @override
+  State<A2Shell> createState() => _A2ShellState();
+}
+
+class _A2ShellState extends State<A2Shell> {
+  A2Entitlements? entitlements;
+  bool openedModule = false;
+
+  static const _moduleIcons = {'health': Icons.favorite_rounded};
+
+  @override
+  void initState() {
+    super.initState();
+    const EntitlementService().fetch(defaultServerUrl).then((value) {
+      if (mounted) setState(() => entitlements = value);
+    });
+  }
+
+  void _openModule(String moduleId) {
+    // Only Health actually exists client-side today -- a future module id
+    // the server might return (from a newer app version's registry) is
+    // silently ignored here rather than crashing. The server's own
+    // minAppVersion field on MODULE_REGISTRY is meant to stop an old app
+    // from ever being told about a module it can't handle in the first
+    // place; this check stays defensive regardless.
+    if (moduleId == 'health') setState(() => openedModule = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (openedModule) {
+      return AppShell(
+        locale: widget.locale,
+        onLocale: widget.onLocale,
+        onSignedOut: widget.onSignedOut,
+      );
+    }
+    final loaded = entitlements;
+    if (loaded == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return Scaffold(
+      backgroundColor: cream,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'A²',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              LText(
+                loaded.membership == 'platinum' ? 'Platinum member' : 'Member',
+                style: const TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: loaded.modules.isEmpty
+                    ? const Center(
+                        child: LText(
+                          'No apps are enabled on your account yet.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      )
+                    : GridView.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.95,
+                        children: [
+                          for (final module in loaded.modules)
+                            _ModuleCard(
+                              module: module,
+                              icon: _moduleIcons[module.id] ?? Icons.apps_rounded,
+                              onTap: () => _openModule(module.id),
+                            ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModuleCard extends StatelessWidget {
+  const _ModuleCard({
+    required this.module,
+    required this.icon,
+    required this.onTap,
+  });
+  final A2Module module;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: forest, size: 32),
+            const Spacer(),
+            Text(
+              module.name,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              module.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const LText(
+                  'Open',
+                  style: TextStyle(fontWeight: FontWeight.w700, color: forest),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_forward_rounded, size: 16, color: forest),
+              ],
+            ),
           ],
         ),
       ),
@@ -8634,7 +8944,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+53';
+  String installedVersion = '1.0.0+54';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;

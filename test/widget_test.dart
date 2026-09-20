@@ -1074,4 +1074,51 @@ void main() {
       expect(entry.servingAmount, 50);
     },
   );
+
+  group('A² shell entitlements', () {
+    test('A2Entitlements round-trips through JSON', () {
+      const original = A2Entitlements(
+        membership: 'platinum',
+        aiEnabled: true,
+        modules: [
+          A2Module(
+            id: 'health',
+            name: 'A² Health',
+            description: 'Food and exercise tracking',
+            icon: 'health',
+            route: 'health',
+          ),
+        ],
+      );
+      final restored = A2Entitlements.fromJson(original.toJson());
+      expect(restored.membership, 'platinum');
+      expect(restored.aiEnabled, true);
+      expect(restored.modules.single.id, 'health');
+      expect(restored.modules.single.name, 'A² Health');
+    });
+
+    test('a module absent from the server response is just absent, not '
+        'a placeholder locked entry', () {
+      final entitlements = A2Entitlements.fromJson({
+        'membership': 'basic',
+        'aiEnabled': false,
+        'modules': <dynamic>[],
+      });
+      expect(entitlements.modules, isEmpty);
+    });
+
+    test('fallback keeps Health available so a migrated user is never '
+        'locked out by a missing/failed entitlements fetch', () {
+      expect(A2Entitlements.fallback.modules.single.id, 'health');
+    });
+
+    test('EntitlementService.fetch returns the fallback for a signed-out '
+        '(no account_token) session without making any network call', () async {
+      SharedPreferences.setMockInitialValues({});
+      final result = await const EntitlementService().fetch(
+        'http://127.0.0.1:1',
+      );
+      expect(result.modules.single.id, 'health');
+    });
+  });
 }

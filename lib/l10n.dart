@@ -1858,6 +1858,38 @@ const _rows = <List<String>>[
     'La IA no pudo calcularlo. Intenta reformularlo o añádelo manualmente.',
     'L’IA non è riuscita a calcolarlo. Prova a riformulare o aggiungilo manualmente.',
   ],
+  [
+    'Platinum member',
+    'Członek Platinum',
+    'Platinum-Mitglied',
+    'Membre Platinum',
+    'Miembro Platinum',
+    'Membro Platinum',
+  ],
+  [
+    'Member',
+    'Członek',
+    'Mitglied',
+    'Membre',
+    'Miembro',
+    'Membro',
+  ],
+  [
+    'No apps are enabled on your account yet.',
+    'Żadna aplikacja nie jest jeszcze włączona na Twoim koncie.',
+    'Für dein Konto ist noch keine App aktiviert.',
+    'Aucune application n’est encore activée sur votre compte.',
+    'Todavía no hay ninguna aplicación activada en tu cuenta.',
+    'Nessuna app è ancora attivata sul tuo account.',
+  ],
+  [
+    'Open',
+    'Otwórz',
+    'Öffnen',
+    'Ouvrir',
+    'Abrir',
+    'Apri',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
