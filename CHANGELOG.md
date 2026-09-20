@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0+53 — 2026-09-20
+
+- Fixed private sync silently failing to retry: `uploadLocalData` never
+  checked whether its upload actually succeeded (a rejected/failed upload
+  looked identical to a successful one), and syncing on app resume only
+  ever pulled from the server, never re-pushed — so a failed upload was
+  never retried, and a later pull could silently overwrite not-yet-synced
+  local changes with the server's stale copy. Syncing now always pushes
+  first and only pulls once that push is confirmed to have succeeded, so
+  a temporary offline moment retries automatically next time the app
+  gets a chance to sync, instead of quietly losing data.
+
 ## 1.0.0+52 — 2026-09-20
 
 - The app's default server address is no longer a Tailscale-only IP

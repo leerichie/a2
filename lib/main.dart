@@ -653,7 +653,21 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       );
       await _loadAccountName();
       if (!enabled) return;
-      await const AccountService().synchronise(defaultServerUrl);
+      // Always push before pulling. This is the retry for any earlier
+      // mutation (add/edit/delete) whose own upload failed -- every
+      // launch, resume, and return to the Today tab is another chance to
+      // get locally-made changes to the server. Pulling first, or
+      // pulling after a failed push, would let synchronise() overwrite
+      // those not-yet-uploaded local changes with the server's stale
+      // copy (it replaces `daily_entries_*` wholesale for any day the
+      // server mentions -- see synchronise() below), so the pull only
+      // runs once the push is confirmed to have succeeded.
+      final pushed = await const AccountService().uploadLocalData(
+        defaultServerUrl,
+      );
+      if (pushed) {
+        await const AccountService().synchronise(defaultServerUrl);
+      }
       await Future.wait([
         _loadTodayEntries(),
         _loadHistory(),
@@ -7653,16 +7667,25 @@ class AccountService {
     return rows.map((row) => row.map(csvField).join(',')).join('\r\n');
   }
 
-  Future<void> uploadLocalData(String serverUrl) async {
+  // Returns whether the push actually reached the server -- callers that
+  // just want fire-and-forget local-mutation behavior (adding/editing/
+  // deleting an entry) can ignore the result, exactly as before. The
+  // return value exists for _restoreAndSync, which must NOT follow this
+  // with a pull when the push failed: pulling here always overwrites
+  // local `daily_entries_*` keys wholesale for any day the server
+  // mentions (see synchronise() below), so a pull right after a failed
+  // push would silently replace not-yet-uploaded local changes with the
+  // server's stale copy instead of ever retrying them.
+  Future<bool> uploadLocalData(String serverUrl) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('account_token');
     final userRaw = prefs.getString('account_user');
-    if (token == null || userRaw == null) return;
+    if (token == null || userRaw == null) return true;
     final user = jsonDecode(userRaw) as Map<String, dynamic>;
-    if (user['privateSync'] != true) return;
+    if (user['privateSync'] != true) return true;
     final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
     try {
-      await http
+      final response = await http
           .put(
             Uri.parse('$base/api/v1/auth/sync'),
             headers: {
@@ -7672,8 +7695,20 @@ class AccountService {
             body: jsonEncode({'payload': await _localPayload()}),
           )
           .timeout(const Duration(seconds: 15));
+      // A non-2xx response from http.put does NOT throw on its own -- it
+      // has to be checked explicitly, otherwise a real server-side
+      // rejection looks identical to a successful upload to every caller.
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception('Sync upload failed (${response.statusCode})');
+      }
+      return true;
     } catch (_) {
-      // Local saving remains reliable when the private server is unavailable.
+      // Local saving remains reliable when the private server is
+      // unavailable -- the caller (_restoreAndSync) is responsible for
+      // retrying this on the next sync opportunity (launch, resume, or
+      // returning to Today), which happens automatically since it always
+      // pushes before it pulls.
+      return false;
     }
   }
 
@@ -8599,7 +8634,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+52';
+  String installedVersion = '1.0.0+53';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
