@@ -145,9 +145,21 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
   }
 
   Future<void> _finishOnboarding() async {
-    setState(() => onboarding = false);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
+    // A brand-new install with no account previously landed straight in
+    // local-only Health, never once seeing the sign-in options -- easy to
+    // miss that A² accounts (and the modules they unlock) exist at all.
+    // Reusing the same sign-in/create-account/"keep using a2 locally"
+    // gate that a sign-out already shows offers the choice once, right
+    // after language selection, without forcing it: "keep using a2
+    // locally" still works exactly as before.
+    final hasExistingAccount = prefs.getString('account_token') != null;
+    setState(() {
+      onboarding = false;
+      hasAccount = hasExistingAccount;
+      if (!hasExistingAccount) signedOut = true;
+    });
   }
 
   void _handleSignedOut() => setState(() => signedOut = true);
@@ -692,6 +704,32 @@ class _A2ShellState extends State<A2Shell> {
     if (moduleId == 'health') setState(() => openedModule = true);
   }
 
+  Future<void> _confirmSignOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText('Sign out'),
+        content: const LText('Sign out of your A² account on this device?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const LText('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const LText(
+              'Sign out',
+              style: TextStyle(color: coral),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await const AccountService().logout(defaultServerUrl);
+    if (mounted) widget.onSignedOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (openedModule) {
@@ -746,16 +784,42 @@ class _A2ShellState extends State<A2Shell> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'A²',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'A²',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        LText(
+                          loaded.membership == 'platinum'
+                              ? 'Platinum member'
+                              : 'Member',
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Sign-out was previously only reachable from inside a
+                  // module's own settings -- now that the dashboard is the
+                  // top-level screen, it needs its own way out too rather
+                  // than forcing a detour through Health just to sign out.
+                  IconButton(
+                    icon: const Icon(Icons.logout_rounded, color: Colors.black54),
+                    tooltip: ui(context, 'Sign out'),
+                    onPressed: _confirmSignOut,
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              LText(
-                loaded.membership == 'platinum' ? 'Platinum member' : 'Member',
-                style: const TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Expanded(
                 child: loaded.modules.isEmpty
                     ? const Center(
@@ -7912,6 +7976,40 @@ class AccountService {
     return body['user'] as Map<String, dynamic>;
   }
 
+  // Links a Google/Apple (Firebase) identity to the account the caller is
+  // ALREADY signed into -- deliberately not the same code path as
+  // authenticateWithFirebase above, which matches by email and is meant
+  // for a fresh sign-in. This one goes by the current session token, so
+  // an email mismatch (Apple's private relay address is the common case)
+  // can never silently switch the active account or spawn a duplicate
+  // one; it always attaches to whichever account you were already using
+  // when you tapped "Link" in Settings.
+  Future<Map<String, dynamic>> linkFirebaseIdentity({
+    required String serverUrl,
+    required String idToken,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in first to link an account.');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/firebase/link'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'idToken': idToken}),
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(body['error'] ?? 'Could not link this sign-in method');
+    }
+    await prefs.setString('account_user', jsonEncode(body['user']));
+    return body['user'] as Map<String, dynamic>;
+  }
+
   Future<void> changePassword({
     required String serverUrl,
     required String currentPassword,
@@ -9025,12 +9123,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+58';
+  String installedVersion = '1.0.0+59';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
   bool accountIsAdmin = false;
   bool accountGoogleLinked = false;
+  bool accountFirebaseLinked = false;
   bool entrySyncEnabled = false;
   List<LinkedUser> syncPartners = [];
   List<SyncInvite> incomingInvites = [];
@@ -9157,6 +9256,10 @@ class _ProfilePageState extends State<ProfilePage> {
       accountGoogleLinked =
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['googleLinked'] ==
+              true;
+      accountFirebaseLinked =
+          accountRaw != null &&
+          (jsonDecode(accountRaw) as Map<String, dynamic>)['firebaseLinked'] ==
               true;
       entrySyncEnabled =
           accountRaw != null &&
@@ -9638,7 +9741,8 @@ class _ProfilePageState extends State<ProfilePage> {
               builder: (_) => AccountSheet(
                 serverUrl: contentServerUrl,
                 accountEmail: accountEmail,
-                googleLinked: accountGoogleLinked,
+                googleLinked: accountGoogleLinked || accountFirebaseLinked,
+                appleLinked: accountFirebaseLinked,
                 onSignedOut: widget.onSignedOut,
               ),
             );
@@ -10712,6 +10816,7 @@ class AccountSheet extends StatefulWidget {
     required this.serverUrl,
     required this.accountEmail,
     this.googleLinked = false,
+    this.appleLinked = false,
     this.initialRegister = false,
     this.accountRequired = false,
     this.onDismiss,
@@ -10720,6 +10825,7 @@ class AccountSheet extends StatefulWidget {
   final String serverUrl;
   final String? accountEmail;
   final bool googleLinked;
+  final bool appleLinked;
   final bool initialRegister;
   final bool accountRequired;
 
@@ -10752,6 +10858,10 @@ class _AccountSheetState extends State<AccountSheet> {
   late bool googleLinked = widget.googleLinked;
   bool linkingGoogle = false;
   String? googleError;
+
+  late bool appleLinked = widget.appleLinked;
+  bool linkingApple = false;
+  String? appleError;
 
   @override
   void dispose() {
@@ -10998,16 +11108,32 @@ class _AccountSheetState extends State<AccountSheet> {
     }
   }
 
+  // Goes via Firebase + the session-based /link endpoint now, not the old
+  // direct-to-server flow -- that old one matched by email, which could
+  // silently switch the signed-in account (or spawn a duplicate) on any
+  // mismatch instead of linking to the account actually open right now.
   Future<void> _linkGoogle() async {
     setState(() {
       linkingGoogle = true;
       googleError = null;
     });
     try {
-      final idToken = await GoogleAuthService.signIn();
-      await const AccountService().authenticateWithGoogle(
+      await GoogleSignIn.instance.initialize();
+      final account = await GoogleSignIn.instance.authenticate();
+      final googleIdToken = account.authentication.idToken;
+      if (googleIdToken == null) {
+        throw Exception('Google did not return a sign-in token.');
+      }
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        GoogleAuthProvider.credential(idToken: googleIdToken),
+      );
+      final firebaseIdToken = await userCredential.user?.getIdToken();
+      if (firebaseIdToken == null) {
+        throw Exception('Could not complete linking.');
+      }
+      await const AccountService().linkFirebaseIdentity(
         serverUrl: widget.serverUrl,
-        idToken: idToken,
+        idToken: firebaseIdToken,
       );
       if (mounted) setState(() => googleLinked = true);
     } catch (exception) {
@@ -11021,6 +11147,47 @@ class _AccountSheetState extends State<AccountSheet> {
       }
     } finally {
       if (mounted) setState(() => linkingGoogle = false);
+    }
+  }
+
+  Future<void> _linkApple() async {
+    setState(() {
+      linkingApple = true;
+      appleError = null;
+    });
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        OAuthProvider('apple.com').credential(
+          idToken: appleCredential.identityToken,
+          accessToken: appleCredential.authorizationCode,
+        ),
+      );
+      final firebaseIdToken = await userCredential.user?.getIdToken();
+      if (firebaseIdToken == null) {
+        throw Exception('Could not complete linking.');
+      }
+      await const AccountService().linkFirebaseIdentity(
+        serverUrl: widget.serverUrl,
+        idToken: firebaseIdToken,
+      );
+      if (mounted) setState(() => appleLinked = true);
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => appleError = exception.toString().replaceFirst(
+            'Exception: ',
+            '',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => linkingApple = false);
     }
   }
 
@@ -11137,9 +11304,7 @@ class _AccountSheetState extends State<AccountSheet> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: linkingGoogle || googleClientId.isEmpty
-                          ? null
-                          : _linkGoogle,
+                      onPressed: linkingGoogle ? null : _linkGoogle,
                       icon: linkingGoogle
                           ? const SizedBox.square(
                               dimension: 17,
@@ -11149,17 +11314,6 @@ class _AccountSheetState extends State<AccountSheet> {
                       label: const LText('Link Google account'),
                     ),
                   ),
-                  if (googleClientId.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: LText(
-                        'Google sign-in needs your Google client ID before it can be enabled.',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ),
                   if (googleError != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
@@ -11169,6 +11323,45 @@ class _AccountSheetState extends State<AccountSheet> {
                       ),
                     ),
                 ],
+                const SizedBox(height: 10),
+                if (appleLinked)
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: success, size: 20),
+                      const SizedBox(width: 8),
+                      const LText('Apple ID linked'),
+                    ],
+                  )
+                else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: linkingApple ? null : _linkApple,
+                      icon: linkingApple
+                          ? const SizedBox.square(
+                              dimension: 17,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.apple, size: 22),
+                      label: const LText('Link Apple ID'),
+                    ),
+                  ),
+                  if (appleError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: LText(
+                        appleError!,
+                        style: const TextStyle(color: coral),
+                      ),
+                    ),
+                ],
+                const Padding(
+                  padding: EdgeInsets.only(top: 6),
+                  child: LText(
+                    'Link so signing in again with the same Google/Apple account always reaches this same a2 account, even after a fresh install.',
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                ),
                 const SizedBox(height: 22),
                 SizedBox(
                   width: double.infinity,

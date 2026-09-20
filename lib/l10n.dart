@@ -1914,6 +1914,38 @@ const _rows = <List<String>>[
     'Volver al panel de A²',
     'Torna alla dashboard A²',
   ],
+  [
+    'Link Apple ID',
+    'Połącz Apple ID',
+    'Apple-ID verknüpfen',
+    'Lier l’identifiant Apple',
+    'Vincular Apple ID',
+    'Collega Apple ID',
+  ],
+  [
+    'Apple ID linked',
+    'Apple ID połączone',
+    'Apple-ID verknüpft',
+    'Identifiant Apple lié',
+    'Apple ID vinculado',
+    'Apple ID collegato',
+  ],
+  [
+    'Link so signing in again with the same Google/Apple account always reaches this same a2 account, even after a fresh install.',
+    'Połącz, aby ponowne logowanie tym samym kontem Google/Apple zawsze prowadziło do tego samego konta a2, nawet po ponownej instalacji.',
+    'Verknüpfen, damit eine erneute Anmeldung mit demselben Google-/Apple-Konto immer zu diesem a2-Konto führt, auch nach einer Neuinstallation.',
+    'Liez ce compte pour que se reconnecter avec le même compte Google/Apple mène toujours à ce même compte a2, même après une réinstallation.',
+    'Vincula esta cuenta para que volver a iniciar sesión con la misma cuenta de Google/Apple lleve siempre a esta misma cuenta de a2, incluso tras reinstalar.',
+    'Collega per far sì che accedere di nuovo con lo stesso account Google/Apple porti sempre a questo stesso account a2, anche dopo una reinstallazione.',
+  ],
+  [
+    'Sign out of your A² account on this device?',
+    'Wylogować konto A² na tym urządzeniu?',
+    'Von deinem A²-Konto auf diesem Gerät abmelden?',
+    'Se déconnecter de votre compte A² sur cet appareil ?',
+    '¿Cerrar sesión de tu cuenta A² en este dispositivo?',
+    'Uscire dal tuo account A² su questo dispositivo?',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {

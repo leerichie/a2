@@ -304,7 +304,7 @@ const MODULE_REGISTRY = [
 // Health says nothing about being entitled to something added later.
 const defaultModuleAccess = () => ({health: true});
 
-const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], googleLinked: user.googleLinked === true, createdAt: user.createdAt, membership: user.membership || 'basic', moduleAccess: {...defaultModuleAccess(), ...(user.moduleAccess || {})}});
+const publicAppUser = user => ({id: user.id, email: user.email, name: user.name, role: user.role || 'user', blocked: user.blocked === true, privateSync: user.privateSync === true, aiEnabled: user.aiEnabled === true, entrySyncEnabled: user.entrySyncEnabled === true, linkedUserIds: user.linkedUserIds || [], googleLinked: user.googleLinked === true, firebaseLinked: Boolean(user.firebaseUid), createdAt: user.createdAt, membership: user.membership || 'basic', moduleAccess: {...defaultModuleAccess(), ...(user.moduleAccess || {})}});
 const syncInvitesFile = join(process.env.DATA_DIR || join(root, 'data'), 'sync-invites.json');
 const loadSyncInvites = async () => {
   try { return JSON.parse(await readFile(syncInvitesFile, 'utf8')).invites || []; }
@@ -648,6 +648,35 @@ const server = createServer(async (req, res) => {
           .filter(module => module.globalEnabled && moduleAccess[module.id] === true)
           .map(module => ({id: module.id, name: module.name, description: module.description, icon: module.icon, route: module.route}));
         return json(res, 200, {membership: user.membership || 'basic', aiEnabled: user.aiEnabled === true, modules});
+      }
+      // Links a Firebase identity to the CURRENTLY SIGNED-IN account,
+      // identified by the session token -- never by matching the Firebase
+      // token's own email, unlike the public /api/v1/auth/firebase bridge
+      // above. That distinction matters: an email mismatch (e.g. Apple's
+      // "Hide My Email" relay address, or a Google account that isn't the
+      // one an existing account was originally registered under) must
+      // never silently switch someone onto a different account or create
+      // a duplicate empty one -- it must attach to the account they are
+      // ACTUALLY logged into right now, exactly as they intend when they
+      // tap "Link" from inside their own settings.
+      if (req.method === 'POST' && url.pathname === '/api/v1/auth/firebase/link') {
+        const {idToken} = await readBody(req);
+        if (!idToken) return json(res, 400, {error: 'A Firebase ID token is required'});
+        let decoded;
+        try {
+          decoded = await verifyFirebaseIdToken(idToken);
+        } catch (error) {
+          return json(res, 401, {error: 'Invalid or expired sign-in token'});
+        }
+        const users = await loadAppUsers();
+        const me = users.find(item => item.id === appSession.userId);
+        if (!me) return json(res, 401, {error: 'Account no longer exists'});
+        const conflict = users.find(item => item.id !== me.id && item.firebaseUid === decoded.uid);
+        if (conflict) return json(res, 409, {error: 'This sign-in method is already linked to a different a2 account'});
+        me.firebaseUid = decoded.uid;
+        await saveAppUsers(users);
+        await logActivity({username: me.name || me.email}, `${me.email} linked a Google/Apple sign-in method to their account`);
+        return json(res, 200, {user: publicAppUser(me)});
       }
       if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
         appSessions.delete(appSession.token); return json(res, 200, {ok: true});

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.0+59 — 2026-09-20
+
+- Added a sign-out option to the A² dashboard itself (previously only
+  reachable from inside a module's own settings — you were stuck once
+  you got there).
+- New installs now get offered a sign-in choice right after language
+  selection, instead of silently landing in local-only Health with no
+  hint that A² accounts exist. "Keep using a2 locally" still works
+  exactly as before if you decline.
+- Fixed a real data-safety gap ahead of real accounts moving to Google/
+  Apple sign-in: "Link Google account" (and the new "Link Apple ID")
+  now attach to whichever account you're ALREADY signed into, verified
+  by session rather than by matching the Google/Apple account's email.
+  The old email-matching approach could silently switch your active
+  account, or create a duplicate empty one, whenever the email didn't
+  match exactly — which Apple's "Hide My Email" relay address makes the
+  common case, not an edge case. Verified against production, including
+  the exact mismatched-email scenario and that one sign-in method can't
+  be linked to two different accounts.
+
 ## 1.0.0+58 — 2026-09-20
 
 - "Continue with Google" should now actually work: installed the
