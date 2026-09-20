@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_options.dart';
@@ -7847,6 +7849,36 @@ class AccountService {
     return body['user'] as Map<String, dynamic>;
   }
 
+  // Bridges a Firebase Auth identity (Apple/Google/email, whichever
+  // provider was actually used) into this app's own account/session
+  // system -- everything downstream (sync, AI, entitlements) only ever
+  // looks at account_token/account_user exactly as it already does for
+  // the direct email/password and Google flows above.
+  Future<Map<String, dynamic>> authenticateWithFirebase({
+    required String serverUrl,
+    required String idToken,
+  }) async {
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .post(
+          Uri.parse('$base/api/v1/auth/firebase'),
+          headers: {'content-type': 'application/json'},
+          body: jsonEncode({'idToken': idToken}),
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(body['error'] ?? 'Sign-in failed');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('account_token', body['token'] as String);
+    await prefs.setString('account_user', jsonEncode(body['user']));
+    if ((body['user'] as Map<String, dynamic>)['privateSync'] == true) {
+      await synchronise(serverUrl);
+    }
+    return body['user'] as Map<String, dynamic>;
+  }
+
   Future<void> changePassword({
     required String serverUrl,
     required String currentPassword,
@@ -8960,7 +8992,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+55';
+  String installedVersion = '1.0.0+56';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
@@ -10698,6 +10730,12 @@ class _AccountSheetState extends State<AccountSheet> {
     super.dispose();
   }
 
+  // Kept, not deleted: the pre-Firebase direct email/password sign-in.
+  // No longer wired to any visible button (see build() below, which now
+  // calls _firebaseEmailSignIn instead) -- an explicit product decision
+  // to keep this available for reference/rollback rather than remove it
+  // outright while the Firebase-based identity layer is still new.
+  // ignore: unused_element
   Future<void> _submit() async {
     setState(() {
       busy = true;
@@ -10729,6 +10767,11 @@ class _AccountSheetState extends State<AccountSheet> {
     }
   }
 
+  // Kept, not deleted: the pre-Firebase Google sign-in (straight to this
+  // server's own /api/v1/auth/google, never touching Firebase). See
+  // _submit's comment above -- same reasoning, same "not currently wired
+  // to a button" status.
+  // ignore: unused_element
   Future<void> _googleSignIn() async {
     setState(() {
       busy = true;
@@ -10751,6 +10794,131 @@ class _AccountSheetState extends State<AccountSheet> {
       if (mounted) {
         setState(
           () => error = exception.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  // Shared tail for every Firebase-based sign-in method below: bridge the
+  // Firebase identity into this app's own account/session system (see
+  // AccountService.authenticateWithFirebase), then dismiss exactly the
+  // same way _submit()/_googleSignIn() above already do.
+  Future<void> _completeFirebaseSignIn(String? idToken) async {
+    if (idToken == null) throw Exception('Could not complete sign-in.');
+    await const AccountService().authenticateWithFirebase(
+      serverUrl: widget.serverUrl,
+      idToken: idToken,
+    );
+    if (!mounted) return;
+    if (widget.onDismiss != null) {
+      widget.onDismiss!();
+    } else {
+      Navigator.pop(context, true);
+    }
+  }
+
+  Future<void> _firebaseEmailSignIn() async {
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final UserCredential credential;
+      if (register) {
+        credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text,
+        );
+        if (name.text.trim().isNotEmpty) {
+          await credential.user?.updateDisplayName(name.text.trim());
+        }
+      } else {
+        credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email.text.trim(),
+          password: password.text,
+        );
+      }
+      await _completeFirebaseSignIn(await credential.user?.getIdToken());
+    } on FirebaseAuthException catch (exception) {
+      if (mounted) setState(() => error = exception.message ?? exception.code);
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => error = exception.toString().replaceFirst('Exception: ', ''),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  // Google via Firebase -- a separate, new path from the legacy
+  // _googleSignIn() above (which goes straight to this server's own
+  // /api/v1/auth/google, never touching Firebase). Needs the Google OAuth
+  // client Firebase auto-provisions once its own OAuth consent screen has
+  // been configured once for this project; until that's done, Google
+  // itself will reject the request and this degrades to the same
+  // friendly "try email instead" message as an unconfigured Apple
+  // sign-in, rather than a confusing raw platform error.
+  Future<void> _firebaseGoogleSignIn() async {
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await GoogleSignIn.instance.initialize();
+      final account = await GoogleSignIn.instance.authenticate();
+      final googleIdToken = account.authentication.idToken;
+      if (googleIdToken == null) {
+        throw Exception('Google did not return a sign-in token.');
+      }
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        GoogleAuthProvider.credential(idToken: googleIdToken),
+      );
+      await _completeFirebaseSignIn(await userCredential.user?.getIdToken());
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => error =
+              'Google sign-in isn\'t fully set up yet. Try email instead.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  // Apple via Firebase -- needs a Sign In with Apple key uploaded to the
+  // Firebase Auth provider config plus the capability enabled in Xcode,
+  // both requiring the Apple Developer account holder's own action. Until
+  // that's done this degrades to the same friendly message as an
+  // unconfigured Google sign-in above.
+  Future<void> _firebaseAppleSignIn() async {
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        OAuthProvider('apple.com').credential(
+          idToken: appleCredential.identityToken,
+          accessToken: appleCredential.authorizationCode,
+        ),
+      );
+      await _completeFirebaseSignIn(await userCredential.user?.getIdToken());
+    } catch (exception) {
+      if (mounted) {
+        setState(
+          () => error =
+              'Sign in with Apple isn\'t fully set up yet. Try email instead.',
         );
       }
     } finally {
@@ -11004,6 +11172,47 @@ class _AccountSheetState extends State<AccountSheet> {
                   style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
                 const SizedBox(height: 22),
+                // A² shared identity, via Firebase (Apple/Google/email) --
+                // replaces the old direct email/password + Google UI as
+                // the visible front door. That old code (_submit,
+                // _googleSignIn, the legacy Google button/fallback text)
+                // is kept below, just no longer called from here: existing
+                // accounts keep working via the server's identity-bridge
+                // route matching by email, nothing about their data or
+                // login capability was removed.
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: busy ? null : _firebaseAppleSignIn,
+                    icon: const Icon(Icons.apple, size: 22),
+                    label: const LText('Continue with Apple'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: busy ? null : _firebaseGoogleSignIn,
+                    icon: const Icon(Icons.g_mobiledata, size: 22),
+                    label: const LText('Continue with Google'),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: LText(
+                          'or use email',
+                          style: TextStyle(fontSize: 12, color: Colors.black45),
+                        ),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                ),
                 if (register)
                   TextField(
                     controller: name,
@@ -11044,7 +11253,7 @@ class _AccountSheetState extends State<AccountSheet> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: busy ? null : _submit,
+                    onPressed: busy ? null : _firebaseEmailSignIn,
                     icon: busy
                         ? const SizedBox.square(
                             dimension: 17,
@@ -11072,29 +11281,6 @@ class _AccountSheetState extends State<AccountSheet> {
                     ),
                   ),
                 ),
-                if (!widget.accountRequired) const Divider(height: 28),
-                if (googleClientId.isEmpty)
-                  const Row(
-                    children: [
-                      Icon(Icons.g_mobiledata, size: 28, color: Colors.black38),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: LText(
-                          'Google sign-in needs your Google client ID before it can be enabled.',
-                          style: TextStyle(fontSize: 12, color: Colors.black45),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: busy ? null : _googleSignIn,
-                      icon: const Icon(Icons.g_mobiledata, size: 22),
-                      label: const LText('Continue with Google'),
-                    ),
-                  ),
                 if (!widget.accountRequired)
                   SizedBox(
                     width: double.infinity,

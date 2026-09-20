@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0+56 — 2026-09-20
+
+- The sign-in screen is now "Continue with Apple / Continue with Google /
+  or use email" via the shared A² Firebase identity, replacing the old
+  direct email/password + Google UI as the visible front door. A new
+  server-side identity bridge (`/api/v1/auth/firebase`, verifying the
+  Firebase token by hand against Google's public keys — no extra SDK
+  dependency) matches an existing account by email and links it, or
+  creates a new one exactly like registering directly would; nothing
+  about existing accounts' data or login capability was removed, and the
+  old code paths are still in the app, just no longer wired to a button.
+  Email/password via Firebase is fully working end to end, verified
+  against production with a real token round-trip. Google needs one more
+  one-time setup step (an OAuth consent screen for the new Firebase
+  project) and Apple needs Apple Developer Portal configuration — both
+  buttons are wired up already and will start working the moment that
+  setup is done, degrading to a friendly "try email instead" message
+  until then rather than a confusing raw error.
+
 ## 1.0.0+55 — 2026-09-20
 
 - Added the Firebase project and SDK wiring for the shared A² identity

@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
+import { createPublicKey, createVerify, randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import * as foodCatalogue from './food_catalogue.mjs';
 import * as exerciseCatalogue from './exercise_catalogue.mjs';
@@ -208,6 +208,48 @@ const verifyPassword = async (password, stored) => {
   const expected = Buffer.from(expectedHex, 'hex');
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 };
+// Verifies a Firebase Auth ID token WITHOUT the firebase-admin SDK -- this
+// server has no service account key (and doesn't need one just to verify
+// tokens), so it does what firebase-admin itself does under the hood:
+// fetch Google's public signing keys, check the RS256 signature, and
+// validate the standard claims by hand. This keeps the "no framework,
+// minimal dependencies" shape of the rest of this file rather than
+// pulling in the full, heavy admin SDK for one narrow job.
+const FIREBASE_PROJECT_ID = 'a2-platform';
+let googlePublicKeysCache = {keys: null, expiresAt: 0};
+const getGooglePublicKeys = async () => {
+  if (googlePublicKeysCache.keys && googlePublicKeysCache.expiresAt > Date.now()) {
+    return googlePublicKeysCache.keys;
+  }
+  const response = await fetch('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com');
+  if (!response.ok) throw new Error('Failed to fetch Google public keys');
+  const {keys} = await response.json();
+  googlePublicKeysCache = {keys, expiresAt: Date.now() + 60 * 60 * 1000};
+  return keys;
+};
+const base64UrlDecode = input => Buffer.from(input.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+async function verifyFirebaseIdToken(idToken) {
+  const parts = String(idToken || '').split('.');
+  if (parts.length !== 3) throw new Error('Malformed token');
+  const header = JSON.parse(base64UrlDecode(parts[0]).toString('utf8'));
+  const payload = JSON.parse(base64UrlDecode(parts[1]).toString('utf8'));
+  if (header.alg !== 'RS256') throw new Error('Unexpected signing algorithm');
+  const keys = await getGooglePublicKeys();
+  const jwk = keys.find(key => key.kid === header.kid);
+  if (!jwk) throw new Error('Unknown signing key');
+  const publicKey = createPublicKey({key: jwk, format: 'jwk'});
+  const signedData = `${parts[0]}.${parts[1]}`;
+  const valid = createVerify('RSA-SHA256').update(signedData).verify(publicKey, base64UrlDecode(parts[2]));
+  if (!valid) throw new Error('Invalid signature');
+  const now = Math.floor(Date.now() / 1000);
+  if (typeof payload.exp !== 'number' || payload.exp < now) throw new Error('Token expired');
+  if (typeof payload.iat !== 'number' || payload.iat > now + 60) throw new Error('Token issued in the future');
+  if (payload.aud !== FIREBASE_PROJECT_ID) throw new Error('Wrong audience');
+  if (payload.iss !== `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`) throw new Error('Wrong issuer');
+  if (!payload.sub) throw new Error('Missing subject');
+  return {uid: payload.sub, email: payload.email, emailVerified: payload.email_verified === true, name: payload.name};
+}
+
 const saveUsers = async users => {
   await mkdir(dirname(usersFile), {recursive: true});
   await writeFile(usersFile, JSON.stringify({users}, null, 2), {mode: 0o600});
@@ -539,6 +581,50 @@ const server = createServer(async (req, res) => {
       const token = randomBytes(32).toString('hex');
       appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
       return json(res, 200, {token, user: publicAppUser(user)});
+    }
+    // The shared A² identity bridge: Firebase Auth (Apple/Google/email,
+    // whichever provider the user actually used) only ever proves who
+    // someone is -- this endpoint is what turns that into an A² account
+    // and this server's own session token, which is the only thing every
+    // other route (sync, AI, entitlements) ever checks. An existing
+    // account is matched and linked by email, never overwritten; a new
+    // one is created exactly like a direct email/password registration
+    // would, just with no usable password of its own (mirrors how the
+    // Google-only branch above already does this).
+    if (req.method === 'POST' && url.pathname === '/api/v1/auth/firebase') {
+      const clientIp = realClientIp(req);
+      if (enforceRateLimit(res, [[`firebase-auth:ip:${clientIp}`, RATE_LIMIT_CONFIG.loginPerIp]])) return;
+      const {idToken} = await readBody(req);
+      if (!idToken) return json(res, 400, {error: 'A Firebase ID token is required'});
+      let decoded;
+      try {
+        decoded = await verifyFirebaseIdToken(idToken);
+      } catch (error) {
+        return json(res, 401, {error: 'Invalid or expired sign-in token'});
+      }
+      const normalEmail = String(decoded.email || '').trim().toLowerCase();
+      if (!validEmail(normalEmail)) return json(res, 400, {error: 'This sign-in method did not provide a usable email address'});
+      const users = await loadAppUsers();
+      let user = users.find(item => item.email === normalEmail);
+      const isNewUser = !user;
+      if (!user) {
+        user = {
+          id: randomUUID(), email: normalEmail, name: String(decoded.name || '').trim().slice(0, 60),
+          role: 'user', blocked: false, privateSync: false, aiEnabled: false, entrySyncEnabled: false, linkedUserIds: [],
+          passwordHash: await hashPassword(randomBytes(32).toString('hex')),
+          firebaseUid: decoded.uid, createdAt: new Date().toISOString(),
+        };
+        users.push(user);
+      } else if (user.blocked === true) {
+        return json(res, 403, {error: 'This account has been blocked'});
+      } else {
+        user.firebaseUid = decoded.uid;
+      }
+      await saveAppUsers(users);
+      const token = randomBytes(32).toString('hex');
+      appSessions.set(token, {userId: user.id, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000});
+      await logActivity({username: user.name || user.email}, `${user.email} signed in via Firebase${isNewUser ? ' (new account)' : ''}`);
+      return json(res, isNewUser ? 201 : 200, {token, user: publicAppUser(user)});
     }
     if (url.pathname.startsWith('/api/v1/auth/')) {
       const appSession = appSessionFor(req);

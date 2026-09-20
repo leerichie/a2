@@ -1890,6 +1890,22 @@ const _rows = <List<String>>[
     'Abrir',
     'Apri',
   ],
+  [
+    'Continue with Apple',
+    'Kontynuuj z Apple',
+    'Mit Apple fortfahren',
+    'Continuer avec Apple',
+    'Continuar con Apple',
+    'Continua con Apple',
+  ],
+  [
+    'or use email',
+    'lub użyj e-maila',
+    'oder E-Mail verwenden',
+    'ou utiliser l’e-mail',
+    'o usa el correo electrónico',
+    'oppure usa l’email',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {
