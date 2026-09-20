@@ -1906,6 +1906,14 @@ const _rows = <List<String>>[
     'o usa el correo electrónico',
     'oppure usa l’email',
   ],
+  [
+    'Back to A² dashboard',
+    'Powrót do panelu A²',
+    'Zurück zum A²-Dashboard',
+    'Retour au tableau de bord A²',
+    'Volver al panel de A²',
+    'Torna alla dashboard A²',
+  ],
 ];
 
 final Map<String, List<String>> _translations = {

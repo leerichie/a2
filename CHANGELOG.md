@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0+57 — 2026-09-20
+
+- Fixed a real gap in the new A² dashboard: there was no way back to it
+  once you opened a module (Health) — you were stuck there. Added a
+  small floating icon, bottom-left, on every Health screen that returns
+  to the dashboard. AppShell itself is untouched (the button is overlaid
+  on top, not built into it), so this works the same way for every
+  future module too. Positioned to clear the bottom navigation bar
+  (an initial version briefly covered the "Today" tab — caught and fixed
+  before release) and to not collide with the existing "Add" button on
+  the opposite corner.
+
 ## 1.0.0+56 — 2026-09-20
 
 - The sign-in screen is now "Continue with Apple / Continue with Google /

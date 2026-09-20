@@ -695,10 +695,43 @@ class _A2ShellState extends State<A2Shell> {
   @override
   Widget build(BuildContext context) {
     if (openedModule) {
-      return AppShell(
-        locale: widget.locale,
-        onLocale: widget.onLocale,
-        onSignedOut: widget.onSignedOut,
+      // AppShell is rendered completely unmodified (see the class comment
+      // above) -- this floating button is overlaid on top rather than
+      // built into it, so nothing about Health's own UI has to change to
+      // give every module a consistent way back to the dashboard. Bottom
+      // -left is deliberately opposite the existing "Add" FAB (bottom-
+      // right/end by default) so the two never collide on any of
+      // AppShell's four tabs.
+      return Stack(
+        children: [
+          AppShell(
+            locale: widget.locale,
+            onLocale: widget.onLocale,
+            onSignedOut: widget.onSignedOut,
+          ),
+          Positioned(
+            // 96 clears the Material 3 NavigationBar's default 80dp height
+            // plus a small margin -- SafeArea alone doesn't account for
+            // this, since the nav bar isn't a system inset, it's part of
+            // AppShell's own Scaffold layout sitting below this overlay.
+            left: 12,
+            bottom: 96,
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                elevation: 3,
+                child: IconButton(
+                  icon: const Icon(Icons.apps_rounded, color: forest),
+                  tooltip: ui(context, 'Back to A² dashboard'),
+                  onPressed: () => setState(() => openedModule = false),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
     final loaded = entitlements;
@@ -8992,7 +9025,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+56';
+  String installedVersion = '1.0.0+57';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
