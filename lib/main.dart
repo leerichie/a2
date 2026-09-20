@@ -129,10 +129,19 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
     }
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
+    final onboardingDone = prefs.getBool('onboarding_complete') ?? false;
+    final accountExists = prefs.getString('account_token') != null;
     setState(() {
       locale = Locale(prefs.getString('language') ?? 'en');
-      onboarding = !(prefs.getBool('onboarding_complete') ?? false);
-      hasAccount = prefs.getString('account_token') != null;
+      onboarding = !onboardingDone;
+      hasAccount = accountExists;
+      // An A² account is required, full stop -- there is no local-only
+      // mode any more (see AccountSheet's accountRequired, which hides
+      // "keep using a2 locally" entirely). An already-onboarded install
+      // with no account (from before this requirement existed, or after
+      // signing out) goes straight to the sign-in gate on every cold
+      // start, not just once right after onboarding.
+      if (onboardingDone && !accountExists) signedOut = true;
       ready = true;
     });
   }
@@ -147,13 +156,10 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
   Future<void> _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
-    // A brand-new install with no account previously landed straight in
-    // local-only Health, never once seeing the sign-in options -- easy to
-    // miss that A² accounts (and the modules they unlock) exist at all.
-    // Reusing the same sign-in/create-account/"keep using a2 locally"
-    // gate that a sign-out already shows offers the choice once, right
-    // after language selection, without forcing it: "keep using a2
-    // locally" still works exactly as before.
+    // A brand-new install previously landed straight in local-only
+    // Health -- now that an account is mandatory, onboarding flows
+    // straight into the same sign-in/create-account gate a sign-out
+    // already shows, right after language selection.
     final hasExistingAccount = prefs.getString('account_token') != null;
     setState(() {
       onboarding = false;
@@ -222,6 +228,7 @@ class _A2AppState extends State<A2App> with WidgetsBindingObserver {
                 child: AccountSheet(
                   serverUrl: defaultServerUrl,
                   accountEmail: null,
+                  accountRequired: true,
                   onDismiss: _handleGateDismissed,
                 ),
               ),
@@ -258,10 +265,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Health tracking that fits real life',
     'intro': 'Photos, spoonfuls and rough portions are enough. a2 turns them into useful trends without pretending every estimate is exact.',
     'next': 'Continue',
-    'privacy': 'Private by default',
-    'privacyBody': 'Start without an account. Your records and compressed photos stay on this phone unless you choose backup or sync.',
-    'account': 'Your choice of account',
-    'accountBody': 'Use a2 locally, sign in for cross-device sync, or connect your own storage. You stay in control.',
+    'privacy': 'Private and secure',
+    'privacyBody': 'Your records and photos are tied to your account, never shared with anyone else, and synced safely across your devices.',
+    'account': 'One account, every device',
+    'accountBody': 'Sign in with Apple, Google, or email to get started — it keeps your data safe and in sync wherever you use a2.',
     'start': 'Start using a2',
     'today': 'Today',
     'progress': 'Progress',
@@ -272,10 +279,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Zdrowie dopasowane do życia',
     'intro': 'Zdjęcia, łyżki i przybliżone porcje wystarczą. a2 pokazuje użyteczne trendy bez udawanej precyzji.',
     'next': 'Dalej',
-    'privacy': 'Prywatność od początku',
-    'privacyBody': 'Zacznij bez konta. Dane i skompresowane zdjęcia zostają w telefonie, dopóki nie wybierzesz kopii lub synchronizacji.',
-    'account': 'Konto na twoich zasadach',
-    'accountBody': 'Używaj lokalnie, zaloguj się do synchronizacji albo podłącz własne miejsce.',
+    'privacy': 'Prywatnie i bezpiecznie',
+    'privacyBody': 'Twoje dane i zdjęcia są przypisane do twojego konta, nie są nikomu udostępniane i bezpiecznie synchronizują się między urządzeniami.',
+    'account': 'Jedno konto, każde urządzenie',
+    'accountBody': 'Zaloguj się przez Apple, Google lub e-mail, aby zacząć — dzięki temu dane są bezpieczne i zsynchronizowane wszędzie, gdzie używasz a2.',
     'start': 'Zacznij korzystać',
     'today': 'Dzisiaj',
     'progress': 'Postępy',
@@ -286,10 +293,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Gesundheit, die ins Leben passt',
     'intro': 'Fotos, Löffel und grobe Portionen reichen. a2 macht daraus hilfreiche Trends ohne falsche Genauigkeit.',
     'next': 'Weiter',
-    'privacy': 'Standardmäßig privat',
-    'privacyBody': 'Starte ohne Konto. Daten und komprimierte Fotos bleiben auf diesem Gerät, bis du Backup oder Sync wählst.',
-    'account': 'Deine Kontoentscheidung',
-    'accountBody': 'Lokal nutzen, für Synchronisierung anmelden oder eigenen Speicher verbinden.',
+    'privacy': 'Privat und sicher',
+    'privacyBody': 'Deine Daten und Fotos sind an dein Konto gebunden, werden mit niemandem geteilt und sicher zwischen deinen Geräten synchronisiert.',
+    'account': 'Ein Konto, jedes Gerät',
+    'accountBody': 'Melde dich mit Apple, Google oder E-Mail an, um loszulegen — so bleiben deine Daten sicher und überall synchron.',
     'start': 'a2 starten',
     'today': 'Heute',
     'progress': 'Fortschritt',
@@ -300,10 +307,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Le suivi santé adapté à la vraie vie',
     'intro': 'Photos, cuillerées et portions approximatives suffisent. a2 crée des tendances utiles sans fausse précision.',
     'next': 'Continuer',
-    'privacy': 'Privé par défaut',
-    'privacyBody': 'Commencez sans compte. Données et photos compressées restent sur ce téléphone sans sauvegarde choisie.',
-    'account': 'Votre choix de compte',
-    'accountBody': 'Utilisez a2 localement, connectez-vous pour synchroniser ou utilisez votre stockage.',
+    'privacy': 'Privé et sécurisé',
+    'privacyBody': 'Vos données et photos sont liées à votre compte, ne sont partagées avec personne et se synchronisent en toute sécurité entre vos appareils.',
+    'account': 'Un compte, tous vos appareils',
+    'accountBody': 'Connectez-vous avec Apple, Google ou un e-mail pour commencer — vos données restent sûres et synchronisées partout.',
     'start': 'Commencer avec a2',
     'today': "Aujourd’hui",
     'progress': 'Progrès',
@@ -314,10 +321,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Salud que encaja en la vida real',
     'intro': 'Fotos, cucharadas y porciones aproximadas bastan. a2 crea tendencias útiles sin fingir precisión.',
     'next': 'Continuar',
-    'privacy': 'Privado por defecto',
-    'privacyBody': 'Empieza sin cuenta. Tus datos y fotos comprimidas quedan en el teléfono salvo que elijas copia o sincronización.',
-    'account': 'Tú eliges la cuenta',
-    'accountBody': 'Usa a2 localmente, inicia sesión para sincronizar o conecta tu almacenamiento.',
+    'privacy': 'Privado y seguro',
+    'privacyBody': 'Tus datos y fotos están vinculados a tu cuenta, no se comparten con nadie y se sincronizan de forma segura entre tus dispositivos.',
+    'account': 'Una cuenta, todos tus dispositivos',
+    'accountBody': 'Inicia sesión con Apple, Google o correo electrónico para empezar — así tus datos están seguros y sincronizados en todas partes.',
     'start': 'Empezar con a2',
     'today': 'Hoy',
     'progress': 'Progreso',
@@ -328,11 +335,10 @@ const copy = <String, Map<String, String>>{
     'welcome': 'Salute adatta alla vita reale',
     'intro': 'Foto, cucchiai e porzioni approssimative bastano. a2 crea tendenze utili senza falsa precisione.',
     'next': 'Continua',
-    'privacy': 'Privato per impostazione',
-    'privacyBody': 'Inizia senza account. Dati e foto compresse restano sul telefono finché non scegli backup o sincronizzazione.',
-    'account': 'Scegli tu l’account',
-    'accountBody':
-        'Usa a2 in locale, accedi per sincronizzare o collega il tuo spazio.',
+    'privacy': 'Privato e sicuro',
+    'privacyBody': 'I tuoi dati e le tue foto sono legati al tuo account, non vengono condivisi con nessuno e si sincronizzano in modo sicuro tra i tuoi dispositivi.',
+    'account': 'Un account, tutti i dispositivi',
+    'accountBody': 'Accedi con Apple, Google o email per iniziare — così i tuoi dati restano al sicuro e sincronizzati ovunque.',
     'start': 'Inizia con a2',
     'today': 'Oggi',
     'progress': 'Progressi',
@@ -9142,7 +9148,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+60';
+  String installedVersion = '1.0.0+61';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
@@ -10892,12 +10898,13 @@ class _AccountSheetState extends State<AccountSheet> {
     super.dispose();
   }
 
-  // Kept, not deleted: the pre-Firebase direct email/password sign-in.
-  // No longer wired to any visible button (see build() below, which now
-  // calls _firebaseEmailSignIn instead) -- an explicit product decision
-  // to keep this available for reference/rollback rather than remove it
-  // outright while the Firebase-based identity layer is still new.
-  // ignore: unused_element
+  // The pre-Firebase direct email/password sign-in -- no longer wired to
+  // its own visible button (build() below calls _firebaseEmailSignIn
+  // instead), but still very much in use: it's the fallback
+  // _firebaseEmailSignIn reaches for whenever Firebase itself rejects an
+  // email/password combination, which is exactly what happens for every
+  // account created before the Firebase-based identity layer existed
+  // (Firebase has simply never heard of that email at all).
   Future<void> _submit() async {
     setState(() {
       busy = true;
@@ -10987,22 +10994,41 @@ class _AccountSheetState extends State<AccountSheet> {
       error = null;
     });
     try {
-      final UserCredential credential;
       if (register) {
-        credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email.text.trim(),
-          password: password.text,
-        );
+        final credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email: email.text.trim(),
+              password: password.text,
+            );
         if (name.text.trim().isNotEmpty) {
           await credential.user?.updateDisplayName(name.text.trim());
         }
+        await _completeFirebaseSignIn(await credential.user?.getIdToken());
       } else {
-        credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email.text.trim(),
-          password: password.text,
-        );
+        try {
+          final credential = await FirebaseAuth.instance
+              .signInWithEmailAndPassword(
+                email: email.text.trim(),
+                password: password.text,
+              );
+          await _completeFirebaseSignIn(await credential.user?.getIdToken());
+        } on FirebaseAuthException {
+          // This email predates Firebase-based sign-in entirely -- it was
+          // created back when the app used direct email/password auth
+          // against this server's own password hash, so Firebase has
+          // never heard of it and always rejects it (recent Firebase
+          // versions deliberately return the same generic
+          // "invalid-credential" for both "no such user" and "wrong
+          // password", so the two can't be told apart by error code --
+          // falling back here either succeeds correctly or fails with the
+          // same "incorrect password" a legitimate wrong password should
+          // give, never a security regression either way). _submit() is
+          // the original, still-working direct-authentication method this
+          // account actually has (see its own comment above) -- reused
+          // as-is rather than duplicated.
+          return await _submit();
+        }
       }
-      await _completeFirebaseSignIn(await credential.user?.getIdToken());
     } on FirebaseAuthException catch (exception) {
       if (mounted) setState(() => error = exception.message ?? exception.code);
     } catch (exception) {

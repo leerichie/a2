@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0+61 — 2026-09-20
+
+- Fixed email sign-in being completely broken for accounts created before
+  A² added Firebase-based sign-in (e.g. accounts made through the old
+  direct email/password flow). It only ever tried Firebase, which has no
+  record of them, and failed with "supplied auth credential is
+  malformed." Signing in with such an email now falls back to the
+  original direct authentication automatically when Firebase doesn't
+  recognise it — registering a brand-new account still goes through
+  Firebase as before.
+- An A² account is now always required — the old "Keep using a2 locally"
+  option is gone. Every cold start with no signed-in account now shows
+  the sign-in screen instead of silently falling back to local-only use.
+
 ## 1.0.0+60 — 2026-09-20
 
 - Fixed "Continue with Google" freezing on a blank page instead of

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:a2/main.dart';
 import 'package:a2/l10n.dart';
@@ -8,6 +9,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Now that A2Shell fetches live entitlements on every cold start with an
+// account, any widget test that exercises that real path would otherwise
+// make a genuine HTTPS call to the production server. This makes that call
+// fail instantly (no real socket/DNS activity, no dependence on whatever
+// network the test happens to run on) so EntitlementService.fetch falls
+// through to its cache/fallback path immediately instead of only after a
+// real timeout.
+class _UnreachableHttpClient implements HttpClient {
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) async {
+    throw const SocketException('network disabled in tests');
+  }
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -378,50 +399,74 @@ void main() {
     rootBundle.clear();
     // The app only reads the stored language preference when it takes the
     // real cold-start path (startOnboarding: true skips it entirely, which
-    // is why every other test here defaults to English).
+    // is why every other test here defaults to English). That path now
+    // also requires a signed-in account, so this needs a token too -- the
+    // actual value never reaches any real server (see
+    // _UnreachableHttpClient above).
     SharedPreferences.setMockInitialValues({
       'onboarding_complete': true,
       'language': 'pl',
+      'account_token': 'test-token',
+      'account_user': jsonEncode({'name': 'Test'}),
     });
     await tester.runAsync(() => FoodParser.load(locale: 'pl'));
-    await tester.pumpWidget(const A2App());
-    await tester.pump(const Duration(milliseconds: 300));
+    await HttpOverrides.runZoned(
+      () async {
+        await tester.pumpWidget(const A2App());
+        for (var i = 0; i < 6; i++) {
+          await tester.pump(const Duration(milliseconds: 300));
+        }
 
-    // The app's own UI chrome is translated via LText -- with the
-    // language preference set to Polish above, these labels are now
-    // "Dodaj"/"Jedzenie lub napój"/"Dodaj do dnia" rather than English.
-    await tester.tap(find.text('Dodaj'));
-    await tester.pump(const Duration(milliseconds: 500));
-    tester
-        .widget<ListTile>(
-          find.ancestor(of: find.text('Jedzenie lub napój'), matching: find.byType(ListTile)),
-        )
-        .onTap!();
-    await tester.pump(const Duration(milliseconds: 500));
+        // Signing in now lands on the A² dashboard rather than straight in
+        // Health -- tap through to it, same as a real user would.
+        tester
+            .widget<InkWell>(
+              find.ancestor(of: find.text('A² Health'), matching: find.byType(InkWell)),
+            )
+            .onTap!();
+        await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.enterText(find.byType(TextField), 'duza kawa, pol lyzki jogurtu, mala herbata');
-    await tester.runAsync(() async {
-      tester
-          .widget<FilledButton>(
-            find.ancestor(of: find.text('Dodaj do dnia'), matching: find.byType(FilledButton)),
-          )
-          .onPressed!();
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-    });
-    for (var i = 0; i < 6; i++) {
-      await tester.pump(const Duration(milliseconds: 300));
-    }
+        // The app's own UI chrome is translated via LText -- with the
+        // language preference set to Polish above, these labels are now
+        // "Dodaj"/"Jedzenie lub napój"/"Dodaj do dnia" rather than English.
+        await tester.tap(find.text('Dodaj'));
+        await tester.pump(const Duration(milliseconds: 500));
+        tester
+            .widget<ListTile>(
+              find.ancestor(of: find.text('Jedzenie lub napój'), matching: find.byType(ListTile)),
+            )
+            .onTap!();
+        await tester.pump(const Duration(milliseconds: 500));
 
-    // All three resolve locally (coffee, yoghurt, tea) so the entry saves
-    // immediately -- if the sheet had loaded the English parser instead
-    // (the bug being fixed here), none of these Polish words would
-    // resolve locally and this would stay blocked with a clarification
-    // message instead of disappearing into a saved entry. The
-    // clarification message itself is not translated, so it would still
-    // read in English if it appeared.
-    expect(find.textContaining('Please clarify'), findsNothing);
-    expect(find.textContaining("don't have nutrition data"), findsNothing);
-    expect(find.text('Nic dziś nie zapisano'), findsNothing); // "Nothing logged today" (pl)
+        await tester.enterText(
+          find.byType(TextField),
+          'duza kawa, pol lyzki jogurtu, mala herbata',
+        );
+        await tester.runAsync(() async {
+          tester
+              .widget<FilledButton>(
+                find.ancestor(of: find.text('Dodaj do dnia'), matching: find.byType(FilledButton)),
+              )
+              .onPressed!();
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        });
+        for (var i = 0; i < 6; i++) {
+          await tester.pump(const Duration(milliseconds: 300));
+        }
+
+        // All three resolve locally (coffee, yoghurt, tea) so the entry saves
+        // immediately -- if the sheet had loaded the English parser instead
+        // (the bug being fixed here), none of these Polish words would
+        // resolve locally and this would stay blocked with a clarification
+        // message instead of disappearing into a saved entry. The
+        // clarification message itself is not translated, so it would still
+        // read in English if it appeared.
+        expect(find.textContaining('Please clarify'), findsNothing);
+        expect(find.textContaining("don't have nutrition data"), findsNothing);
+        expect(find.text('Nic dziś nie zapisano'), findsNothing); // "Nothing logged today" (pl)
+      },
+      createHttpClient: (context) => _UnreachableHttpClient(),
+    );
   });
 
   testWidgets('a brand/composite food FoodEstimator used to recognize is '
