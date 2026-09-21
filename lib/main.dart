@@ -43,7 +43,9 @@ Future<void> main() async {
   // failed Firebase init must never block using the app locally or with
   // the existing account system.
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (error) {
     debugPrint('[main] Firebase.initializeApp failed: $error');
   }
@@ -584,14 +586,13 @@ class A2Entitlements {
   final bool aiEnabled;
   final List<A2Module> modules;
 
-  factory A2Entitlements.fromJson(Map<String, dynamic> json) =>
-      A2Entitlements(
-        membership: json['membership'] as String? ?? 'basic',
-        aiEnabled: json['aiEnabled'] == true,
-        modules: ((json['modules'] as List<dynamic>?) ?? const [])
-            .map((item) => A2Module.fromJson(item as Map<String, dynamic>))
-            .toList(),
-      );
+  factory A2Entitlements.fromJson(Map<String, dynamic> json) => A2Entitlements(
+    membership: json['membership'] as String? ?? 'basic',
+    aiEnabled: json['aiEnabled'] == true,
+    modules: ((json['modules'] as List<dynamic>?) ?? const [])
+        .map((item) => A2Module.fromJson(item as Map<String, dynamic>))
+        .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
     'membership': membership,
@@ -723,10 +724,7 @@ class _A2ShellState extends State<A2Shell> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const LText(
-              'Sign out',
-              style: TextStyle(color: coral),
-            ),
+            child: const LText('Sign out', style: TextStyle(color: coral)),
           ),
         ],
       ),
@@ -819,7 +817,10 @@ class _A2ShellState extends State<A2Shell> {
                   // top-level screen, it needs its own way out too rather
                   // than forcing a detour through Health just to sign out.
                   IconButton(
-                    icon: const Icon(Icons.logout_rounded, color: Colors.black54),
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.black54,
+                    ),
                     tooltip: ui(context, 'Sign out'),
                     onPressed: _confirmSignOut,
                   ),
@@ -844,7 +845,8 @@ class _A2ShellState extends State<A2Shell> {
                           for (final module in loaded.modules)
                             _ModuleCard(
                               module: module,
-                              icon: _moduleIcons[module.id] ?? Icons.apps_rounded,
+                              icon:
+                                  _moduleIcons[module.id] ?? Icons.apps_rounded,
                               onTap: () => _openModule(module.id),
                             ),
                         ],
@@ -900,7 +902,11 @@ class _ModuleCard extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, color: forest),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward_rounded, size: 16, color: forest),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: forest,
+                ),
               ],
             ),
           ],
@@ -3537,8 +3543,9 @@ class _EntryThumbnailState extends State<_EntryThumbnail> {
   @override
   void didUpdateWidget(_EntryThumbnail old) {
     super.didUpdateWidget(old);
-    if (old.localPath != widget.localPath || old.mediaId != widget.mediaId)
+    if (old.localPath != widget.localPath || old.mediaId != widget.mediaId) {
       _resolve();
+    }
   }
 
   void _resolve() {
@@ -4287,8 +4294,9 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
       if (mounted) setState(() => parser = value);
     });
     _hintTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (mounted)
+      if (mounted) {
         setState(() => hintIndex = (hintIndex + 1) % _hintExamples.length);
+      }
     });
   }
 
@@ -4612,7 +4620,9 @@ class _PortionedExerciseConfirmSheetState
     text: widget.estimate.caloriesPerPortion.round().toString(),
   );
   late final portions = TextEditingController(
-    text: widget.estimate.consumedPortions == widget.estimate.consumedPortions.roundToDouble()
+    text:
+        widget.estimate.consumedPortions ==
+            widget.estimate.consumedPortions.roundToDouble()
         ? widget.estimate.consumedPortions.toInt().toString()
         : widget.estimate.consumedPortions.toString(),
   );
@@ -4655,12 +4665,16 @@ class _PortionedExerciseConfirmSheetState
             TextField(
               controller: name,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: ui(context, 'Exercise name')),
+              decoration: InputDecoration(
+                labelText: ui(context, 'Exercise name'),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: caloriesPerPortion,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 labelText: ui(context, 'Calories per round'),
@@ -4670,7 +4684,9 @@ class _PortionedExerciseConfirmSheetState
             const SizedBox(height: 12),
             TextField(
               controller: portions,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 labelText: ui(context, 'How many portions?'),
@@ -4686,7 +4702,10 @@ class _PortionedExerciseConfirmSheetState
             const SizedBox(height: 6),
             LText(
               '= ${_totalCalories.round()} kcal',
-              style: const TextStyle(fontWeight: FontWeight.w600, color: forest),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: forest,
+              ),
             ),
             const SizedBox(height: 18),
             SizedBox(
@@ -5100,7 +5119,8 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    onChanged: widget.showPackWeightField || widget.showQuantityField
+                    onChanged:
+                        widget.showPackWeightField || widget.showQuantityField
                         ? (_) => setState(() {})
                         : null,
                     decoration: InputDecoration(
@@ -11231,10 +11251,8 @@ class _AccountSheetState extends State<AccountSheet> {
     } catch (exception) {
       if (mounted) {
         setState(
-          () => appleError = exception.toString().replaceFirst(
-            'Exception: ',
-            '',
-          ),
+          () =>
+              appleError = exception.toString().replaceFirst('Exception: ', ''),
         );
       }
     } finally {
