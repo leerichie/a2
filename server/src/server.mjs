@@ -633,6 +633,24 @@ const server = createServer(async (req, res) => {
         const user = (await loadAppUsers()).find(item => item.id === appSession.userId);
         return user ? json(res, 200, {user: publicAppUser(user)}) : json(res, 401, {error: 'Account no longer exists'});
       }
+      // Self-service toggle for a user's OWN privateSync flag, restricted to
+      // admin-role accounts. privateSync is an explicit allowlist the owner
+      // controls for who gets a copy of their data on this private home
+      // server -- a normal account still can't grant itself access, but the
+      // admin's own phone switch needs something to actually call instead
+      // of just being decorative.
+      if (req.method === 'PATCH' && url.pathname === '/api/v1/auth/private-sync') {
+        const users = await loadAppUsers();
+        const user = users.find(item => item.id === appSession.userId);
+        if (!user) return json(res, 401, {error: 'Account no longer exists'});
+        if (user.role !== 'admin') return json(res, 403, {error: 'Only an admin account can change this from the app'});
+        const {enabled} = await readBody(req);
+        if (typeof enabled !== 'boolean') return json(res, 400, {error: 'enabled must be true or false'});
+        user.privateSync = enabled;
+        await saveAppUsers(users);
+        await logActivity({username: user.name || user.email}, `${user.email} turned private sync ${enabled ? 'on' : 'off'} for themselves from the app`);
+        return json(res, 200, {user: publicAppUser(user)});
+      }
       // The A² shell's dashboard renders exactly what this returns and
       // nothing else -- a module absent from this list must not appear as
       // a locked/greyed-out card, it must not appear at all. A module only

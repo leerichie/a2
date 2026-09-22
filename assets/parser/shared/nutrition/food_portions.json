@@ -2980,6 +2980,15 @@
     "confidence": "medium"
   },
   {
+    "foodId": "cucumber",
+    "foodNameAsGiven": "cucumber",
+    "unit": null,
+    "size": null,
+    "grams": 100,
+    "confidence": "medium",
+    "source": "typical serving weight"
+  },
+  {
     "foodId": "chicken_breast",
     "foodNameAsGiven": "chicken breast",
     "unit": null,

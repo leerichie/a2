@@ -129,7 +129,7 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     expect(find.text(greetingFor(DateTime.now())), findsOneWidget);
     expect(find.text('Nothing logged today'), findsOneWidget);
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     final foodOption = find.ancestor(
       of: find.text('Food or drink'),
@@ -169,7 +169,10 @@ void main() {
     final dailyKey = prefs.getKeys().firstWhere(
       (key) => key.startsWith('daily_entries_'),
     );
-    expect(prefs.getStringList(dailyKey)!.single, contains('yoghurt and banana'));
+    expect(
+      prefs.getStringList(dailyKey)!.single,
+      contains('yoghurt and banana'),
+    );
 
     await tester.scrollUntilVisible(
       find.byIcon(Icons.delete_outline),
@@ -226,16 +229,22 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
-          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+          find.ancestor(
+            of: find.text('Food or drink'),
+            matching: find.byType(ListTile),
+          ),
         )
         .onTap!();
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.enterText(find.byType(TextField), 'egg and dragonfruit powder');
+    await tester.enterText(
+      find.byType(TextField),
+      'egg and dragonfruit powder',
+    );
     // Even with the cache pre-warmed above, the app's own async chain
     // still needs the real event loop (not the fake clock pump() advances)
     // to actually finish -- runAsync steps outside that fake clock for
@@ -243,7 +252,10 @@ void main() {
     await tester.runAsync(() async {
       tester
           .widget<FilledButton>(
-            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+            find.ancestor(
+              of: find.text('Add to day'),
+              matching: find.byType(FilledButton),
+            ),
           )
           .onPressed!();
       await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -259,91 +271,96 @@ void main() {
     // clarification request; the whole entry is still blocked rather than
     // silently summed to just the egg total.
     expect(find.textContaining('Recognized'), findsNothing);
-    expect(find.textContaining('Please clarify: dragonfruit powder'), findsOneWidget);
+    expect(
+      find.textContaining('Please clarify: dragonfruit powder'),
+      findsOneWidget,
+    );
     expect(find.text('Nothing logged today'), findsOneWidget);
   });
 
   testWidgets(
-      'the real-world mixed breakfast sentence now resolves completely, '
-      'locally, with no AI needed', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    rootBundle.clear();
-    // FoodParser's local catalogue/nutrient JSON has grown large enough
-    // that a *cold* load can outrun what a fake-async pump() loop will
-    // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
-    // less) load then gets stuck forever, and rootBundle caches that
-    // stuck Future per asset path, so every later call for the same path
-    // (even one properly wrapped in runAsync) just awaits that same
-    // never-resolving Future. Pre-warming once via runAsync here lets the
-    // real read complete and populates the cache with the resolved
-    // string, so every subsequent load (including the app's own) is an
-    // instant cache hit instead of a fresh, fake-zone-broken request.
-    await tester.runAsync(() => FoodParser.load());
-    await tester.pumpWidget(const A2App(startOnboarding: false));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    await tester.tap(find.text('Add'));
-    await tester.pump(const Duration(milliseconds: 500));
-    tester
-        .widget<ListTile>(
-          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
-        )
-        .onTap!();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    await tester.enterText(
-      find.byType(TextField),
-      '2 tbsp coleslaw, 4 slice smoked salmon, boiled egg, 2 slice cheddar, '
-      'spoon light cottage cheese, black coffee, glass water, half glass fruit smoothie',
-    );
-    // Even with the cache pre-warmed above, the app's own async chain
-    // still needs the real event loop (not the fake clock pump() advances)
-    // to actually finish -- runAsync steps outside that fake clock for
-    // the extent of this call so it genuinely completes before we assert.
-    await tester.runAsync(() async {
-      tester
-          .widget<FilledButton>(
-            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
-          )
-          .onPressed!();
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-    });
-    for (var i = 0; i < 6; i++) {
+    'the real-world mixed breakfast sentence now resolves completely, '
+    'locally, with no AI needed',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      rootBundle.clear();
+      // FoodParser's local catalogue/nutrient JSON has grown large enough
+      // that a *cold* load can outrun what a fake-async pump() loop will
+      // ever drain -- AddMealSheet.initState's own (unawaited, real-zone-
+      // less) load then gets stuck forever, and rootBundle caches that
+      // stuck Future per asset path, so every later call for the same path
+      // (even one properly wrapped in runAsync) just awaits that same
+      // never-resolving Future. Pre-warming once via runAsync here lets the
+      // real read complete and populates the cache with the resolved
+      // string, so every subsequent load (including the app's own) is an
+      // instant cache hit instead of a fresh, fake-zone-broken request.
+      await tester.runAsync(() => FoodParser.load());
+      await tester.pumpWidget(const A2App(startOnboarding: false));
       await tester.pump(const Duration(milliseconds: 300));
-    }
 
-    // All 8 components now resolve locally with real nutrition data:
-    // coleslaw (tablespoon rule), smoked salmon (its own dedicated
-    // catalogue entry + slice portion), boiled egg (generic-parent
-    // fallback to egg), cheddar (its own real USDA record, see
-    // tool/import_usda_nutrients.py), light cottage cheese (generic-volume
-    // spoonful), black coffee and water (bare-mention defaults, water
-    // genuinely 0 kcal), and fruit smoothie (its own derived nutrient
-    // value, glass/half-glass via the existing drink-container mechanism).
-    // No AI call is needed at all -- the entry saves immediately, not
-    // blocked, no clarification shown.
-    expect(find.textContaining('Recognized'), findsNothing);
-    expect(find.textContaining("don't have nutrition data"), findsNothing);
-    expect(find.textContaining('Please clarify'), findsNothing);
-    expect(find.text('Nothing logged today'), findsNothing);
-    expect(find.textContaining('515'), findsWidgets);
-    final prefs = await SharedPreferences.getInstance();
-    final dailyKey = prefs.getKeys().firstWhere(
-      (key) => key.startsWith('daily_entries_'),
-    );
-    expect(
-      prefs.getStringList(dailyKey)!.single,
-      contains('smoked salmon'),
-    );
-  });
+      await tester.tap(find.byTooltip('Add'));
+      await tester.pump(const Duration(milliseconds: 500));
+      tester
+          .widget<ListTile>(
+            find.ancestor(
+              of: find.text('Food or drink'),
+              matching: find.byType(ListTile),
+            ),
+          )
+          .onTap!();
+      await tester.pump(const Duration(milliseconds: 500));
 
-  testWidgets(
-      'water recognized as part of a wider food sentence also updates '
+      await tester.enterText(
+        find.byType(TextField),
+        '2 tbsp coleslaw, 4 slice smoked salmon, boiled egg, 2 slice cheddar, '
+        'spoon light cottage cheese, black coffee, glass water, half glass fruit smoothie',
+      );
+      // Even with the cache pre-warmed above, the app's own async chain
+      // still needs the real event loop (not the fake clock pump() advances)
+      // to actually finish -- runAsync steps outside that fake clock for
+      // the extent of this call so it genuinely completes before we assert.
+      await tester.runAsync(() async {
+        tester
+            .widget<FilledButton>(
+              find.ancestor(
+                of: find.text('Add to day'),
+                matching: find.byType(FilledButton),
+              ),
+            )
+            .onPressed!();
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      });
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+
+      // All 8 components now resolve locally with real nutrition data:
+      // coleslaw (tablespoon rule), smoked salmon (its own dedicated
+      // catalogue entry + slice portion), boiled egg (generic-parent
+      // fallback to egg), cheddar (its own real USDA record, see
+      // tool/import_usda_nutrients.py), light cottage cheese (generic-volume
+      // spoonful), black coffee and water (bare-mention defaults, water
+      // genuinely 0 kcal), and fruit smoothie (its own derived nutrient
+      // value, glass/half-glass via the existing drink-container mechanism).
+      // No AI call is needed at all -- the entry saves immediately, not
+      // blocked, no clarification shown.
+      expect(find.textContaining('Recognized'), findsNothing);
+      expect(find.textContaining("don't have nutrition data"), findsNothing);
+      expect(find.textContaining('Please clarify'), findsNothing);
+      expect(find.text('Nothing logged today'), findsNothing);
+      expect(find.textContaining('515'), findsWidgets);
+      final prefs = await SharedPreferences.getInstance();
+      final dailyKey = prefs.getKeys().firstWhere(
+        (key) => key.startsWith('daily_entries_'),
+      );
+      expect(prefs.getStringList(dailyKey)!.single, contains('smoked salmon'));
+    },
+  );
+
+  testWidgets('water recognized as part of a wider food sentence also updates '
       'the day\'s water total, not just a water-only description', (
     tester,
   ) async {
@@ -356,11 +373,14 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
-          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+          find.ancestor(
+            of: find.text('Food or drink'),
+            matching: find.byType(ListTile),
+          ),
         )
         .onTap!();
     await tester.pump(const Duration(milliseconds: 500));
@@ -368,11 +388,17 @@ void main() {
     // Not a water-only description (WaterIntakeParser would reject this --
     // it only matches a description that's entirely about water), so this
     // only resolves through FoodParser, alongside "toast".
-    await tester.enterText(find.byType(TextField), 'toast and half glass water');
+    await tester.enterText(
+      find.byType(TextField),
+      'toast and half glass water',
+    );
     await tester.runAsync(() async {
       tester
           .widget<FilledButton>(
-            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+            find.ancestor(
+              of: find.text('Add to day'),
+              matching: find.byType(FilledButton),
+            ),
           )
           .onPressed!();
       await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -387,8 +413,7 @@ void main() {
     expect(find.text('125'), findsWidgets);
   });
 
-  testWidgets(
-      'switching the app language to Polish makes the live Add Meal '
+  testWidgets('switching the app language to Polish makes the live Add Meal '
       'screen actually use the Polish FoodParser, not a hardcoded locale', (
     tester,
   ) async {
@@ -410,63 +435,97 @@ void main() {
       'account_user': jsonEncode({'name': 'Test'}),
     });
     await tester.runAsync(() => FoodParser.load(locale: 'pl'));
-    await HttpOverrides.runZoned(
-      () async {
-        await tester.pumpWidget(const A2App());
-        for (var i = 0; i < 6; i++) {
-          await tester.pump(const Duration(milliseconds: 300));
-        }
-
-        // Signing in now lands on the A² dashboard rather than straight in
-        // Health -- tap through to it, same as a real user would.
-        tester
-            .widget<InkWell>(
-              find.ancestor(of: find.text('A² Health'), matching: find.byType(InkWell)),
-            )
-            .onTap!();
+    await HttpOverrides.runZoned(() async {
+      await tester.pumpWidget(const A2App());
+      for (var i = 0; i < 6; i++) {
         await tester.pump(const Duration(milliseconds: 300));
+      }
 
-        // The app's own UI chrome is translated via LText -- with the
-        // language preference set to Polish above, these labels are now
-        // "Dodaj"/"Jedzenie lub napój"/"Dodaj do dnia" rather than English.
-        await tester.tap(find.text('Dodaj'));
-        await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('0 kcal'), findsOneWidget);
+      expect(find.text('0 ml'), findsOneWidget);
+      expect(find.text('0 min'), findsOneWidget);
+      expect(
+        find.text('Food, exercise, weight and photo tracking'),
+        findsNothing,
+      );
+
+      // Signing in now lands on the A² dashboard rather than straight in
+      // Health -- tap through to it, same as a real user would.
+      tester
+          .widget<InkWell>(
+            find.ancestor(
+              of: find.text('A² Health'),
+              matching: find.byType(InkWell),
+            ),
+          )
+          .onTap!();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // The header A² logo replaces the old floating apps button and is the
+      // route back to the module dashboard.
+      expect(find.byTooltip('Powrót do panelu A²'), findsOneWidget);
+      expect(find.byIcon(Icons.apps_rounded), findsNothing);
+      await tester.tap(find.byTooltip('Powrót do panelu A²'));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('A² Health'), findsOneWidget);
+      tester
+          .widget<InkWell>(
+            find.ancestor(
+              of: find.text('A² Health'),
+              matching: find.byType(InkWell),
+            ),
+          )
+          .onTap!();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // The app's own UI chrome is translated via LText -- with the
+      // language preference set to Polish above, these labels are now
+      // "Dodaj"/"Jedzenie lub napój"/"Dodaj do dnia" rather than English.
+      await tester.tap(find.byTooltip('Dodaj'));
+      await tester.pump(const Duration(milliseconds: 500));
+      tester
+          .widget<ListTile>(
+            find.ancestor(
+              of: find.text('Jedzenie lub napój'),
+              matching: find.byType(ListTile),
+            ),
+          )
+          .onTap!();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.enterText(
+        find.byType(TextField),
+        'duza kawa, pol lyzki jogurtu, mala herbata',
+      );
+      await tester.runAsync(() async {
         tester
-            .widget<ListTile>(
-              find.ancestor(of: find.text('Jedzenie lub napój'), matching: find.byType(ListTile)),
+            .widget<FilledButton>(
+              find.ancestor(
+                of: find.text('Dodaj do dnia'),
+                matching: find.byType(FilledButton),
+              ),
             )
-            .onTap!();
-        await tester.pump(const Duration(milliseconds: 500));
+            .onPressed!();
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      });
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 300));
+      }
 
-        await tester.enterText(
-          find.byType(TextField),
-          'duza kawa, pol lyzki jogurtu, mala herbata',
-        );
-        await tester.runAsync(() async {
-          tester
-              .widget<FilledButton>(
-                find.ancestor(of: find.text('Dodaj do dnia'), matching: find.byType(FilledButton)),
-              )
-              .onPressed!();
-          await Future<void>.delayed(const Duration(milliseconds: 500));
-        });
-        for (var i = 0; i < 6; i++) {
-          await tester.pump(const Duration(milliseconds: 300));
-        }
-
-        // All three resolve locally (coffee, yoghurt, tea) so the entry saves
-        // immediately -- if the sheet had loaded the English parser instead
-        // (the bug being fixed here), none of these Polish words would
-        // resolve locally and this would stay blocked with a clarification
-        // message instead of disappearing into a saved entry. The
-        // clarification message itself is not translated, so it would still
-        // read in English if it appeared.
-        expect(find.textContaining('Please clarify'), findsNothing);
-        expect(find.textContaining("don't have nutrition data"), findsNothing);
-        expect(find.text('Nic dziś nie zapisano'), findsNothing); // "Nothing logged today" (pl)
-      },
-      createHttpClient: (context) => _UnreachableHttpClient(),
-    );
+      // All three resolve locally (coffee, yoghurt, tea) so the entry saves
+      // immediately -- if the sheet had loaded the English parser instead
+      // (the bug being fixed here), none of these Polish words would
+      // resolve locally and this would stay blocked with a clarification
+      // message instead of disappearing into a saved entry. The
+      // clarification message itself is not translated, so it would still
+      // read in English if it appeared.
+      expect(find.textContaining('Please clarify'), findsNothing);
+      expect(find.textContaining("don't have nutrition data"), findsNothing);
+      expect(
+        find.text('Nic dziś nie zapisano'),
+        findsNothing,
+      ); // "Nothing logged today" (pl)
+    }, createHttpClient: (context) => _UnreachableHttpClient());
   });
 
   testWidgets('a brand/composite food FoodEstimator used to recognize is '
@@ -490,11 +549,14 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
-          find.ancestor(of: find.text('Food or drink'), matching: find.byType(ListTile)),
+          find.ancestor(
+            of: find.text('Food or drink'),
+            matching: find.byType(ListTile),
+          ),
         )
         .onTap!();
     await tester.pump(const Duration(milliseconds: 500));
@@ -512,7 +574,10 @@ void main() {
     await tester.runAsync(() async {
       tester
           .widget<FilledButton>(
-            find.ancestor(of: find.text('Add to day'), matching: find.byType(FilledButton)),
+            find.ancestor(
+              of: find.text('Add to day'),
+              matching: find.byType(FilledButton),
+            ),
           )
           .onPressed!();
       await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -539,7 +604,7 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
@@ -552,21 +617,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     await tester.enterText(find.byType(TextField), '20 min HIIT');
-    tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
+    tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise'))
+        .onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
     for (var i = 0; i < 6; i++) {
       await tester.pump(const Duration(milliseconds: 300));
     }
 
-    expect(find.textContaining('210'), findsWidgets); // 9.0 MET x 70kg x (20/60)h
+    expect(
+      find.textContaining('210'),
+      findsWidgets,
+    ); // 9.0 MET x 70kg x (20/60)h
 
     final prefs = await SharedPreferences.getInstance();
-    final dailyKey = prefs
-        .getKeys()
-        .firstWhere((key) => key.startsWith('daily_entries_'));
-    final saved =
-        jsonDecode(prefs.getStringList(dailyKey)!.single) as Map<String, dynamic>;
+    final dailyKey = prefs.getKeys().firstWhere(
+      (key) => key.startsWith('daily_entries_'),
+    );
+    final saved = jsonDecode(
+      prefs.getStringList(dailyKey)!.single,
+    ) as Map<String, dynamic>;
     expect(saved['exerciseActivityId'], 'hiit');
     expect(saved['exerciseMet'], 9.0);
     expect(saved['exerciseBodyWeightKg'], 70.0);
@@ -588,7 +659,7 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
@@ -604,7 +675,9 @@ void main() {
       find.byType(TextField),
       '20 min underwater basket weaving',
     );
-    tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
+    tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise'))
+        .onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
     for (var i = 0; i < 6; i++) {
@@ -612,7 +685,9 @@ void main() {
     }
 
     expect(
-      find.textContaining('don\'t recognize "20 min underwater basket weaving"'),
+      find.textContaining(
+        'don\'t recognize "20 min underwater basket weaving"',
+      ),
       findsOneWidget,
     );
     expect(find.text('Nothing logged today'), findsOneWidget);
@@ -629,7 +704,7 @@ void main() {
     await tester.pumpWidget(const A2App(startOnboarding: false));
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .widget<ListTile>(
@@ -642,7 +717,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     await tester.enterText(find.byType(TextField), '20 min HIIT');
-    tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise')).onPressed!();
+    tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Add exercise'))
+        .onPressed!();
     // The offline parser loads its JSON assets asynchronously; pump
     // several times to robustly drain that regardless of prior test timing.
     for (var i = 0; i < 6; i++) {
@@ -823,6 +900,25 @@ void main() {
     expect(breakfast.carbs, greaterThanOrEqualTo(45));
   });
 
+  test(
+    'meal labels are categorized and removed in all supported languages',
+    () {
+      const examples = {
+        'breakfast cucumber': ('Breakfast', 'cucumber'),
+        'śniadanie ogórek': ('Breakfast', 'ogorek'),
+        'Frühstück Gurke': ('Breakfast', 'gurke'),
+        'petit-déjeuner concombre': ('Breakfast', 'concombre'),
+        'desayuno pepino': ('Breakfast', 'pepino'),
+        'colazione cetriolo': ('Breakfast', 'cetriolo'),
+      };
+      for (final example in examples.entries) {
+        final result = extractMealContext(example.key);
+        expect(result.$1, example.value.$1, reason: example.key);
+        expect(result.$3, example.value.$2, reason: example.key);
+      }
+    },
+  );
+
   test('detects and orders common meal descriptions', () {
     expect(MealCategory.detect('Bacon breakfast', false), 'Breakfast');
     expect(MealCategory.detect('Quick afternoon snack', false), 'Snack');
@@ -910,6 +1006,95 @@ void main() {
     expect(nudge.title, 'Good time for breakfast');
   });
 
+  test('add companion responds to food, water, exercise and time of day', () {
+    expect(AddCompanionMood.values.map((mood) => mood.emoji), [
+      '🤤',
+      '🥵',
+      '🏃',
+      '😊',
+      '💪',
+    ]);
+    const meal = FoodEntry('Lunch', '13:00', 1400, 60, Icons.restaurant);
+    const exercise = FoodEntry(
+      'Walk',
+      '17:00',
+      200,
+      0,
+      Icons.directions_run,
+      isExercise: true,
+    );
+    expect(
+      AddCompanionMood.forToday(
+        entries: const [],
+        waterMl: 0,
+        waterTargetMl: 2000,
+        calories: 0,
+        calorieTarget: 2000,
+        now: DateTime(2026, 9, 22, 9),
+      ),
+      AddCompanionMood.hungry,
+    );
+    expect(
+      AddCompanionMood.forToday(
+        entries: const [meal],
+        waterMl: 200,
+        waterTargetMl: 2000,
+        calories: 1400,
+        calorieTarget: 2000,
+        now: DateTime(2026, 9, 22, 13),
+      ),
+      AddCompanionMood.thirsty,
+    );
+    expect(
+      AddCompanionMood.forToday(
+        entries: const [meal],
+        waterMl: 1200,
+        waterTargetMl: 2000,
+        calories: 1400,
+        calorieTarget: 2000,
+        now: DateTime(2026, 9, 22, 18),
+      ),
+      AddCompanionMood.move,
+    );
+    expect(
+      AddCompanionMood.forToday(
+        entries: const [meal, exercise],
+        waterMl: 1200,
+        waterTargetMl: 2000,
+        calories: 1400,
+        calorieTarget: 2000,
+        now: DateTime(2026, 9, 22, 18),
+      ),
+      AddCompanionMood.strong,
+    );
+  });
+
+  test('A² dashboard health summary totals today’s recorded data', () {
+    const entries = [
+      FoodEntry('Lunch', '13:00', 700, 30, Icons.restaurant),
+      FoodEntry(
+        'Walk',
+        '17:00',
+        180,
+        0,
+        Icons.directions_run,
+        isExercise: true,
+        exerciseDurationMinutes: 30,
+      ),
+    ];
+    final summary = DashboardHealthSummary.fromToday(
+      entries,
+      waterMl: 1000,
+      calorieTarget: 2000,
+      waterTargetMl: 2000,
+      now: DateTime(2026, 9, 22, 18),
+    );
+    expect(summary.calories, 700);
+    expect(summary.waterMl, 1000);
+    expect(summary.exerciseMinutes, 30);
+    expect(summary.mood, AddCompanionMood.happy);
+  });
+
   test('daily nudge nudges toward lunch later with nothing logged', () {
     final nudge = DailyNudge.forToday(
       entries: const [],
@@ -970,22 +1155,27 @@ void main() {
     expect(nudge.title, 'Back near target after exercise');
   });
 
-  test('daily nudge suggests a MET-based walk duration when body weight is known', () {
-    final nudge = DailyNudge.forToday(
-      entries: [const FoodEntry('Dinner', '20:00', 2500, 90, Icons.restaurant)],
-      calories: 2500,
-      targetCalories: 2100,
-      protein: 90,
-      targetProtein: 130,
-      bodyWeightKg: 80,
-      walkMet: 4.8,
-      now: DateTime(2026, 1, 1, 21),
-    );
-    // 400 kcal over ÷ (4.8 MET × 80 kg) × 60 ≈ 62 min, rounded to the
-    // nearest 5 — never a fixed, invented calorie burn.
-    expect(nudge.body, contains('min'));
-    expect(nudge.body, isNot(contains('extreme')));
-  });
+  test(
+    'daily nudge suggests a MET-based walk duration when body weight is known',
+    () {
+      final nudge = DailyNudge.forToday(
+        entries: [
+          const FoodEntry('Dinner', '20:00', 2500, 90, Icons.restaurant),
+        ],
+        calories: 2500,
+        targetCalories: 2100,
+        protein: 90,
+        targetProtein: 130,
+        bodyWeightKg: 80,
+        walkMet: 4.8,
+        now: DateTime(2026, 1, 1, 21),
+      );
+      // 400 kcal over ÷ (4.8 MET × 80 kg) × 60 ≈ 62 min, rounded to the
+      // nearest 5 — never a fixed, invented calorie burn.
+      expect(nudge.body, contains('min'));
+      expect(nudge.body, isNot(contains('extreme')));
+    },
+  );
 
   test('daily nudge recognises a balanced day of food and exercise', () {
     final nudge = DailyNudge.forToday(
@@ -1012,6 +1202,44 @@ void main() {
   test('recommended water intake scales with body weight', () {
     expect(recommendedWaterMl(80), 2800);
     expect(recommendedWaterMl(null), 2000);
+  });
+
+  testWidgets('long-pressing Water only offers a confirmed reset', (
+    tester,
+  ) async {
+    var resets = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 130,
+              child: WaterCard(
+                waterMl: 750,
+                waterTargetMl: 2000,
+                onReset: () => resets++,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(WaterCard));
+    await tester.pumpAndSettle();
+    expect(find.text("Reset today's water intake?"), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(resets, 0);
+
+    await tester.longPress(find.byType(WaterCard));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset'));
+    await tester.pumpAndSettle();
+    expect(resets, 1);
   });
 
   test('water descriptions resolve to dashboard millilitres', () {
@@ -1053,72 +1281,108 @@ void main() {
     expect(MealCategory.detect('coffee', false), 'Drinks');
   });
 
-  testWidgets(
-    'AddFoodSheet quantity field scales what gets logged, never the '
-    'catalogue basis (the AI "recipe/batch" confirmation flow)',
-    (tester) async {
-      // AddFoodSheet has enough fields (esp. with showQuantityField on) that
-      // the "Confirm" button sits below the default 600pt-tall test surface
-      // -- give it real phone-sized room instead of scrolling to find it.
-      tester.view.physicalSize = const Size(400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets('AddFoodSheet quantity field scales what gets logged, never the '
+      'catalogue basis (the AI "recipe/batch" confirmation flow)', (
+    tester,
+  ) async {
+    // AddFoodSheet has enough fields (esp. with showQuantityField on) that
+    // the "Confirm" button sits below the default 600pt-tall test surface
+    // -- give it real phone-sized room instead of scrolling to find it.
+    tester.view.physicalSize = const Size(400, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      AddFoodResult? captured;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () async {
-                  captured = await showModalBottomSheet<AddFoodResult>(
-                    context: context,
-                    builder: (_) => const AddFoodSheet(
-                      title: 'Confirm AI estimate',
-                      suggestedName: 'Twaróg waffle',
-                      initialCalories: 100,
-                      initialProtein: 10,
-                      initialCarbs: 5,
-                      initialFat: 3,
-                      initialServingAmount: 50,
-                      initialServingUnit: 'g',
-                      showQuantityField: true,
-                      initialQuantity: 2,
-                      totalPortionsHint: 6,
-                    ),
-                  );
-                },
-                child: const Text('open'),
-              ),
+    AddFoodResult? captured;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () async {
+                captured = await showModalBottomSheet<AddFoodResult>(
+                  context: context,
+                  builder: (_) => const AddFoodSheet(
+                    title: 'Confirm AI estimate',
+                    suggestedName: 'Twaróg waffle',
+                    initialCalories: 100,
+                    initialProtein: 10,
+                    initialCarbs: 5,
+                    initialFat: 3,
+                    initialServingAmount: 50,
+                    initialServingUnit: 'g',
+                    showQuantityField: true,
+                    initialQuantity: 2,
+                    totalPortionsHint: 6,
+                  ),
+                );
+              },
+              child: const Text('open'),
             ),
           ),
         ),
-      );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Confirm'));
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Salt'), findsOneWidget);
+    await tester.ensureVisible(find.text('Confirm'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
 
-      // Today's logged entry is the per-portion figures times the quantity
-      // eaten (2 portions of a 100 kcal/10g protein portion).
-      expect(captured, isNotNull);
-      expect(captured!.kcal, 200);
-      expect(captured!.protein, 20);
-      expect(captured!.carbs, 10);
-      expect(captured!.fat, 6);
-      expect(captured!.weightGrams, 100);
+    // Today's logged entry is the per-portion figures times the quantity
+    // eaten (2 portions of a 100 kcal/10g protein portion).
+    expect(captured, isNotNull);
+    expect(captured!.kcal, 200);
+    expect(captured!.protein, 20);
+    expect(captured!.carbs, 10);
+    expect(captured!.fat, 6);
+    expect(captured!.weightGrams, 100);
 
-      // What's remembered for next time is always the single-portion basis,
-      // never multiplied by how many were eaten this time.
-      final overlay = await LocalCatalogueOverlay.load();
-      final entry = overlay.entries.firstWhere(
-        (e) => e.canonical == 'Twaróg waffle',
-      );
-      expect(entry.kcalPer100g, 100 * 100 / 50);
-      expect(entry.servingAmount, 50);
-    },
-  );
+    // What's remembered for next time is always the single-portion basis,
+    // never multiplied by how many were eaten this time.
+    final overlay = await LocalCatalogueOverlay.load();
+    final entry = overlay.entries.firstWhere(
+      (e) => e.canonical == 'Twaróg waffle',
+    );
+    expect(entry.kcalPer100g, 100 * 100 / 50);
+    expect(entry.servingAmount, 50);
+  });
+
+  testWidgets('A² Health summary card fits a narrow phone dashboard', (
+    tester,
+  ) async {
+    // This reproduces the 141.7dp-wide card from the reported overflow.
+    tester.view.physicalSize = const Size(344, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.1)),
+          child: child!,
+        ),
+        home: A2Shell(
+          locale: const Locale('en'),
+          onLocale: (_) {},
+          onSignedOut: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('A² Health'), findsOneWidget);
+    expect(find.text('0 kcal'), findsOneWidget);
+    expect(find.text('0 ml'), findsOneWidget);
+    expect(find.text('0 min'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   group('A² shell entitlements', () {
     test('A2Entitlements round-trips through JSON', () {

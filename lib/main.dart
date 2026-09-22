@@ -690,6 +690,7 @@ class A2Shell extends StatefulWidget {
 class _A2ShellState extends State<A2Shell> {
   A2Entitlements? entitlements;
   bool openedModule = false;
+  DashboardHealthSummary healthSummary = const DashboardHealthSummary.empty();
 
   static const _moduleIcons = {'health': Icons.favorite_rounded};
 
@@ -699,6 +700,41 @@ class _A2ShellState extends State<A2Shell> {
     const EntitlementService().fetch(defaultServerUrl).then((value) {
       if (mounted) setState(() => entitlements = value);
     });
+    _loadHealthSummary();
+  }
+
+  Future<void> _loadHealthSummary() async {
+    final now = DateTime.now();
+    final results = await Future.wait<Object>([
+      const DailyEntryRepository().load(now),
+      const WaterRepository().load(now),
+      SharedPreferences.getInstance(),
+    ]);
+    final entries = results[0] as List<FoodEntry>;
+    final waterMl = results[1] as int;
+    final prefs = results[2] as SharedPreferences;
+    if (!mounted) return;
+    setState(() {
+      healthSummary = DashboardHealthSummary.fromToday(
+        entries,
+        waterMl: waterMl,
+        calorieTarget: prefs.getInt('daily_target') ?? 2100,
+        waterTargetMl: recommendedWaterMl(
+          prefs.getString('body_profile') == null
+              ? null
+              : BodyProfile.fromJson(
+                  jsonDecode(prefs.getString('body_profile')!)
+                      as Map<String, dynamic>,
+                ).weightKg,
+        ),
+        now: now,
+      );
+    });
+  }
+
+  void _closeModule() {
+    setState(() => openedModule = false);
+    _loadHealthSummary();
   }
 
   void _openModule(String moduleId) {
@@ -737,43 +773,11 @@ class _A2ShellState extends State<A2Shell> {
   @override
   Widget build(BuildContext context) {
     if (openedModule) {
-      // AppShell is rendered completely unmodified (see the class comment
-      // above) -- this floating button is overlaid on top rather than
-      // built into it, so nothing about Health's own UI has to change to
-      // give every module a consistent way back to the dashboard. Bottom
-      // -left is deliberately opposite the existing "Add" FAB (bottom-
-      // right/end by default) so the two never collide on any of
-      // AppShell's four tabs.
-      return Stack(
-        children: [
-          AppShell(
-            locale: widget.locale,
-            onLocale: widget.onLocale,
-            onSignedOut: widget.onSignedOut,
-          ),
-          Positioned(
-            // 96 clears the Material 3 NavigationBar's default 80dp height
-            // plus a small margin -- SafeArea alone doesn't account for
-            // this, since the nav bar isn't a system inset, it's part of
-            // AppShell's own Scaffold layout sitting below this overlay.
-            left: 12,
-            bottom: 96,
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              child: Material(
-                color: Colors.white,
-                shape: const CircleBorder(),
-                elevation: 3,
-                child: IconButton(
-                  icon: const Icon(Icons.apps_rounded, color: forest),
-                  tooltip: ui(context, 'Back to A² dashboard'),
-                  onPressed: () => setState(() => openedModule = false),
-                ),
-              ),
-            ),
-          ),
-        ],
+      return AppShell(
+        locale: widget.locale,
+        onLocale: widget.onLocale,
+        onSignedOut: widget.onSignedOut,
+        onDashboardTap: _closeModule,
       );
     }
     final loaded = entitlements;
@@ -836,20 +840,30 @@ class _A2ShellState extends State<A2Shell> {
                           style: TextStyle(color: Colors.black54),
                         ),
                       )
-                    : GridView.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 0.95,
-                        children: [
-                          for (final module in loaded.modules)
-                            _ModuleCard(
-                              module: module,
-                              icon:
-                                  _moduleIcons[module.id] ?? Icons.apps_rounded,
-                              onTap: () => _openModule(module.id),
+                    : GridView.builder(
+                        itemCount: loaded.modules.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              // A fixed compact height prevents wider phones
+                              // from growing an empty area below the metrics.
+                              // Increase this value if future card content
+                              // needs a little more vertical room.
+                              mainAxisExtent: 160,
                             ),
-                        ],
+                        itemBuilder: (context, index) {
+                          final module = loaded.modules[index];
+                          return _ModuleCard(
+                            module: module,
+                            icon: _moduleIcons[module.id] ?? Icons.apps_rounded,
+                            healthSummary: module.id == 'health'
+                                ? healthSummary
+                                : null,
+                            onTap: () => _openModule(module.id),
+                          );
+                        },
                       ),
               ),
             ],
@@ -860,58 +874,207 @@ class _A2ShellState extends State<A2Shell> {
   }
 }
 
-class _ModuleCard extends StatelessWidget {
+class DashboardHealthSummary {
+  const DashboardHealthSummary({
+    required this.calories,
+    required this.waterMl,
+    required this.exerciseMinutes,
+    required this.mood,
+  });
+
+  const DashboardHealthSummary.empty()
+    : calories = 0,
+      waterMl = 0,
+      exerciseMinutes = 0,
+      mood = AddCompanionMood.hungry;
+
+  factory DashboardHealthSummary.fromToday(
+    List<FoodEntry> entries, {
+    required int waterMl,
+    required int calorieTarget,
+    required int waterTargetMl,
+    required DateTime now,
+  }) {
+    final calories = entries
+        .where((entry) => !entry.isExercise)
+        .fold(0, (sum, entry) => sum + entry.calories);
+    final exerciseMinutes = entries
+        .where((entry) => entry.isExercise)
+        .fold<double>(
+          0,
+          (sum, entry) => sum + (entry.exerciseDurationMinutes ?? 0),
+        )
+        .round();
+    return DashboardHealthSummary(
+      calories: calories,
+      waterMl: waterMl,
+      exerciseMinutes: exerciseMinutes,
+      mood: AddCompanionMood.forToday(
+        entries: entries,
+        waterMl: waterMl,
+        waterTargetMl: waterTargetMl,
+        calories: calories,
+        calorieTarget: calorieTarget,
+        now: now,
+      ),
+    );
+  }
+
+  final int calories;
+  final int waterMl;
+  final int exerciseMinutes;
+  final AddCompanionMood mood;
+}
+
+class _ModuleCard extends StatefulWidget {
   const _ModuleCard({
     required this.module,
     required this.icon,
     required this.onTap,
+    this.healthSummary,
   });
   final A2Module module;
   final IconData icon;
   final VoidCallback onTap;
+  final DashboardHealthSummary? healthSummary;
+
+  @override
+  State<_ModuleCard> createState() => _ModuleCardState();
+}
+
+class _ModuleCardState extends State<_ModuleCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 4),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  IconData get _backgroundIcon => switch (widget.healthSummary?.mood) {
+    AddCompanionMood.hungry => Icons.restaurant_rounded,
+    AddCompanionMood.thirsty => Icons.water_drop_rounded,
+    AddCompanionMood.move => Icons.directions_run_rounded,
+    AddCompanionMood.happy => Icons.eco_rounded,
+    AddCompanionMood.strong => Icons.spa_rounded,
+    null => widget.icon,
+  };
+
+  String _waterLabel(int ml) {
+    if (ml >= 1000 && ml % 100 == 0) {
+      final litres = ml / 1000;
+      return '${litres == litres.roundToDouble() ? litres.toInt() : litres.toStringAsFixed(1)} l';
+    }
+    return '$ml ml';
+  }
 
   @override
   Widget build(BuildContext context) => Card(
+    clipBehavior: Clip.antiAlias,
     child: InkWell(
       borderRadius: BorderRadius.circular(24),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: forest, size: 32),
-            const Spacer(),
-            Text(
-              module.name,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+      onTap: widget.onTap,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(12 * _controller.value, -8 * _controller.value),
+                child: Transform.rotate(
+                  angle: .08 * (_controller.value - .5),
+                  child: child,
+                ),
+              ),
+              child: Align(
+                alignment: const Alignment(1.25, -.85),
+                child: Icon(
+                  _backgroundIcon,
+                  size: 112,
+                  color: forest.withValues(alpha: .075),
+                ),
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              module.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const LText(
-                  'Open',
-                  style: TextStyle(fontWeight: FontWeight.w700, color: forest),
+                Icon(widget.icon, color: forest, size: 32),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.module.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 16,
+                      color: forest,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: forest,
-                ),
+                const SizedBox(height: 4),
+                if (widget.healthSummary case final summary?) ...[
+                  _DashboardMetric(
+                    icon: Icons.restaurant_rounded,
+                    value: '${summary.calories} kcal',
+                  ),
+                  _DashboardMetric(
+                    icon: Icons.water_drop_rounded,
+                    value: _waterLabel(summary.waterMl),
+                  ),
+                  _DashboardMetric(
+                    icon: Icons.directions_run_rounded,
+                    value: '${summary.exerciseMinutes} min',
+                  ),
+                ] else
+                  Text(
+                    widget.module.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    ),
+  );
+}
+
+class _DashboardMetric extends StatelessWidget {
+  const _DashboardMetric({required this.icon, required this.value});
+  final IconData icon;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 2),
+    child: Row(
+      children: [
+        Icon(icon, size: 14, color: forest),
+        const SizedBox(width: 6),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
+      ],
     ),
   );
 }
@@ -922,10 +1085,12 @@ class AppShell extends StatefulWidget {
     required this.locale,
     required this.onLocale,
     required this.onSignedOut,
+    this.onDashboardTap,
   });
   final Locale locale;
   final ValueChanged<Locale> onLocale;
   final VoidCallback onSignedOut;
+  final VoidCallback? onDashboardTap;
   @override
   State<AppShell> createState() => _AppShellState();
 }
@@ -945,6 +1110,12 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   // (never invented) for the daily nudge's exercise-duration suggestion.
   double walkMet = 4.8;
   final entries = <FoodEntry>[];
+  // Incremented synchronously for every local entry mutation. Async refreshes
+  // use it to avoid replacing a newly-added entry with an older snapshot that
+  // began loading before the mutation (most visible after a label scan).
+  int _entriesRevision = 0;
+  int _pendingEntrySaves = 0;
+  Future<void> _entrySaveQueue = Future<void>.value();
   List<DayPhoto> photos = [];
   List<HistoryRecord> history = [];
   int get calories => entries
@@ -1090,6 +1261,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       );
       await _loadAccountName();
       if (!enabled) return;
+      final revisionBeforePush = _entriesRevision;
       // Always push before pulling. This is the retry for any earlier
       // mutation (add/edit/delete) whose own upload failed -- every
       // launch, resume, and return to the Today tab is another chance to
@@ -1102,7 +1274,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       final pushed = await const AccountService().uploadLocalData(
         defaultServerUrl,
       );
-      if (pushed) {
+      // A local add/edit/delete may have landed while this upload was in
+      // flight. In that case its data was not guaranteed to be in the pushed
+      // payload, so never follow with a stale server pull that could erase it.
+      if (pushed && revisionBeforePush == _entriesRevision) {
         await const AccountService().synchronise(defaultServerUrl);
       }
       await Future.wait([
@@ -1162,8 +1337,11 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _loadTodayEntries() async {
+    final revisionAtStart = _entriesRevision;
     final restored = await const DailyEntryRepository().load(DateTime.now());
-    if (mounted) {
+    if (mounted &&
+        revisionAtStart == _entriesRevision &&
+        _pendingEntrySaves == 0) {
       setState(() {
         entries
           ..clear()
@@ -1173,8 +1351,22 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   }
 
   Future<void> _saveTodayEntries() async {
-    await const DailyEntryRepository().save(DateTime.now(), entries);
-    await const AccountService().uploadLocalData(defaultServerUrl);
+    _entriesRevision++;
+    // Freeze the exact UI state being saved; later list mutations must not
+    // alter an in-flight persistence operation.
+    final snapshot = List<FoodEntry>.of(entries);
+    _pendingEntrySaves++;
+    final queuedSave = _entrySaveQueue = _entrySaveQueue.then(
+      (_) => const DailyEntryRepository().save(DateTime.now(), snapshot),
+    );
+    try {
+      await queuedSave;
+    } finally {
+      _pendingEntrySaves--;
+    }
+    // Local data is authoritative for immediate UI. Network sync is a
+    // background concern and will also retry during the periodic refresh.
+    unawaited(const AccountService().uploadLocalData(defaultServerUrl));
   }
 
   Future<void> _loadTodayPhotos() async {
@@ -1277,6 +1469,14 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       style: dietStyle,
       weightKg: bodyWeightKg,
     );
+    final addMood = AddCompanionMood.forToday(
+      entries: entries,
+      waterMl: waterMl,
+      waterTargetMl: waterTargetMl,
+      calories: calories,
+      calorieTarget: targets.calories,
+      now: DateTime.now(),
+    );
     final pages = [
       TodayPage(
         accountName: accountName,
@@ -1295,6 +1495,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         entrySyncAvailable: entrySyncAvailable,
         onSyncEntry: _shareEntry,
         onRefresh: _restoreAndSync,
+        onDashboardTap: widget.onDashboardTap,
         walkMet: walkMet,
         onDelete: (entry) async {
           await const AccountService().recordDeletedEntry(
@@ -1367,19 +1568,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         ],
       ),
       floatingActionButton: index == 0
-          ? FloatingActionButton.extended(
-              backgroundColor: forest,
-              foregroundColor: Colors.white,
-              elevation: 2,
-              highlightElevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              icon: const Icon(Icons.add_rounded, size: 26),
-              label: const LText(
-                'Add',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-              ),
+          ? FloatingActionButton(
+              tooltip: ui(context, 'Add'),
+              backgroundColor: Colors.transparent,
+              foregroundColor: ink,
+              elevation: 0,
+              focusElevation: 0,
+              hoverElevation: 0,
+              highlightElevation: 0,
+              child: AddCompanionEmoji(mood: addMood),
               onPressed: () async {
                 final result = await showModalBottomSheet<Object>(
                   context: context,
@@ -1410,6 +1607,106 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           : null,
     );
   }
+}
+
+enum AddCompanionMood {
+  hungry('🤤'),
+  thirsty('🥵'),
+  move('🏃'),
+  happy('😊'),
+  strong('💪');
+
+  const AddCompanionMood(this.emoji);
+  final String emoji;
+
+  static AddCompanionMood forToday({
+    required List<FoodEntry> entries,
+    required int waterMl,
+    required int waterTargetMl,
+    required int calories,
+    required int calorieTarget,
+    required DateTime now,
+  }) {
+    final hasFood = entries.any((entry) => !entry.isExercise);
+    final hasExercise = entries.any((entry) => entry.isExercise);
+    final waterProgress = waterTargetMl <= 0 ? 1.0 : waterMl / waterTargetMl;
+    final calorieProgress = calorieTarget <= 0 ? 1.0 : calories / calorieTarget;
+
+    if (!hasFood) return AddCompanionMood.hungry;
+    if (waterProgress < .4 && now.hour >= 11) {
+      return AddCompanionMood.thirsty;
+    }
+    if (!hasExercise && now.hour >= 16) return AddCompanionMood.move;
+    if (hasExercise && calorieProgress >= .6 && waterProgress >= .5) {
+      return AddCompanionMood.strong;
+    }
+    return AddCompanionMood.happy;
+  }
+}
+
+class AddCompanionEmoji extends StatefulWidget {
+  const AddCompanionEmoji({super.key, required this.mood});
+  final AddCompanionMood mood;
+
+  @override
+  State<AddCompanionEmoji> createState() => _AddCompanionEmojiState();
+}
+
+class _AddCompanionEmojiState extends State<AddCompanionEmoji>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 430),
+    );
+    _scale = Tween<double>(begin: 1, end: 1.22).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
+    );
+    _animate();
+  }
+
+  @override
+  void didUpdateWidget(covariant AddCompanionEmoji oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.mood != widget.mood) _animate();
+  }
+
+  void _animate() {
+    _controller
+      ..reset()
+      ..repeat(reverse: true, count: 6);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ScaleTransition(
+    scale: _scale,
+    child: AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: animation,
+        child: RotationTransition(
+          turns: Tween<double>(begin: -.04, end: 0).animate(animation),
+          child: child,
+        ),
+      ),
+      child: FittedBox(
+        key: ValueKey(widget.mood),
+        fit: BoxFit.scaleDown,
+        child: Text(widget.mood.emoji, style: const TextStyle(fontSize: 38)),
+      ),
+    ),
+  );
 }
 
 // A brief, tasteful "achievement" pop shown once when a daily target is
@@ -1869,10 +2166,12 @@ class TodayPage extends StatelessWidget {
     this.onSyncEntry,
     this.walkMet = 4.8,
     this.onRefresh,
+    this.onDashboardTap,
   });
   // Manual fallback for anything shared into this account -- normal sync
   // is the periodic/tab-switch/resume checks in _AppShellState, not this.
   final Future<void> Function()? onRefresh;
+  final VoidCallback? onDashboardTap;
   final String accountName;
   final List<FoodEntry> entries;
   final List<DayPhoto> photos;
@@ -2014,6 +2313,7 @@ class TodayPage extends StatelessWidget {
               TopBar(
                 '${greetingFor(DateTime.now())}${accountName.isEmpty ? '' : ', $accountName'}',
                 fullDate(DateTime.now()),
+                onDashboardTap: onDashboardTap,
               ),
               const SizedBox(height: 22),
               if (entries.isEmpty) ...[
@@ -2097,6 +2397,7 @@ class TodayPage extends StatelessWidget {
                       child: WaterCard(
                         waterMl: waterMl,
                         waterTargetMl: waterTargetMl,
+                        onReset: () => onAddWater(-waterMl),
                       ),
                     ),
                   ],
@@ -2189,8 +2490,9 @@ class EditEntryResult {
 }
 
 class TopBar extends StatelessWidget {
-  const TopBar(this.title, this.subtitle, {super.key});
+  const TopBar(this.title, this.subtitle, {super.key, this.onDashboardTap});
   final String title, subtitle;
+  final VoidCallback? onDashboardTap;
   @override
   Widget build(BuildContext context) => Row(
     children: [
@@ -2219,16 +2521,71 @@ class TopBar extends StatelessWidget {
           ],
         ),
       ),
-      ClipOval(
-        child: Image.asset(
-          'assets/branding/app_icon.png',
-          width: 44,
-          height: 44,
-          fit: BoxFit.cover,
-        ),
-      ),
+      DashboardLogoButton(onTap: onDashboardTap),
     ],
   );
+}
+
+class DashboardLogoButton extends StatefulWidget {
+  const DashboardLogoButton({super.key, this.onTap});
+  final VoidCallback? onTap;
+
+  @override
+  State<DashboardLogoButton> createState() => _DashboardLogoButtonState();
+}
+
+class _DashboardLogoButtonState extends State<DashboardLogoButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    _scale = Tween<double>(
+      begin: 1,
+      end: 1.22,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    if (widget.onTap != null) _controller.repeat(reverse: true, count: 4);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = ClipOval(
+      child: Image.asset(
+        'assets/branding/app_icon.png',
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+      ),
+    );
+    if (widget.onTap == null) return logo;
+    return ScaleTransition(
+      scale: _scale,
+      child: Tooltip(
+        message: ui(context, 'Back to A² dashboard'),
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: widget.onTap,
+            child: Padding(padding: const EdgeInsets.all(4), child: logo),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class HeroCard extends StatelessWidget {
@@ -2392,8 +2749,32 @@ class WaterCard extends StatelessWidget {
     super.key,
     required this.waterMl,
     required this.waterTargetMl,
+    this.onReset,
   });
   final int waterMl, waterTargetMl;
+  final VoidCallback? onReset;
+
+  Future<void> _confirmReset(BuildContext context) async {
+    if (onReset == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const LText("Reset today's water intake?"),
+        content: const LText("This will set today's water total to 0 ml."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const LText('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const LText('Reset', style: TextStyle(color: coral)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) onReset!();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2411,6 +2792,7 @@ class WaterCard extends StatelessWidget {
       aqua,
       trailing: WaterGlass(progress: progress, width: 14, height: 20),
       complete: complete,
+      onLongPress: onReset == null ? null : () => _confirmReset(context),
     );
   }
 }
@@ -2480,6 +2862,7 @@ class MetricCard extends StatelessWidget {
     super.key,
     this.trailing,
     this.onTap,
+    this.onLongPress,
     this.complete = false,
   });
   final String label, value, unit, detail;
@@ -2487,11 +2870,13 @@ class MetricCard extends StatelessWidget {
   final Color color;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final bool complete;
   @override
   Widget build(BuildContext context) => Card(
     child: InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -4535,7 +4920,7 @@ class _AddExerciseSheetState extends State<AddExerciseSheet> {
                 ),
                 SizedBox(width: 10),
                 LText(
-                  'Estimating with AI…',
+                  'Analysing exercise entry…',
                   style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
               ],
@@ -4761,6 +5146,7 @@ class AddFoodResult {
     required this.servingAmount,
     required this.servingUnit,
     this.weightGrams,
+    this.mealCategory,
     required this.savedToCatalogue,
   });
   final String name;
@@ -4772,6 +5158,7 @@ class AddFoodResult {
   // scaled up to the whole pack when a pack weight was given; null when
   // neither this sheet nor the label had any weight to go on at all.
   final double? weightGrams;
+  final String? mealCategory;
   final bool savedToCatalogue;
 }
 
@@ -4886,6 +5273,9 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
   late bool saveToCatalogue = widget.defaultSaveToCatalogue;
   String? error;
   bool saving = false;
+  late String _lastRecognizedUnit = _normalizedUnit(
+    widget.initialServingUnit ?? 'g',
+  );
 
   static String _formatNum(double v) =>
       v == v.roundToDouble() ? v.toInt().toString() : v.toString();
@@ -4911,6 +5301,17 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
   double? _num(TextEditingController c) =>
       double.tryParse(c.text.trim().replaceAll(',', '.'));
 
+  static String _normalizedUnit(String value) {
+    final unit = value.trim().toLowerCase();
+    return switch (unit) {
+      'gram' || 'grams' => 'g',
+      'kilogram' || 'kilograms' => 'kg',
+      'millilitre' || 'millilitres' || 'milliliter' || 'milliliters' => 'ml',
+      'litre' || 'litres' || 'liter' || 'liters' => 'l',
+      _ => unit,
+    };
+  }
+
   // Mass/volume units the portion amount could be given in, each as a
   // multiple of the pack weight field's own unit (always grams) -- so
   // switching "Unit" between these keeps the pack-weight scaling correct
@@ -4934,6 +5335,45 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     'liters': 1000.0,
   };
 
+  void _onServingUnitChanged(String value) {
+    final next = _normalizedUnit(value);
+    final oldScale = _gramsPerUnit[_lastRecognizedUnit];
+    final nextScale = _gramsPerUnit[next];
+    if (oldScale != null && nextScale != null && oldScale != nextScale) {
+      void convert(TextEditingController controller) {
+        final current = _num(controller);
+        if (current != null) {
+          controller.text = _formatNum(current * oldScale / nextScale);
+        }
+      }
+
+      convert(servingAmount);
+      convert(packWeight);
+    }
+    if (nextScale != null) _lastRecognizedUnit = next;
+    setState(() {});
+  }
+
+  void _resetScannedValues() {
+    void reset(TextEditingController controller, double? value) {
+      controller.text = value == null ? '' : _formatNum(value);
+    }
+
+    reset(calories, widget.initialCalories);
+    reset(protein, widget.initialProtein);
+    reset(carbs, widget.initialCarbs);
+    reset(fat, widget.initialFat);
+    reset(saturatedFat, widget.initialSaturatedFat);
+    reset(sugar, widget.initialSugar);
+    reset(fibre, widget.initialFibre);
+    reset(salt, widget.initialSalt);
+    servingAmount.text = _formatNum(widget.initialServingAmount ?? 100);
+    servingUnit.text = widget.initialServingUnit ?? 'g';
+    _lastRecognizedUnit = _normalizedUnit(servingUnit.text);
+    reset(packWeight, widget.initialPackWeightGrams);
+    setState(() => error = null);
+  }
+
   // How much bigger the whole pack is than the calories/portion row above,
   // when the user has given a whole-pack weight -- 1.0 (no scaling) until
   // both a valid portion size and a valid pack weight are present. A unit
@@ -4944,9 +5384,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     final amount = _num(servingAmount);
     final pack = _num(packWeight);
     if (amount == null || amount <= 0 || pack == null || pack <= 0) return 1;
-    final unitGrams =
-        _gramsPerUnit[servingUnit.text.trim().toLowerCase()] ?? 1.0;
-    return pack / (amount * unitGrams);
+    return pack / amount;
   }
 
   // How many portions the user says they actually had -- 1 (no scaling)
@@ -4960,7 +5398,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
   }
 
   Future<void> _save() async {
-    final foodName = name.text.trim();
+    final (mealCategory, _, foodName) = extractMealContext(name.text.trim());
     final kcal = _num(calories);
     final amount = _num(servingAmount);
     if (foodName.isEmpty) {
@@ -4982,22 +5420,23 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
     final unit = servingUnit.text.trim().isEmpty
         ? 'g'
         : servingUnit.text.trim();
+    final baseAmount = amount * (_gramsPerUnit[_normalizedUnit(unit)] ?? 1.0);
     if (saveToCatalogue) {
       final entry = OverlayFoodEntry(
         id: OverlayFoodEntry.idFor(foodName),
         canonical: foodName,
-        kcalPer100g: kcal * 100 / amount,
+        kcalPer100g: kcal * 100 / baseAmount,
         proteinPer100g: () {
           final v = _num(protein);
-          return v == null ? null : v * 100 / amount;
+          return v == null ? null : v * 100 / baseAmount;
         }(),
         carbsPer100g: () {
           final v = _num(carbs);
-          return v == null ? null : v * 100 / amount;
+          return v == null ? null : v * 100 / baseAmount;
         }(),
         fatPer100g: () {
           final v = _num(fat);
-          return v == null ? null : v * 100 / amount;
+          return v == null ? null : v * 100 / baseAmount;
         }(),
         servingAmount: amount,
         servingUnit: unit,
@@ -5006,17 +5445,19 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
       final overlay = await LocalCatalogueOverlay.load();
       await overlay.upsert(entry);
       unawaited(
-        const CatalogueSyncService().contribute(
-          defaultServerUrl,
-          name: foodName,
-          kcal: kcal,
-          protein: _num(protein),
-          carbs: _num(carbs),
-          fat: _num(fat),
-          servingAmount: amount,
-          servingUnit: unit,
-          locale: widget.locale,
-        ),
+        const CatalogueSyncService()
+            .contribute(
+              defaultServerUrl,
+              name: foodName,
+              kcal: kcal,
+              protein: _num(protein),
+              carbs: _num(carbs),
+              fat: _num(fat),
+              servingAmount: amount,
+              servingUnit: unit,
+              locale: widget.locale,
+            )
+            .catchError((_) {}),
       );
     }
     if (mounted) {
@@ -5040,7 +5481,8 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
           salt: scaled(salt),
           servingAmount: amount,
           servingUnit: unit,
-          weightGrams: amount * scale,
+          weightGrams: baseAmount * scale,
+          mealCategory: mealCategory,
           savedToCatalogue: saveToCatalogue,
         ),
       );
@@ -5055,126 +5497,190 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(20, 18, 20, sheetBottomInset(context, 24)),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: SizedBox(width: 42, child: Divider(thickness: 4)),
-            ),
-            const SizedBox(height: 10),
-            LText(
-              widget.title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 6),
-            LText(
-              widget.subtitle ?? 'Calories and a portion are enough — the rest is optional. Correct anything that’s wrong before confirming.',
-              style: const TextStyle(color: Colors.black54, height: 1.35),
-            ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: name,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: ui(context, 'Food name')),
-            ),
-            if (widget.showQuantityField) ...[
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            labelStyle: const TextStyle(fontSize: 10),
+            floatingLabelStyle: const TextStyle(fontSize: 10),
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: SizedBox(width: 42, child: Divider(thickness: 4)),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: LText(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  if (widget.showPackWeightField)
+                    IconButton(
+                      tooltip: ui(context, 'Reset scanned values'),
+                      onPressed: _resetScannedValues,
+                      icon: const Icon(Icons.restart_alt_rounded),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              LText(
+                widget.subtitle ?? 'Calories and a portion are enough — the rest is optional. Correct anything that’s wrong before confirming.',
+                style: const TextStyle(color: Colors.black54, height: 1.35),
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: name,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: ui(context, 'Food name'),
+                ),
+              ),
+              if (widget.showQuantityField) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: quantity,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: ui(context, 'How many portions did you have?'),
+                  ),
+                ),
+                if (widget.totalPortionsHint != null &&
+                    widget.totalPortionsHint! > 1) ...[
+                  const SizedBox(height: 6),
+                  LText(
+                    '${ui(context, 'Makes about')} ${_formatNum(widget.totalPortionsHint!)} ${ui(context, 'portions in total')}',
+                    style: const TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+                ],
+                if (_quantityFactor != 1) ...[
+                  const SizedBox(height: 6),
+                  LText(
+                    '= ${_formatNum((_num(calories) ?? 0) * _quantityFactor)} kcal',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: forest,
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: 12),
-              TextField(
-                controller: quantity,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: ui(context, 'How many portions did you have?'),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: calories,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged:
+                          widget.showPackWeightField || widget.showQuantityField
+                          ? (_) => setState(() {})
+                          : null,
+                      decoration: InputDecoration(labelText: 'kcal'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: protein,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Protein'),
+                        suffixText: 'g',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: carbs,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Carbs'),
+                        suffixText: 'g',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: fat,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Fat'),
+                        suffixText: 'g',
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              if (widget.totalPortionsHint != null &&
-                  widget.totalPortionsHint! > 1) ...[
-                const SizedBox(height: 6),
-                LText(
-                  '${ui(context, 'Makes about')} ${_formatNum(widget.totalPortionsHint!)} ${ui(context, 'portions in total')}',
-                  style: const TextStyle(fontSize: 11, color: Colors.black54),
-                ),
-              ],
-              if (_quantityFactor != 1) ...[
-                const SizedBox(height: 6),
-                LText(
-                  '= ${_formatNum((_num(calories) ?? 0) * _quantityFactor)} kcal',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: forest,
-                  ),
-                ),
-              ],
-            ],
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: calories,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  if (widget.showPackWeightField) ...[
+                    Expanded(
+                      child: TextField(
+                        controller: packWeight,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: ui(context, 'Pack weight'),
+                          suffixText: 'g',
+                        ),
+                      ),
                     ),
-                    onChanged:
-                        widget.showPackWeightField || widget.showQuantityField
-                        ? (_) => setState(() {})
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: ui(context, 'Calories'),
-                      suffixText: 'kcal',
+                    const SizedBox(width: 10),
+                  ],
+                  Expanded(
+                    child: TextField(
+                      controller: servingAmount,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: widget.showPackWeightField
+                          ? (_) => setState(() {})
+                          : null,
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Portion qty'),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: servingAmount,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    onChanged: widget.showPackWeightField
-                        ? (_) => setState(() {})
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: ui(context, 'Portion amount'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: servingUnit,
+                      onChanged: _onServingUnitChanged,
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Unit (g/kg/ml/l/pc/slice)'),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: servingUnit,
-                    onChanged: widget.showPackWeightField
-                        ? (_) => setState(() {})
-                        : null,
-                    decoration: InputDecoration(labelText: ui(context, 'Unit')),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const LText(
-              'Units understood: g, kg, ml, l, pc, slice.',
-              style: TextStyle(fontSize: 11, color: Colors.black45),
-            ),
-            if (widget.showPackWeightField) ...[
-              const SizedBox(height: 14),
-              TextField(
-                controller: packWeight,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: ui(context, 'Whole pack weight'),
-                  suffixText: 'g',
-                ),
+                ],
               ),
-              if (_packScaleFactor != 1) ...[
+              if (widget.showPackWeightField && _packScaleFactor != 1) ...[
                 const SizedBox(height: 6),
                 LText(
                   '= ${_formatNum((_num(calories) ?? 0) * _packScaleFactor)} kcal for the whole pack',
@@ -5184,60 +5690,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                   ),
                 ),
               ],
-            ],
-            const SizedBox(height: 14),
-            const LText(
-              'Optional',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: protein,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: ui(context, 'Protein'),
-                      suffixText: 'g',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: carbs,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: ui(context, 'Carbs'),
-                      suffixText: 'g',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: fat,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: ui(context, 'Fat'),
-                      suffixText: 'g',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            // The rest of a nutrition label's usual rows -- only worth
-            // showing when there's a real label behind this sheet to have
-            // read them from (see showPackWeightField).
-            if (widget.showPackWeightField) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -5247,7 +5700,7 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                         decimal: true,
                       ),
                       decoration: InputDecoration(
-                        labelText: ui(context, 'Saturated fat'),
+                        labelText: ui(context, 'Sat. fat'),
                         suffixText: 'g',
                       ),
                     ),
@@ -5278,58 +5731,61 @@ class _AddFoodSheetState extends State<AddFoodSheet> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: salt,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: ui(context, 'Salt'),
+                        suffixText: 'g',
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: salt,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              const SizedBox(height: 8),
+              Material(
+                type: MaterialType.transparency,
+                child: CheckboxListTile(
+                  value: saveToCatalogue,
+                  onChanged: (v) =>
+                      setState(() => saveToCatalogue = v ?? false),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  dense: true,
+                  title: const LText(
+                    'Save to my food list for reuse',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const LText(
+                    'Also shared so others can benefit',
+                    style: TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
                 ),
-                decoration: InputDecoration(
-                  labelText: ui(context, 'Salt'),
-                  suffixText: 'g',
+              ),
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: LText(error!, style: const TextStyle(color: coral)),
+                ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: saving ? null : _save,
+                  child: saving
+                      ? const SizedBox.square(
+                          dimension: 17,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const LText('Confirm'),
                 ),
               ),
             ],
-            const SizedBox(height: 8),
-            Material(
-              type: MaterialType.transparency,
-              child: CheckboxListTile(
-                value: saveToCatalogue,
-                onChanged: (v) => setState(() => saveToCatalogue = v ?? false),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                dense: true,
-                title: const LText(
-                  'Save to my food list for reuse',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-                subtitle: const LText(
-                  'Also shared so others can benefit',
-                  style: TextStyle(fontSize: 11, color: Colors.black54),
-                ),
-              ),
-            ),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: LText(error!, style: const TextStyle(color: coral)),
-              ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: saving ? null : _save,
-                child: saving
-                    ? const SizedBox.square(
-                        dimension: 17,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const LText('Confirm'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     ),
@@ -5943,6 +6399,8 @@ class AddMealSheet extends StatefulWidget {
 class _AddMealSheetState extends State<AddMealSheet> {
   final description = TextEditingController();
   final photoCaption = TextEditingController();
+  final descriptionFocus = FocusNode();
+  final sheetScroll = ScrollController();
   int mode = 0;
   bool aiAvailable = false;
   bool busy = false;
@@ -5967,10 +6425,28 @@ class _AddMealSheetState extends State<AddMealSheet> {
     description.addListener(() {
       if (notice != null) setState(() => notice = null);
     });
+    descriptionFocus.addListener(() {
+      if (descriptionFocus.hasFocus) _revealAddButton();
+    });
+  }
+
+  void _revealAddButton() {
+    // Wait for the keyboard and bottom-sheet inset animations to finish, then
+    // bring the primary action above the keyboard automatically.
+    Future<void>.delayed(const Duration(milliseconds: 350), () {
+      if (!mounted || !sheetScroll.hasClients) return;
+      sheetScroll.animateTo(
+        sheetScroll.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
   void dispose() {
+    descriptionFocus.dispose();
+    sheetScroll.dispose();
     description.dispose();
     photoCaption.dispose();
     super.dispose();
@@ -6043,7 +6519,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
       backgroundColor: Colors.transparent,
       builder: (_) => AddFoodSheet(
         title: 'Confirm scanned label',
-        suggestedName: reading?.productName ?? '',
+        suggestedName: '',
         initialCalories: reading?.caloriesPer100,
         initialProtein: reading?.proteinPer100,
         initialCarbs: reading?.carbsPer100,
@@ -6078,6 +6554,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
         sugar: confirmed.sugar,
         fibre: confirmed.fibre,
         salt: confirmed.salt,
+        category: confirmed.mealCategory,
       ),
     );
   }
@@ -6178,13 +6655,22 @@ class _AddMealSheetState extends State<AddMealSheet> {
   // CatalogueSyncService.contribute), on AI's own real servingGrams basis
   // -- never a guessed weight. Best-effort: a failure here just means this
   // one item stays AI-only a bit longer, never blocks logging the entry.
-  Future<void> _contributeAiFood(NutritionEstimate aiResult) async {
+  Future<void> _contributeAiFood(
+    NutritionEstimate aiResult,
+    String originalPhrase,
+  ) async {
     try {
       final overlay = await LocalCatalogueOverlay.load();
       await overlay.upsert(
         OverlayFoodEntry(
           id: OverlayFoodEntry.idFor(aiResult.name),
           canonical: aiResult.name,
+          // Keep the exact wording that needed AI as an alias. The overlay
+          // parser merges aliases independently of the current UI language,
+          // so this also works for German/French/Spanish/Italian input.
+          aliasesEn: originalPhrase.trim().isEmpty
+              ? const []
+              : [originalPhrase.trim()],
           kcalPer100g: aiResult.calories * 100 / aiResult.servingGrams,
           proteinPer100g: aiResult.protein * 100 / aiResult.servingGrams,
           carbsPer100g: aiResult.carbs * 100 / aiResult.servingGrams,
@@ -6193,15 +6679,17 @@ class _AddMealSheetState extends State<AddMealSheet> {
           source: 'ai',
         ),
       );
-      await const CatalogueSyncService().contribute(
-        defaultServerUrl,
-        name: aiResult.name,
-        kcal: aiResult.calories.toDouble(),
-        protein: aiResult.protein.toDouble(),
-        carbs: aiResult.carbs.toDouble(),
-        servingAmount: aiResult.servingGrams,
-        servingUnit: 'g',
-        locale: widget.locale,
+      unawaited(
+        const CatalogueSyncService().contribute(
+          defaultServerUrl,
+          name: aiResult.name,
+          kcal: aiResult.calories.toDouble(),
+          protein: aiResult.protein.toDouble(),
+          carbs: aiResult.carbs.toDouble(),
+          servingAmount: aiResult.servingGrams,
+          servingUnit: 'g',
+          locale: widget.locale,
+        ),
       );
     } catch (_) {
       // Offline or the server is unreachable -- stays AI-only for now.
@@ -6278,6 +6766,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
         sugar: confirmed.sugar,
         fibre: confirmed.fibre,
         salt: confirmed.salt,
+        category: confirmed.mealCategory,
       ),
     );
   }
@@ -6326,7 +6815,16 @@ class _AddMealSheetState extends State<AddMealSheet> {
           text: phrase,
         );
         final reResolved = localParser.parse(aiResult.name);
-        if (_isFullyResolvedFood(reResolved)) return reResolved.items;
+        if (_isFullyResolvedFood(reResolved)) {
+          if (reResolved.items.length == 1 &&
+              reResolved.items.single.canonicalId != null) {
+            await localParser.rememberAlias(
+              phrase,
+              reResolved.items.single.canonicalId!,
+            );
+          }
+          return reResolved.items;
+        }
         // Local truly has no entry for this one (re-parsing AI's own
         // canonical name still didn't resolve it) -- teach the global
         // catalogue about it now, using AI's own servingGrams so the
@@ -6334,7 +6832,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
         // phone picks this up next time CatalogueSyncService.sync() runs,
         // the same path the manual "Add new food" entry uses.
         if (aiResult.servingGrams > 0) {
-          unawaited(_contributeAiFood(aiResult));
+          await _contributeAiFood(aiResult, phrase);
         }
         return [
           FoodParseItem(
@@ -6459,7 +6957,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
     Navigator.pop(
       context,
       FoodEntry(
-        text,
+        textToParse,
         _clockTime(entryTime),
         estimate.calories,
         estimate.protein,
@@ -6482,6 +6980,8 @@ class _AddMealSheetState extends State<AddMealSheet> {
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
     ),
     child: SingleChildScrollView(
+      controller: sheetScroll,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -6529,19 +7029,21 @@ class _AddMealSheetState extends State<AddMealSheet> {
             ],
           ),
           if (busy)
-            const Padding(
-              padding: EdgeInsets.only(top: 12),
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
               child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   LText(
-                    'Analysing your photo…',
-                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                    mode == 2
+                        ? 'Scanning nutrition label…'
+                        : 'Analysing food entry…',
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
               ),
@@ -6567,6 +7069,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
             ),
             TextField(
               controller: description,
+              focusNode: descriptionFocus,
               minLines: 3,
               maxLines: 5,
               decoration: InputDecoration(
@@ -6583,18 +7086,6 @@ class _AddMealSheetState extends State<AddMealSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            const Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 16, color: forest),
-                SizedBox(width: 7),
-                Expanded(
-                  child: LText(
-                    'AI estimates include a confidence range—never fake precision.',
-                    style: TextStyle(fontSize: 11, color: Colors.black54),
-                  ),
-                ),
-              ],
-            ),
             if (aiAvailable)
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: description,
@@ -8113,6 +8604,36 @@ class AccountService {
     return user['privateSync'] == true;
   }
 
+  // Actually flips the server's own privateSync flag for the signed-in
+  // account -- the phone's "Private server sync" switch used to just be a
+  // manual re-pull with no effect on the server side at all. Restricted
+  // server-side to admin-role accounts (see /api/v1/auth/private-sync):
+  // privateSync is an allowlist the server owner controls, not a general
+  // per-user opt-in, so this can only ever change your OWN account and only
+  // if that account is already an admin.
+  Future<bool> setPrivateSync(String serverUrl, bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('account_token');
+    if (token == null) throw Exception('Sign in first.');
+    final base = serverUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final response = await http
+        .patch(
+          Uri.parse('$base/api/v1/auth/private-sync'),
+          headers: {
+            'content-type': 'application/json',
+            'authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'enabled': enabled}),
+        )
+        .timeout(const Duration(seconds: 15));
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode != 200) {
+      throw Exception(body['error'] ?? 'Could not change sync');
+    }
+    await prefs.setString('account_user', jsonEncode(body['user']));
+    return (body['user'] as Map<String, dynamic>)['privateSync'] == true;
+  }
+
   Future<Map<String, dynamic>> _localPayload() async {
     final prefs = await SharedPreferences.getInstance();
     final daily = <String, dynamic>{};
@@ -9168,7 +9689,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? contentCheckedAt;
   int publishedUpdates = 0;
   bool checkingContent = false;
-  String installedVersion = '1.0.0+61';
+  String installedVersion = '1.0.0+78';
   String? accountEmail;
   bool accountPrivateSync = false;
   late bool accountAiEnabled = widget.aiEnabled;
@@ -9292,6 +9813,7 @@ class _ProfilePageState extends State<ProfilePage> {
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['privateSync'] ==
               true;
+      sync = accountPrivateSync;
       accountAiEnabled =
           accountRaw != null &&
           (jsonDecode(accountRaw) as Map<String, dynamic>)['aiEnabled'] == true;
@@ -9371,6 +9893,31 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (error) {
       if (mounted) {
         setState(() => entrySyncEnabled = !value);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: LText(error.toString().replaceFirst('Exception: ', '')),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _setPrivateSync(bool value) async {
+    setState(() => sync = value);
+    try {
+      final confirmed = await const AccountService().setPrivateSync(
+        defaultServerUrl,
+        value,
+      );
+      if (!mounted) return;
+      setState(() {
+        sync = confirmed;
+        accountPrivateSync = confirmed;
+      });
+      if (confirmed) await const AccountService().synchronise(contentServerUrl);
+    } catch (error) {
+      if (mounted) {
+        setState(() => sync = !value);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: LText(error.toString().replaceFirst('Exception: ', '')),
@@ -10191,21 +10738,20 @@ class _ProfilePageState extends State<ProfilePage> {
       Card(
         child: Column(
           children: [
-            if (accountIsAdmin && accountPrivateSync) ...[
+            if (accountIsAdmin) ...[
               SwitchListTile(
                 value: sync,
-                onChanged: (v) async {
-                  setState(() => sync = v);
-                  if (v) {
-                    await const AccountService().synchronise(contentServerUrl);
-                  }
-                },
+                onChanged: _setPrivateSync,
                 secondary: const Icon(Icons.cloud_outlined, color: forest),
                 title: const LText(
                   'Private server sync',
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
-                subtitle: const LText('Off · your data stays on this device'),
+                subtitle: LText(
+                  sync
+                      ? 'On · syncing with your private server'
+                      : 'Off · your data stays on this device',
+                ),
               ),
               const Divider(height: 1, indent: 55),
             ],

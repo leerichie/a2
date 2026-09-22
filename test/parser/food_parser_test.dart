@@ -35,7 +35,10 @@ void main() {
     });
 
     test('two tablespoons light mayonnaise', () {
-      final item = parser.parse('two tablespoons light mayonnaise').items.single;
+      final item = parser
+          .parse('two tablespoons light mayonnaise')
+          .items
+          .single;
       expect(item.quantity, 2);
       expect(item.unit, 'tablespoon');
       expect(item.canonicalId, 'mayonnaise');
@@ -55,11 +58,17 @@ void main() {
       expect(item.quantity, 0.5);
       expect(item.unit, 'bowl');
       expect(item.canonicalId, 'coleslaw');
-      expect(item.confidence, ParseConfidence.incomplete); // no portion rule, no nutrient data
+      expect(
+        item.confidence,
+        ParseConfidence.incomplete,
+      ); // no portion rule, no nutrient data
     });
 
     test('about half a large bowl of coleslaw', () {
-      final item = parser.parse('about half a large bowl of coleslaw').items.single;
+      final item = parser
+          .parse('about half a large bowl of coleslaw')
+          .items
+          .single;
       expect(item.approximate, true);
       expect(item.quantity, 0.5);
       expect(item.size, 'large');
@@ -129,7 +138,10 @@ void main() {
     });
 
     test('2 large spoonfuls cottage cheese', () {
-      final item = parser.parse('2 large spoonfuls cottage cheese').items.single;
+      final item = parser
+          .parse('2 large spoonfuls cottage cheese')
+          .items
+          .single;
       expect(item.quantity, 2);
       expect(item.size, 'large');
       expect(item.unit, 'spoonful');
@@ -152,7 +164,10 @@ void main() {
     });
 
     test('three quarters of a mug of yoghurt', () {
-      final item = parser.parse('three quarters of a mug of yoghurt').items.single;
+      final item = parser
+          .parse('three quarters of a mug of yoghurt')
+          .items
+          .single;
       expect(item.quantity, 0.75);
       expect(item.unit, 'mug');
       expect(item.canonicalId, 'yoghurt');
@@ -171,7 +186,10 @@ void main() {
 
     test('exact litres + known nutrient data -> high', () {
       final item = parser.parse('0.5l beer').items.single;
-      expect(item.grams, 500); // ml treated 1:1 as grams for now (density-neutral)
+      expect(
+        item.grams,
+        500,
+      ); // ml treated 1:1 as grams for now (density-neutral)
       expect(item.nutrition!.kcal, closeTo(215, 0.01)); // 43 kcal/100ml * 500ml
       expect(item.confidence, ParseConfidence.high);
     });
@@ -182,16 +200,22 @@ void main() {
       expect(item.confidence, ParseConfidence.low);
     });
 
-    test('recognized food, resolved portion, and now a real nutrient record', () {
-      // mayonnaise now has its own real nutrient record (USDA FoodData
-      // Central, via tool/import_usda_nutrients.py) instead of the honest
-      // gap this used to be.
-      final item = parser.parse('1 tablespoon mayonnaise').items.single;
-      expect(item.canonicalId, 'mayonnaise');
-      expect(item.grams, 14);
-      expect(item.nutrition!.kcal, closeTo(95.2, 0.01)); // 680 kcal/100g * 14g
-      expect(item.confidence, ParseConfidence.medium);
-    });
+    test(
+      'recognized food, resolved portion, and now a real nutrient record',
+      () {
+        // mayonnaise now has its own real nutrient record (USDA FoodData
+        // Central, via tool/import_usda_nutrients.py) instead of the honest
+        // gap this used to be.
+        final item = parser.parse('1 tablespoon mayonnaise').items.single;
+        expect(item.canonicalId, 'mayonnaise');
+        expect(item.grams, 14);
+        expect(
+          item.nutrition!.kcal,
+          closeTo(95.2, 0.01),
+        ); // 680 kcal/100g * 14g
+        expect(item.confidence, ParseConfidence.medium);
+      },
+    );
 
     test('subtype now has its own real nutrient record instead of '
         'borrowing its generic parent\'s', () {
@@ -202,6 +226,27 @@ void main() {
       expect(item.nutrition!.kcal, closeTo(467.5, 0.01));
       expect(item.confidence, ParseConfidence.high);
     });
+
+    test('reported chicken typo and bare cucumber both resolve locally', () {
+      final chicken = parser.parse('chicien breast');
+      expect(chicken.unresolved, isEmpty);
+      expect(chicken.items.single.canonicalId, 'chicken_breast');
+      expect(chicken.items.single.nutrition, isNotNull);
+
+      final cucumber = parser.parse('cucumber');
+      expect(cucumber.unresolved, isEmpty);
+      expect(cucumber.items.single.canonicalId, 'cucumber');
+      expect(cucumber.items.single.grams, 100);
+      expect(cucumber.items.single.nutrition, isNotNull);
+    });
+
+    test('an AI-resolved alias is remembered by the normal parser', () async {
+      await parser.rememberAlias('green test crunch', 'cucumber');
+      final reloaded = await FoodParser.load();
+      final result = reloaded.parse('green test crunch');
+      expect(result.unresolved, isEmpty);
+      expect(result.items.single.canonicalId, 'cucumber');
+    });
   });
 
   // Step 3 added these generic entries with no nutrient data at all --
@@ -211,55 +256,72 @@ void main() {
   // deliberately get no bare-mention default portion (the old universal
   // "25ml" assumption is gone), so a bare "wine" with no container word
   // correctly stays incomplete -- not a regression, the intended asymmetry.
-  group('generic canonical entries recognize real migrated nutrition where safe', () {
-    const nowHaveRealData = {
-      'chicken': 165, 'cheese': 350, 'sausage': 300, 'salad': 60,
-      'soup': 55, 'beans': 127, 'raisins': 300,
-    };
-    nowHaveRealData.forEach((word, kcalPer100g) {
-      test('"$word" resolves with real migrated nutrient data, not invented', () {
-        final item = parser.parse(word).items.single;
-        expect(item.canonicalId, word);
-        expect(item.confidence, ParseConfidence.medium);
-        expect(item.nutrition, isNotNull);
-        expect(item.nutrition!.kcal, closeTo(kcalPer100g * item.grams! / 100, 0.01));
+  group(
+    'generic canonical entries recognize real migrated nutrition where safe',
+    () {
+      const nowHaveRealData = {
+        'chicken': 165,
+        'cheese': 350,
+        'sausage': 300,
+        'salad': 60,
+        'soup': 55,
+        'beans': 127,
+        'raisins': 300,
+      };
+      nowHaveRealData.forEach((word, kcalPer100g) {
+        test(
+          '"$word" resolves with real migrated nutrient data, not invented',
+          () {
+            final item = parser.parse(word).items.single;
+            expect(item.canonicalId, word);
+            expect(item.confidence, ParseConfidence.medium);
+            expect(item.nutrition, isNotNull);
+            expect(
+              item.nutrition!.kcal,
+              closeTo(kcalPer100g * item.grams! / 100, 0.01),
+            );
+          },
+        );
       });
-    });
 
-    // Wine's bare-mention default (and every other alcoholic drink's) is
-    // covered in test/parser/migration_coverage_test.dart, which also
-    // documents the 2026-09-18 policy reversal that added it.
+      // Wine's bare-mention default (and every other alcoholic drink's) is
+      // covered in test/parser/migration_coverage_test.dart, which also
+      // documents the 2026-09-18 policy reversal that added it.
 
-    test('generic "chicken" is never silently narrowed to chicken breast', () {
-      final item = parser.parse('chicken').items.single;
-      expect(item.canonicalId, isNot('chicken_breast'));
-      expect(item.canonicalId, 'chicken');
-    });
+      test(
+        'generic "chicken" is never silently narrowed to chicken breast',
+        () {
+          final item = parser.parse('chicken').items.single;
+          expect(item.canonicalId, isNot('chicken_breast'));
+          expect(item.canonicalId, 'chicken');
+        },
+      );
 
-    test('generic "cheese" is never silently narrowed to cheddar', () {
-      final item = parser.parse('cheese').items.single;
-      expect(item.canonicalId, isNot('cheddar'));
-      expect(item.canonicalId, 'cheese');
-    });
+      test('generic "cheese" is never silently narrowed to cheddar', () {
+        final item = parser.parse('cheese').items.single;
+        expect(item.canonicalId, isNot('cheddar'));
+        expect(item.canonicalId, 'cheese');
+      });
 
-    test('"raisin" (singular) resolves to the new "raisins" entry', () {
-      final item = parser.parse('raisin').items.single;
-      expect(item.canonicalId, 'raisins');
-    });
+      test('"raisin" (singular) resolves to the new "raisins" entry', () {
+        final item = parser.parse('raisin').items.single;
+        expect(item.canonicalId, 'raisins');
+      });
 
-    test('"porridge" and "oat" resolve to the existing "oats" entry', () {
-      expect(parser.parse('porridge').items.single.canonicalId, 'oats');
-      expect(parser.parse('oat').items.single.canonicalId, 'oats');
-    });
+      test('"porridge" and "oat" resolve to the existing "oats" entry', () {
+        expect(parser.parse('porridge').items.single.canonicalId, 'oats');
+        expect(parser.parse('oat').items.single.canonicalId, 'oats');
+      });
 
-    test('"crisp" (singular) resolves to the existing "crisps" entry', () {
-      expect(parser.parse('crisp').items.single.canonicalId, 'crisps');
-    });
+      test('"crisp" (singular) resolves to the existing "crisps" entry', () {
+        expect(parser.parse('crisp').items.single.canonicalId, 'crisps');
+      });
 
-    test('regional term "chips" still resolves to fries, not crisps', () {
-      expect(parser.parse('chips').items.single.canonicalId, 'fries');
-    });
-  });
+      test('regional term "chips" still resolves to fries, not crisps', () {
+        expect(parser.parse('chips').items.single.canonicalId, 'fries');
+      });
+    },
+  );
 
   group('unresolved-word tracking', () {
     test('a mixed sentence keeps recognized items and flags the rest', () {
@@ -282,17 +344,29 @@ void main() {
     // below and above).
     const subtypes = {'greek_yoghurt': 'yoghurt'};
     subtypes.forEach((subtypeId, parentId) {
-      test('"$subtypeId" borrows nutrition from its parent "$parentId" at Low confidence', () {
-        final subtypeItem = parser.parse('100g $subtypeId'.replaceAll('_', ' ')).items.single;
-        expect(subtypeItem.canonicalId, subtypeId);
-        expect(subtypeItem.nutrition, isNotNull);
-        expect(subtypeItem.confidence, ParseConfidence.low);
+      test(
+        '"$subtypeId" borrows nutrition from its parent "$parentId" at Low confidence',
+        () {
+          final subtypeItem = parser
+              .parse('100g $subtypeId'.replaceAll('_', ' '))
+              .items
+              .single;
+          expect(subtypeItem.canonicalId, subtypeId);
+          expect(subtypeItem.nutrition, isNotNull);
+          expect(subtypeItem.confidence, ParseConfidence.low);
 
-        final parentItem = parser.parse('100g ${parentId.replaceAll('_', ' ')}').items.single;
-        // Same grams (100g) -> the fallback nutrition must match the
-        // parent's own record exactly, not an invented approximation.
-        expect(subtypeItem.nutrition!.kcal, closeTo(parentItem.nutrition!.kcal, 0.01));
-      });
+          final parentItem = parser
+              .parse('100g ${parentId.replaceAll('_', ' ')}')
+              .items
+              .single;
+          // Same grams (100g) -> the fallback nutrition must match the
+          // parent's own record exactly, not an invented approximation.
+          expect(
+            subtypeItem.nutrition!.kcal,
+            closeTo(parentItem.nutrition!.kcal, 0.01),
+          );
+        },
+      );
     });
 
     test('"mozzarella" now has its own real record instead of borrowing '
@@ -318,12 +392,36 @@ void main() {
   // `approx_household` units like bowl/handful/scoop.
   group('generic standard-volume fallback (any food, not just drinks)', () {
     const cases = {
-      '1 teaspoon cottage cheese': {'unit': 'teaspoon', 'grams': 5.0, 'confidence': ParseConfidence.medium},
-      '1 tablespoon cottage cheese': {'unit': 'tablespoon', 'grams': 15.0, 'confidence': ParseConfidence.medium},
-      '1 dessertspoon cottage cheese': {'unit': 'dessertspoon', 'grams': 10.0, 'confidence': ParseConfidence.medium},
-      '1 cup cottage cheese': {'unit': 'cup', 'grams': 240.0, 'confidence': ParseConfidence.medium},
-      '1 fluid ounce cottage cheese': {'unit': 'fluid_ounce', 'grams': 30.0, 'confidence': ParseConfidence.medium},
-      '1 spoonful cottage cheese': {'unit': 'spoonful', 'grams': 15.0, 'confidence': ParseConfidence.low},
+      '1 teaspoon cottage cheese': {
+        'unit': 'teaspoon',
+        'grams': 5.0,
+        'confidence': ParseConfidence.medium,
+      },
+      '1 tablespoon cottage cheese': {
+        'unit': 'tablespoon',
+        'grams': 15.0,
+        'confidence': ParseConfidence.medium,
+      },
+      '1 dessertspoon cottage cheese': {
+        'unit': 'dessertspoon',
+        'grams': 10.0,
+        'confidence': ParseConfidence.medium,
+      },
+      '1 cup cottage cheese': {
+        'unit': 'cup',
+        'grams': 240.0,
+        'confidence': ParseConfidence.medium,
+      },
+      '1 fluid ounce cottage cheese': {
+        'unit': 'fluid_ounce',
+        'grams': 30.0,
+        'confidence': ParseConfidence.medium,
+      },
+      '1 spoonful cottage cheese': {
+        'unit': 'spoonful',
+        'grams': 15.0,
+        'confidence': ParseConfidence.low,
+      },
     };
     cases.forEach((phrase, expected) {
       test('"$phrase"', () {
@@ -356,13 +454,16 @@ void main() {
       expect(item.confidence, ParseConfidence.medium);
     });
 
-    test('black coffee resolves with a bare-mention default, negligible kcal', () {
-      final item = parser.parse('black coffee').items.single;
-      expect(item.canonicalId, 'coffee');
-      expect(item.grams, 100);
-      expect(item.nutrition!.kcal, closeTo(3, 0.01));
-      expect(item.confidence, ParseConfidence.medium);
-    });
+    test(
+      'black coffee resolves with a bare-mention default, negligible kcal',
+      () {
+        final item = parser.parse('black coffee').items.single;
+        expect(item.canonicalId, 'coffee');
+        expect(item.grams, 100);
+        expect(item.nutrition!.kcal, closeTo(3, 0.01));
+        expect(item.confidence, ParseConfidence.medium);
+      },
+    );
 
     test('tea resolves with a bare-mention default, negligible kcal', () {
       final item = parser.parse('tea').items.single;
@@ -382,24 +483,36 @@ void main() {
       'spoon light cottage cheese, black coffee, glass water, half glass fruit smoothie',
     );
 
-    test('resolves all 8 components with usable nutrition data, none invented', () {
-      final resolvedIds = result.items.map((i) => i.canonicalId).toList();
-      expect(
-        resolvedIds,
-        containsAll([
-          'coleslaw', 'smoked_salmon', 'boiled_egg', 'cheddar',
-          'cottage_cheese', 'coffee', 'water', 'smoothie',
-        ]),
-      );
-      for (final item in result.items) {
-        expect(item.confidence, isNot(ParseConfidence.incomplete));
-        expect(item.nutrition, isNotNull);
-      }
-    });
+    test(
+      'resolves all 8 components with usable nutrition data, none invented',
+      () {
+        final resolvedIds = result.items.map((i) => i.canonicalId).toList();
+        expect(
+          resolvedIds,
+          containsAll([
+            'coleslaw',
+            'smoked_salmon',
+            'boiled_egg',
+            'cheddar',
+            'cottage_cheese',
+            'coffee',
+            'water',
+            'smoothie',
+          ]),
+        );
+        for (final item in result.items) {
+          expect(item.confidence, isNot(ParseConfidence.incomplete));
+          expect(item.nutrition, isNotNull);
+        }
+      },
+    );
 
-    test('nothing is silently dropped -- no leftover unresolved text at all', () {
-      expect(result.unresolved, isEmpty);
-    });
+    test(
+      'nothing is silently dropped -- no leftover unresolved text at all',
+      () {
+        expect(result.unresolved, isEmpty);
+      },
+    );
 
     test('exact quantities are preserved through the whole sentence', () {
       final byId = {for (final i in result.items) i.canonicalId: i};
@@ -413,8 +526,14 @@ void main() {
         'their own real data', () {
       final byId = {for (final i in result.items) i.canonicalId: i};
       expect(byId['water']!.nutrition!.kcal, 0);
-      expect(byId['cheddar']!.confidence, ParseConfidence.medium); // own real data, unit-based portion
-      expect(byId['smoked_salmon']!.confidence, ParseConfidence.medium); // own real data
+      expect(
+        byId['cheddar']!.confidence,
+        ParseConfidence.medium,
+      ); // own real data, unit-based portion
+      expect(
+        byId['smoked_salmon']!.confidence,
+        ParseConfidence.medium,
+      ); // own real data
     });
   });
 
@@ -437,11 +556,22 @@ void main() {
     test('avocado, cheddar, bell pepper and cottage cheese all resolve '
         'with real nutrition data, not invented', () {
       final byId = {for (final i in result.items) i.canonicalId: i};
-      expect(byId['avocado']!.nutrition!.kcal, closeTo(80, 0.01)); // half, 160 kcal/100g
-      expect(byId['cheddar']!.nutrition!.kcal, closeTo(164, 0.01)); // 2 slices, 410 kcal/100g
+      expect(
+        byId['avocado']!.nutrition!.kcal,
+        closeTo(80, 0.01),
+      ); // half, 160 kcal/100g
+      expect(
+        byId['cheddar']!.nutrition!.kcal,
+        closeTo(164, 0.01),
+      ); // 2 slices, 410 kcal/100g
       expect(byId['bell_pepper']!.nutrition, isNotNull);
       expect(byId['cottage_cheese']!.nutrition, isNotNull);
-      for (final id in ['avocado', 'cheddar', 'bell_pepper', 'cottage_cheese']) {
+      for (final id in [
+        'avocado',
+        'cheddar',
+        'bell_pepper',
+        'cottage_cheese',
+      ]) {
         expect(byId[id]!.confidence, isNot(ParseConfidence.incomplete));
       }
     });
@@ -472,7 +602,11 @@ void main() {
     meals.forEach((mealType, phrase) {
       test('$mealType: "$phrase" resolves completely, no invented data', () {
         final result = parser.parse(phrase);
-        expect(result.unresolved, isEmpty, reason: 'nothing silently dropped for $mealType');
+        expect(
+          result.unresolved,
+          isEmpty,
+          reason: 'nothing silently dropped for $mealType',
+        );
         for (final item in result.items) {
           expect(
             item.confidence,

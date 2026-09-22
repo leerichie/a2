@@ -1,3 +1,6 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'aliases/personal_alias.dart';
 import 'aliases/personal_alias_repository.dart';
 import 'catalogue/alias_index.dart';
 import 'catalogue/asset_reader.dart';
@@ -61,7 +64,13 @@ class FoodParser {
     AssetReader reader = defaultAssetReader,
     PersonalAliasRepository? personalAliases,
   }) async {
-    final bundledCatalogue = await FoodCatalogue.load(locale: locale, reader: reader);
+    personalAliases ??= PersonalAliasRepository(
+      await SharedPreferences.getInstance(),
+    );
+    final bundledCatalogue = await FoodCatalogue.load(
+      locale: locale,
+      reader: reader,
+    );
     final lexicon = await Lexicon.load(locale: locale, reader: reader);
     final bundledNutrition = await NutritionCatalogue.load(reader: reader);
     final bundledPortions = await PortionCatalogue.load(reader: reader);
@@ -75,7 +84,9 @@ class FoodParser {
     // mirroring the exact same precedence rule the backend enforces.
     final overlay = await LocalCatalogueOverlay.load();
     final bundledIds = bundledCatalogue.entries.map((e) => e.id).toSet();
-    final newOverlayEntries = overlay.entries.where((e) => !bundledIds.contains(e.id));
+    final newOverlayEntries = overlay.entries.where(
+      (e) => !bundledIds.contains(e.id),
+    );
     final catalogue = FoodCatalogue([
       ...bundledCatalogue.entries,
       for (final o in newOverlayEntries)
@@ -88,7 +99,8 @@ class FoodParser {
     ]);
     final nutrition = NutritionCatalogue({
       for (final e in bundledCatalogue.entries)
-        if (bundledNutrition.forFoodId(e.id) != null) e.id: bundledNutrition.forFoodId(e.id)!,
+        if (bundledNutrition.forFoodId(e.id) != null)
+          e.id: bundledNutrition.forFoodId(e.id)!,
       for (final o in newOverlayEntries)
         o.id: NutrientRecord(
           foodId: o.id,
@@ -146,10 +158,15 @@ class FoodParser {
         // mayonnaise only has its own "tablespoon" rule, so "1 teaspoon
         // mayonnaise" in a recipe has to resolve the same way a user
         // typing that phrase directly would.
-        final rule = portions.lookup(foodId: ingredient.foodId, unit: ingredient.unit);
-        final gramsPerUnit = rule?.grams ?? (ingredient.unit == null
-            ? null
-            : genericVolume.lookup(ingredient.unit!)?.ml);
+        final rule = portions.lookup(
+          foodId: ingredient.foodId,
+          unit: ingredient.unit,
+        );
+        final gramsPerUnit =
+            rule?.grams ??
+            (ingredient.unit == null
+                ? null
+                : genericVolume.lookup(ingredient.unit!)?.ml);
         if (record == null || gramsPerUnit == null) {
           complete = false;
           break;
@@ -178,17 +195,20 @@ class FoodParser {
         fibrePer100g: totalFibre == null ? null : totalFibre / totalGrams * 100,
         source: recipe.source ?? 'derived from default recipe composition',
       );
-      recipePortions.add(PortionRule(
-        foodId: recipe.foodId,
-        foodNameAsGiven: catalogueById[recipe.foodId]?.canonical ?? recipe.foodId,
-        unit: null,
-        size: null,
-        grams: totalGrams,
-        // A composed default, not a food-specific measurement someone
-        // actually recorded -- deliberately lower confidence than a real
-        // authored portion rule (see deriveFoodConfidence).
-        confidence: 'low',
-      ));
+      recipePortions.add(
+        PortionRule(
+          foodId: recipe.foodId,
+          foodNameAsGiven:
+              catalogueById[recipe.foodId]?.canonical ?? recipe.foodId,
+          unit: null,
+          size: null,
+          grams: totalGrams,
+          // A composed default, not a food-specific measurement someone
+          // actually recorded -- deliberately lower confidence than a real
+          // authored portion rule (see deriveFoodConfidence).
+          confidence: 'low',
+        ),
+      );
     }
     final nutritionWithRecipes = NutritionCatalogue({
       for (final e in catalogue.entries)
@@ -241,6 +261,25 @@ class FoodParser {
     );
   }
 
+  /// Remembers wording that AI mapped to an existing canonical food so the
+  /// same input resolves locally next time without another API call.
+  Future<void> rememberAlias(String phrase, String canonicalId) async {
+    final repository = personalAliases;
+    final normalized = normalizeAlias(phrase);
+    if (repository == null || normalized.isEmpty) return;
+    if (repository.resolve(normalized, PersonalAliasKind.food, locale) ==
+        canonicalId) {
+      return;
+    }
+    await repository.add(
+      locale: locale,
+      kind: PersonalAliasKind.food,
+      phrase: phrase.trim(),
+      normalizedPhrase: normalized,
+      canonicalId: canonicalId,
+    );
+  }
+
   FoodParseResult parse(String input) {
     final normalized = normalizeParserText(input);
     final segments = segmentPhrases(normalized, lexicon, aliasIndex);
@@ -253,7 +292,9 @@ class FoodParser {
       if (item != null) {
         items.add(item);
       } else {
-        unresolved.add(UnresolvedSpan(segment, cursor, cursor + segment.length));
+        unresolved.add(
+          UnresolvedSpan(segment, cursor, cursor + segment.length),
+        );
       }
       cursor += segment.length + 1;
     }
@@ -294,8 +335,13 @@ class FoodParser {
       // else to resolve as food ("sausage", "3 sausages"), it was actually
       // the food -- try resolving the unit word itself before giving up.
       if (unit != null && remaining.trim().isEmpty) {
-        final asFood = resolveFood(unit, catalogue, aliasIndex,
-            personalAliases: personalAliases, locale: locale);
+        final asFood = resolveFood(
+          unit,
+          catalogue,
+          aliasIndex,
+          personalAliases: personalAliases,
+          locale: locale,
+        );
         if (asFood.entry != null) {
           remaining = unit;
           unit = null;
@@ -318,15 +364,25 @@ class FoodParser {
       // deliberately compound because the cooking method materially
       // changes nutrition, and must win over generically stripping the
       // word and losing that more specific identity.
-      resolution = resolveFood(remaining, catalogue, aliasIndex,
-          personalAliases: personalAliases, locale: locale);
+      resolution = resolveFood(
+        remaining,
+        catalogue,
+        aliasIndex,
+        personalAliases: personalAliases,
+        locale: locale,
+      );
       if (resolution.entry == null) {
         final prepResult = stripPreparations(remaining, lexicon);
         preparations = prepResult.preparations;
         remaining = prepResult.remainder;
         if (remaining.trim().isNotEmpty) {
-          resolution = resolveFood(remaining, catalogue, aliasIndex,
-              personalAliases: personalAliases, locale: locale);
+          resolution = resolveFood(
+            remaining,
+            catalogue,
+            aliasIndex,
+            personalAliases: personalAliases,
+            locale: locale,
+          );
         }
       }
     }
@@ -356,17 +412,23 @@ class FoodParser {
         gramsPerUnit = measurement.grams;
         exactMeasurement = true;
       } else if (measurement.millilitres != null) {
-        gramsPerUnit = measurement.millilitres; // density-neutral: ml treated 1:1 for now
+        gramsPerUnit =
+            measurement.millilitres; // density-neutral: ml treated 1:1 for now
         exactMeasurement = true;
       } else {
         // `unit == null` here looks up the bare-mention default portion
         // ("egg", "banana" with no unit at all) -- food-specific, not a
         // global assumption (see PortionCatalogue.lookup).
-        final rule = portions.lookup(foodId: nutrientLookupId, unit: unit, size: sizeFullness.size);
+        final rule = portions.lookup(
+          foodId: nutrientLookupId,
+          unit: unit,
+          size: sizeFullness.size,
+        );
         if (rule != null) {
           gramsPerUnit = rule.grams;
           portionRuleConfidence = rule.confidence;
-        } else if (unit != null && pourableCategories.contains(baseEntry.category)) {
+        } else if (unit != null &&
+            pourableCategories.contains(baseEntry.category)) {
           // No food-specific rule for this drink+unit -- fall back to the
           // standard container volume (glass/mug/cup/bottle/carton) shared
           // with WaterIntakeParser. Covers both `drink` (beer, wine, ...)
@@ -392,7 +454,9 @@ class FoodParser {
         }
       }
 
-      final totalGrams = gramsPerUnit == null ? null : gramsPerUnit * quantityResult.quantity;
+      final totalGrams = gramsPerUnit == null
+          ? null
+          : gramsPerUnit * quantityResult.quantity;
       final gramsKnown = totalGrams != null;
 
       NutrientTotals? nutritionTotals;
@@ -403,7 +467,9 @@ class FoodParser {
           proteinG: record.proteinPer100g * factor,
           carbsG: record.carbsPer100g * factor,
           fatG: record.fatPer100g == null ? null : record.fatPer100g! * factor,
-          fibreG: record.fibrePer100g == null ? null : record.fibrePer100g! * factor,
+          fibreG: record.fibrePer100g == null
+              ? null
+              : record.fibrePer100g! * factor,
         );
       }
 

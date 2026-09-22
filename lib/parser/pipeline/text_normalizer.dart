@@ -6,8 +6,33 @@ import 'text_folding.dart';
 // installed locale as a connector/filler word, just for meal time instead
 // of quantity. Folded/lowercased forms only, matched here before segmenting.
 const _mealTimeWords = {
-  'breakfast', 'brunch', 'lunch', 'dinner', 'supper', 'snack',
-  'sniadanie', 'obiad', 'kolacja', 'przekaska',
+  'breakfast',
+  'brunch',
+  'lunch',
+  'dinner',
+  'supper',
+  'snack',
+  'sniadanie',
+  'obiad',
+  'kolacja',
+  'przekaska',
+  'fruhstuck',
+  'mittagessen',
+  'abendessen',
+  'abendbrot',
+  'imbiss',
+  'petit-dejeuner',
+  'dejeuner',
+  'diner',
+  'gouter',
+  'souper',
+  'desayuno',
+  'almuerzo',
+  'cena',
+  'tentempie',
+  'colazione',
+  'pranzo',
+  'spuntino',
 };
 
 String normalizeParserText(String input) {

@@ -1,5 +1,135 @@
 # Changelog
 
+## 1.0.0+78 — 2026-09-22
+
+- Fixed the "Private server sync" switch in Settings: it used to always show
+  "Off" and do nothing but re-pull data when tapped, with no effect on the
+  server. It now actually reads and changes the account's real sync status
+  (admin accounts only, via a new self-service `/api/v1/auth/private-sync`
+  endpoint), and its label reflects the true current state.
+
+## 1.0.0+77 — 2026-09-22
+
+- Simplified the animated Add companion to one larger emoji for each daily
+  condition—hungry, thirsty, movement, happy or strong—and removed the second
+  supporting symbol and white floating-button background.
+
+## 1.0.0+76 — 2026-09-22
+
+- Fixed newly scanned nutrition-label entries occasionally disappearing from
+  Today when an older periodic refresh completed just after the local save.
+- Entry changes now update and persist locally first, with ordered local
+  writes and server upload in the background. A sync that overlaps a local
+  change can no longer pull stale server data over that newer entry.
+
+## 1.0.0+75 — 2026-09-22
+
+- Increased the compact A² dashboard-card height slightly so the Health
+  metrics remain overflow-free with enlarged device text, while retaining the
+  fixed-height layout that avoids excessive empty space on wider phones.
+
+## 1.0.0+74 — 2026-09-22
+
+- Removed the remaining empty area beneath the Health card’s exercise metric
+  by using a compact fixed dashboard-card height instead of allowing card
+  height to grow with screen width.
+
+## 1.0.0+73 — 2026-09-22
+
+- Restored the prominent green heart on the A² Health dashboard card and
+  removed the spacer that reserved unnecessary room for its animation. The
+  animated motif now runs entirely behind the compact card content.
+
+## 1.0.0+72 — 2026-09-22
+
+- Added a long-press action to the Today dashboard’s Water card. It shows a
+  single localized confirmation dialog and resets today’s water total to zero
+  only after confirmation.
+
+## 1.0.0+71 — 2026-09-22
+
+- Fixed the live Health summary card overflowing vertically on narrow phone
+  layouts by giving dashboard module cards more height and compacting the
+  title/action row so all three daily metrics remain visible.
+
+## 1.0.0+70 — 2026-09-22
+
+- Nutrition-label scans no longer guess or prefill the food name; confirming a
+  scan now requires the user to provide the name themselves.
+- Kept compact field labels permanently above their values, shortened “Portion
+  amount” to “Portion qty,” and made package/portion units convert live while
+  preserving the same nutrition and whole-pack calculation.
+- Added a localized reset button to scanned-label confirmation. It restores
+  every OCR-derived nutrition, portion, unit and pack value while preserving
+  the food name the user entered.
+
+## 1.0.0+69 — 2026-09-22
+
+- The A² dashboard’s Health card now shows today’s recorded calories, water
+  and exercise minutes in a compact icon-and-value column instead of the
+  generic food/exercise/weight/photo tracking description.
+- Added a subtle animated background motif to the Health card. It follows the
+  same daily state as the Add companion—food, hydration or movement when one
+  needs attention, and calm healthy foliage when the day is progressing well.
+  The summary refreshes whenever the user returns from Health.
+
+## 1.0.0+68 — 2026-09-22
+
+- Made the animated Add companion’s meaning clearer: concerned face with
+  cutlery when food is missing, hot face with water when hydration is low,
+  hesitant face with a runner when exercise is due, and smiling thumbs-up or
+  muscle combinations when the day is progressing well.
+
+## 1.0.0+67 — 2026-09-22
+
+- Fixed the Add flow showing “Analysing your photo” while processing manually
+  entered text. Loading feedback now identifies the actual operation: scanning
+  a nutrition label, analysing a food entry, or analysing an exercise entry,
+  with matching copy in all six supported languages.
+
+## 1.0.0+66 — 2026-09-22
+
+- Compacted Add Food and scanned-label confirmation into tidy four-column
+  nutrition rows: kcal/protein/carbs/fat and saturated fat/sugar/fibre/salt.
+- Moved the shorter “Pack weight” field alongside portion amount and unit,
+  placed its calculated whole-pack calories directly underneath, and folded
+  the supported-unit list into the Unit label.
+- Meal-type words entered in the food-name confirmation are now treated only
+  as category metadata and removed from both the saved entry name and reusable
+  catalogue name.
+
+## 1.0.0+65 — 2026-09-22
+
+- Made the A² dashboard-return logo pulse more noticeably when Health opens.
+- Replaced the static “+ Add” control with an encouraging animated emoji that
+  reacts to today’s food, water and exercise: hungry, thirsty, ready to move,
+  happy or strong. It animates on opening and whenever its state changes while
+  retaining the same localized Add action and workflow.
+
+## 1.0.0+64 — 2026-09-22
+
+- Replaced the floating module-dashboard return button with the A² logo in the
+  Health Today header. Tapping the logo now returns to the A² dashboard, and it
+  pulses smoothly twice when Health opens to make the action discoverable.
+
+## 1.0.0+63 — 2026-09-22
+
+- The Add Meal sheet now scrolls its primary “Add to day” action into view
+  automatically when the description keyboard opens, so the keyboard no
+  longer has to be dismissed before saving.
+- Removed the AI confidence-range explanation from the Add Meal sheet in all
+  six supported languages to make the form more compact.
+
+## 1.0.0+62 — 2026-09-22
+
+- Fixed common foods reported as unknown: bare cucumber now has a practical
+  default portion, and food wording resolved by AI is remembered locally so
+  the same wording does not require another API call.
+- Meal-type words are now removed from saved entry text while still selecting
+  the correct category, across all six supported languages.
+- Salt is now available as a manual nutrition field for every food entry, while
+  nutrition-label OCR continues to prefill it when present.
+
 ## 1.0.0+61 — 2026-09-20
 
 - Fixed email sign-in being completely broken for accounts created before
