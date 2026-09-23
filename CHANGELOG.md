@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0+79 — 2026-09-23
+
+- Fixed nutrition-label scans opening an empty confirmation form when on-device
+  text recognition failed or found no usable nutrition values. The app now
+  keeps the user in the add flow and shows a localized retry message.
+- Restored the OCR-derived product name and expanded nutrition-term recognition
+  across English, Polish, German, French, Spanish and Italian labels.
+- Kept the on-device text recognizer lifecycle bounded so it is closed after
+  every scan, including failures.
+
 ## 1.0.0+78 — 2026-09-22
 
 - Fixed the "Private server sync" switch in Settings: it used to always show

@@ -994,6 +994,28 @@ void main() {
     expect(reading.hasNutrition, isFalse);
   });
 
+  test(
+    'label reader recognizes nutrition terms in every supported language',
+    () {
+      const labels = {
+        'en': 'Energy 210 kcal Protein 8g Carbohydrate 31g Fat 6g Salt 0.4g',
+        'pl': 'Energia 210 kcal Białko 8g Węglowodany 31g Tłuszcz 6g Sól 0,4g',
+        'de': 'Energie 210 kcal Eiweiß 8g Kohlenhydrate 31g Fett 6g Salz 0,4g',
+        'fr': 'Énergie 210 kcal Protéines 8g Glucides 31g Matières grasses 6g Sel 0,4g',
+        'es': 'Valor energético 210 kcal Proteínas 8g Hidratos de carbono 31g Grasas 6g Sal 0,4g',
+        'it': 'Valore energetico 210 kcal Proteine 8g Carboidrati 31g Grassi 6g Sale 0,4g',
+      };
+      for (final label in labels.entries) {
+        final reading = LabelParser.parse(label.value);
+        expect(reading.caloriesPer100, 210, reason: label.key);
+        expect(reading.proteinPer100, 8, reason: label.key);
+        expect(reading.carbsPer100, 31, reason: label.key);
+        expect(reading.fatPer100, 6, reason: label.key);
+        expect(reading.saltPer100, 0.4, reason: label.key);
+      }
+    },
+  );
+
   test('daily nudge encourages breakfast when nothing is logged yet', () {
     final nudge = DailyNudge.forToday(
       entries: const [],

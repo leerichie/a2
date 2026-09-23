@@ -1330,6 +1330,22 @@ const _rows = <List<String>>[
     'Scansione dell’etichetta nutrizionale…',
   ],
   [
+    'The label could not be scanned. Try again in better light.',
+    'Nie udało się zeskanować etykiety. Spróbuj ponownie przy lepszym oświetleniu.',
+    'Das Etikett konnte nicht gescannt werden. Versuche es bei besserem Licht erneut.',
+    'L’étiquette n’a pas pu être scannée. Réessayez avec un meilleur éclairage.',
+    'No se pudo escanear la etiqueta. Inténtalo de nuevo con mejor luz.',
+    'Non è stato possibile scansionare l’etichetta. Riprova con una luce migliore.',
+  ],
+  [
+    'No nutrition values were found. Keep the full table in the photo and try again.',
+    'Nie znaleziono wartości odżywczych. Umieść całą tabelę na zdjęciu i spróbuj ponownie.',
+    'Es wurden keine Nährwerte gefunden. Fotografiere die gesamte Tabelle und versuche es erneut.',
+    'Aucune valeur nutritionnelle n’a été trouvée. Cadrez tout le tableau et réessayez.',
+    'No se encontraron valores nutricionales. Incluye toda la tabla en la foto e inténtalo de nuevo.',
+    'Non sono stati trovati valori nutrizionali. Inquadra tutta la tabella e riprova.',
+  ],
+  [
     'Analysing food entry…',
     'Analizowanie wpisu posiłku…',
     'Lebensmitteleintrag wird analysiert…',

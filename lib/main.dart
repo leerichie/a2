@@ -4437,21 +4437,29 @@ class LabelParser {
     const g = 'g';
 
     final calories = _firstNumberNearAny(folded, [
-      '(?:energy|calories|energia|wartosc energetyczna)',
+      '(?:energy|calories|energia|wartosc energetyczna|energie|valeur energetique|valor energetico|valore energetico)',
     ], 'kcal');
-    final protein = _firstNumberNearAny(folded, ['(?:protein|bialko)'], g);
+    final protein = _firstNumberNearAny(folded, [
+      '(?:protein|bialko|eiweiss|proteines|proteinas|proteine)',
+    ], g);
     final carbs = _firstNumberNearAny(folded, [
-      '(?:carbohydrate|carbs|weglowodany)',
+      '(?:carbohydrate|carbs|weglowodany|kohlenhydrate|glucides|hidratos de carbono|carboidrati)',
     ], g);
     final sugars = _firstNumberNearAny(folded, [
-      '(?:of which sugars|sugars|w tym cukry|cukry)',
+      '(?:of which sugars|sugars|w tym cukry|cukry|davon zucker|sucres|azucares|zuccheri)',
     ], g);
-    final fat = _firstNumberNearAny(folded, ['(?:total fat|fat|tluszcz)'], g);
+    final fat = _firstNumberNearAny(folded, [
+      '(?:total fat|fat|tluszcz|fett|matieres grasses|grasas|grassi)',
+    ], g);
     final saturatedFat = _firstNumberNearAny(folded, [
-      '(?:of which saturates|saturates|saturated fat|w tym nasycone|nasycone)',
+      '(?:of which saturates|saturates|saturated fat|w tym nasycone|nasycone|davon gesattigte fettsauren|acides gras satures|grasas saturadas|acidi grassi saturi)',
     ], g);
-    final fibre = _firstNumberNearAny(folded, ['(?:fibre|fiber|blonnik)'], g);
-    final salt = _firstNumberNearAny(folded, ['(?:salt|sol)'], g);
+    final fibre = _firstNumberNearAny(folded, [
+      '(?:fibre|fiber|blonnik|ballaststoffe|fibres alimentaires|fibra alimentaria|fibre alimentari)',
+    ], g);
+    final salt = _firstNumberNearAny(folded, [
+      '(?:salt|sol|salz|sel|sale|sal)',
+    ], g);
 
     String? basis;
     if (RegExp(
@@ -6472,17 +6480,15 @@ class _AddMealSheetState extends State<AddMealSheet> {
     }
   }
 
-  Future<LabelReading?> _readLabel(XFile photo) async {
+  Future<LabelReading> _readLabel(XFile photo) async {
     final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
     try {
       final result = await recognizer.processImage(
         InputImage.fromFilePath(photo.path),
       );
       return LabelParser.parse(result.text);
-    } catch (_) {
-      return null;
     } finally {
-      recognizer.close();
+      await recognizer.close();
     }
   }
 
@@ -6507,34 +6513,51 @@ class _AddMealSheetState extends State<AddMealSheet> {
       return;
     }
     setState(() => busy = true);
-    final reading = await _readLabel(photo);
+    LabelReading reading;
+    try {
+      reading = await _readLabel(photo);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        busy = false;
+        mode = 0;
+        notice = 'The label could not be scanned. Try again in better light.';
+      });
+      return;
+    }
     if (!mounted) return;
     setState(() {
       busy = false;
       mode = 0;
     });
+    if (!reading.hasNutrition) {
+      setState(
+        () => notice = 'No nutrition values were found. Keep the full table in the photo and try again.',
+      );
+      return;
+    }
     final confirmed = await showModalBottomSheet<AddFoodResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => AddFoodSheet(
         title: 'Confirm scanned label',
-        suggestedName: '',
-        initialCalories: reading?.caloriesPer100,
-        initialProtein: reading?.proteinPer100,
-        initialCarbs: reading?.carbsPer100,
-        initialFat: reading?.fatPer100,
-        initialSaturatedFat: reading?.saturatedFatPer100,
-        initialSugar: reading?.sugarsPer100,
-        initialFibre: reading?.fibrePer100,
-        initialSalt: reading?.saltPer100,
-        initialServingAmount: reading?.basis == 'perServing'
-            ? (reading?.servingSizeGrams ?? 100)
+        suggestedName: reading.productName ?? '',
+        initialCalories: reading.caloriesPer100,
+        initialProtein: reading.proteinPer100,
+        initialCarbs: reading.carbsPer100,
+        initialFat: reading.fatPer100,
+        initialSaturatedFat: reading.saturatedFatPer100,
+        initialSugar: reading.sugarsPer100,
+        initialFibre: reading.fibrePer100,
+        initialSalt: reading.saltPer100,
+        initialServingAmount: reading.basis == 'perServing'
+            ? (reading.servingSizeGrams ?? 100)
             : 100,
-        initialServingUnit: reading?.basis == 'per100ml' ? 'ml' : 'g',
+        initialServingUnit: reading.basis == 'per100ml' ? 'ml' : 'g',
         defaultSaveToCatalogue: false,
         showPackWeightField: true,
-        initialPackWeightGrams: reading?.totalGrams,
+        initialPackWeightGrams: reading.totalGrams,
         locale: widget.locale,
       ),
     );
