@@ -18,28 +18,45 @@ void main() {
   });
 
   group('every household-portion unit alias resolves to its canonical unit', () {
-    test('covers tsp/tbsp/cup, spoon/bowl/glass/mug/handful/pinch/splash, '
-        'slice/piece/scoop, pack/container -- and everything else in the lexicon', () {
-      expect(lexicon.unitByAlias, isNotEmpty);
-      final failures = <String>[];
-      lexicon.unitByAlias.forEach((alias, expectedUnit) {
-        final result = parseHouseholdPortion('$alias food', lexicon);
-        if (result.unit != expectedUnit) {
-          failures.add('"$alias" -> ${result.unit} (expected $expectedUnit)');
-        }
-      });
-      expect(failures, isEmpty, reason: failures.join('\n'));
-    });
+    test(
+      'covers tsp/tbsp/cup, spoon/bowl/glass/mug/handful/pinch/splash, '
+      'slice/piece/scoop, pack/container -- and everything else in the lexicon',
+      () {
+        expect(lexicon.unitByAlias, isNotEmpty);
+        final failures = <String>[];
+        lexicon.unitByAlias.forEach((alias, expectedUnit) {
+          final result = parseHouseholdPortion('$alias food', lexicon);
+          if (result.unit != expectedUnit) {
+            failures.add('"$alias" -> ${result.unit} (expected $expectedUnit)');
+          }
+        });
+        expect(failures, isEmpty, reason: failures.join('\n'));
+      },
+    );
 
     // Spot-check a representative sample by name, so a passing matrix test
     // above can't silently hide a wrong *expected* mapping in the lexicon
     // reverse-index itself (this cross-checks a few by literal id).
     const representative = {
-      'tsp': 'teaspoon', 'tbsp': 'tablespoon', 'cup': 'cup', 'ml': 'millilitre',
-      'spoon': 'spoonful', 'bowl': 'bowl', 'glass': 'glass', 'mug': 'mug',
-      'handful': 'handful', 'pinch': 'pinch', 'splash': 'splash',
-      'slice': 'slice', 'piece': 'piece', 'scoop': 'scoop', 'serving': 'serving',
-      'pack': 'pack', 'container': 'container', 'bottle': 'bottle', 'jar': 'jar',
+      'tsp': 'teaspoon',
+      'tbsp': 'tablespoon',
+      'cup': 'cup',
+      'ml': 'millilitre',
+      'spoon': 'spoonful',
+      'bowl': 'bowl',
+      'glass': 'glass',
+      'mug': 'mug',
+      'handful': 'handful',
+      'pinch': 'pinch',
+      'splash': 'splash',
+      'slice': 'slice',
+      'piece': 'piece',
+      'scoop': 'scoop',
+      'serving': 'serving',
+      'pack': 'pack',
+      'container': 'container',
+      'bottle': 'bottle',
+      'jar': 'jar',
     };
     representative.forEach((alias, unitId) {
       test('"$alias" -> $unitId', () {
@@ -65,7 +82,9 @@ void main() {
       lexicon.fullnessByAlias.forEach((alias, expectedFullness) {
         final result = parseSizeAndFullness('$alias food', lexicon);
         if (result.fullness != expectedFullness) {
-          failures.add('"$alias" -> ${result.fullness} (expected $expectedFullness)');
+          failures.add(
+            '"$alias" -> ${result.fullness} (expected $expectedFullness)',
+          );
         }
       });
       expect(failures, isEmpty, reason: failures.join('\n'));
@@ -78,7 +97,9 @@ void main() {
       lexicon.fractions.forEach((phrase, expectedValue) {
         final result = parseQuantity('$phrase food', lexicon);
         if ((result.quantity - expectedValue).abs() > 0.0001) {
-          failures.add('"$phrase" -> ${result.quantity} (expected $expectedValue)');
+          failures.add(
+            '"$phrase" -> ${result.quantity} (expected $expectedValue)',
+          );
         }
       });
       expect(failures, isEmpty, reason: failures.join('\n'));
@@ -91,22 +112,29 @@ void main() {
         if (expectedValue == 0) return;
         final result = parseQuantity('$word food', lexicon);
         if (result.quantity != expectedValue) {
-          failures.add('"$word" -> ${result.quantity} (expected $expectedValue)');
+          failures.add(
+            '"$word" -> ${result.quantity} (expected $expectedValue)',
+          );
         }
       });
       expect(failures, isEmpty, reason: failures.join('\n'));
     });
 
-    test('every word multiplier in the lexicon (single/double/triple/couple)', () {
-      final failures = <String>[];
-      lexicon.multipliers.forEach((word, expectedValue) {
-        final result = parseQuantity('$word food', lexicon);
-        if (result.quantity != expectedValue) {
-          failures.add('"$word" -> ${result.quantity} (expected $expectedValue)');
-        }
-      });
-      expect(failures, isEmpty, reason: failures.join('\n'));
-    });
+    test(
+      'every word multiplier in the lexicon (single/double/triple/couple)',
+      () {
+        final failures = <String>[];
+        lexicon.multipliers.forEach((word, expectedValue) {
+          final result = parseQuantity('$word food', lexicon);
+          if (result.quantity != expectedValue) {
+            failures.add(
+              '"$word" -> ${result.quantity} (expected $expectedValue)',
+            );
+          }
+        });
+        expect(failures, isEmpty, reason: failures.join('\n'));
+      },
+    );
 
     test('every approximation word sets approximate=true', () {
       final failures = <String>[];
@@ -118,7 +146,18 @@ void main() {
     });
 
     test('digit-based multiplier patterns (1x, x1, 2×, ...) all parse', () {
-      for (final pattern in ['1x', '2x', '3x', 'x1', 'x2', 'x3', '2 x', '3 x', '2×', '3×']) {
+      for (final pattern in [
+        '1x',
+        '2x',
+        '3x',
+        'x1',
+        'x2',
+        'x3',
+        '2 x',
+        '3 x',
+        '2×',
+        '3×',
+      ]) {
         final result = parseQuantity('$pattern food', lexicon);
         expect(result.quantity, greaterThan(0), reason: pattern);
       }

@@ -8,36 +8,48 @@ Map<String, dynamic> _readAliases(String path) =>
     json.decode(File(path).readAsStringSync()) as Map<String, dynamic>;
 
 List<dynamic> _readCatalogue() => json.decode(
-      File('assets/parser/shared/food_catalogue.json').readAsStringSync(),
-    ) as List<dynamic>;
+  File('assets/parser/shared/food_catalogue.json').readAsStringSync(),
+) as List<dynamic>;
 
 void main() {
   const path = 'assets/parser/en/food_aliases.json';
 
-  test('generic foods without a natural subtype are valid canonical entries', () {
-    final catalogue = _readCatalogue();
-    final byId = {for (final e in catalogue) (e as Map<String, dynamic>)['id']: e};
-    const generics = {
-      'chicken': 'meat_poultry',
-      'cheese': 'dairy_alternative',
-      'sausage': 'meat_poultry',
-      'salad': 'prepared_meal',
-      'soup': 'prepared_meal',
-      'beans': 'legume_nut_seed',
-      'wine': 'drink',
-      'raisins': 'fruit',
-    };
-    final taxonomy = (json.decode(
-      File('assets/parser/shared/taxonomy_categories.json').readAsStringSync(),
-    ) as Map<String, dynamic>)['categories'] as List<dynamic>;
-    generics.forEach((id, category) {
-      expect(byId.containsKey(id), true, reason: '$id should exist in the catalogue');
-      expect(byId[id]!['category'], category);
-      expect(taxonomy, contains(category));
-      // Deliberately generic: never silently narrowed to a specific subtype.
-      expect(byId[id]!['base_food'], null);
-    });
-  });
+  test(
+    'generic foods without a natural subtype are valid canonical entries',
+    () {
+      final catalogue = _readCatalogue();
+      final byId = {
+        for (final e in catalogue) (e as Map<String, dynamic>)['id']: e,
+      };
+      const generics = {
+        'chicken': 'meat_poultry',
+        'cheese': 'dairy_alternative',
+        'sausage': 'meat_poultry',
+        'salad': 'prepared_meal',
+        'soup': 'prepared_meal',
+        'beans': 'legume_nut_seed',
+        'wine': 'drink',
+        'raisins': 'fruit',
+      };
+      final taxonomy =
+          (json.decode(
+                File('assets/parser/shared/taxonomy_categories.json')
+                    .readAsStringSync(),
+              ) as Map<String, dynamic>)['categories']
+              as List<dynamic>;
+      generics.forEach((id, category) {
+        expect(
+          byId.containsKey(id),
+          true,
+          reason: '$id should exist in the catalogue',
+        );
+        expect(byId[id]!['category'], category);
+        expect(taxonomy, contains(category));
+        // Deliberately generic: never silently narrowed to a specific subtype.
+        expect(byId[id]!['base_food'], null);
+      });
+    },
+  );
 
   test('generic entries resolve without inventing a subtype-specific id', () {
     final aliases = _readAliases(path);
@@ -60,7 +72,10 @@ void main() {
   test('porridge/oat resolve to the existing oats entry, not a new one', () {
     final aliases = _readAliases(path);
     final oatsAliases = (aliases['oats'] as List<dynamic>).cast<String>();
-    expect(oatsAliases, containsAll(['oat', 'oats', 'oatmeal', 'porridge', 'porridge oats']));
+    expect(
+      oatsAliases,
+      containsAll(['oat', 'oats', 'oatmeal', 'porridge', 'porridge oats']),
+    );
     expect(aliases.containsKey('porridge'), false);
     expect(aliases.containsKey('oat'), false);
   });
@@ -71,16 +86,19 @@ void main() {
     expect(crispsAliases, containsAll(['crisp', 'crisps', 'potato crisps']));
   });
 
-  test('English regional terms: chips means fries, crisps means potato crisps', () {
-    final aliases = _readAliases(path);
-    final index = AliasIndex.build(
-      aliases.map((k, v) => MapEntry(k, (v as List<dynamic>).cast<String>())),
-    );
-    expect(index.resolve('chips'), 'fries');
-    expect(index.resolve('crisps'), 'crisps');
-    final crispsAliases = (aliases['crisps'] as List<dynamic>).cast<String>();
-    expect(crispsAliases, contains('potato crisps'));
-  });
+  test(
+    'English regional terms: chips means fries, crisps means potato crisps',
+    () {
+      final aliases = _readAliases(path);
+      final index = AliasIndex.build(
+        aliases.map((k, v) => MapEntry(k, (v as List<dynamic>).cast<String>())),
+      );
+      expect(index.resolve('chips'), 'fries');
+      expect(index.resolve('crisps'), 'crisps');
+      final crispsAliases = (aliases['crisps'] as List<dynamic>).cast<String>();
+      expect(crispsAliases, contains('potato crisps'));
+    },
+  );
 
   test('zero alias collisions in the shipped food catalogue', () {
     final aliases = _readAliases(path);
@@ -93,7 +111,8 @@ void main() {
   test('bare "cola" and branded "coca_cola" are kept separate (not merged, not colliding)', () {
     final aliases = _readAliases(path);
     expect((aliases['cola'] as List<dynamic>).cast<String>(), ['cola']);
-    final cocaColaAliases = (aliases['coca_cola'] as List<dynamic>).cast<String>();
+    final cocaColaAliases = (aliases['coca_cola'] as List<dynamic>)
+        .cast<String>();
     expect(cocaColaAliases, isNot(contains('cola')));
     expect(cocaColaAliases, containsAll(['coke', 'coca cola', 'coca-cola']));
   });
@@ -102,7 +121,10 @@ void main() {
     final aliases = _readAliases(path);
     expect(aliases.containsKey('pickled_cucumber'), false);
     final gherkinAliases = (aliases['gherkin'] as List<dynamic>).cast<String>();
-    expect(gherkinAliases, containsAll(['gherkin', 'pickle', 'pickled cucumber']));
+    expect(
+      gherkinAliases,
+      containsAll(['gherkin', 'pickle', 'pickled cucumber']),
+    );
   });
 
   test('all 9 generated-plural typos are fixed', () {
@@ -112,18 +134,40 @@ void main() {
         .map((s) => s.toLowerCase())
         .toSet();
     const typos = [
-      'blackberrys', 'blueberrys', 'cherrys', 'cranberrys', 'gooseberrys',
-      'raspberrys', 'strawberrys', 'elderberrys', 'mulberrys',
+      'blackberrys',
+      'blueberrys',
+      'cherrys',
+      'cranberrys',
+      'gooseberrys',
+      'raspberrys',
+      'strawberrys',
+      'elderberrys',
+      'mulberrys',
     ];
     const correctPlurals = [
-      'blackberries', 'blueberries', 'cherries', 'cranberries', 'gooseberries',
-      'raspberries', 'strawberries', 'elderberries', 'mulberries',
+      'blackberries',
+      'blueberries',
+      'cherries',
+      'cranberries',
+      'gooseberries',
+      'raspberries',
+      'strawberries',
+      'elderberries',
+      'mulberries',
     ];
     for (final typo in typos) {
-      expect(allAliases.contains(typo), false, reason: '"$typo" should have been fixed');
+      expect(
+        allAliases.contains(typo),
+        false,
+        reason: '"$typo" should have been fixed',
+      );
     }
     for (final correct in correctPlurals) {
-      expect(allAliases.contains(correct), true, reason: '"$correct" should be present');
+      expect(
+        allAliases.contains(correct),
+        true,
+        reason: '"$correct" should be present',
+      );
     }
   });
 }

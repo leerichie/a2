@@ -92,15 +92,18 @@ void main() {
   });
 
   group('deriveExerciseConfidence', () {
-    test('high: activity + duration + body weight all present, not approximate', () {
-      final c = deriveExerciseConfidence(
-        activityResolved: true,
-        durationKnown: true,
-        bodyWeightKnown: true,
-        approximate: false,
-      );
-      expect(c, ParseConfidence.high);
-    });
+    test(
+      'high: activity + duration + body weight all present, not approximate',
+      () {
+        final c = deriveExerciseConfidence(
+          activityResolved: true,
+          durationKnown: true,
+          bodyWeightKnown: true,
+          approximate: false,
+        );
+        expect(c, ParseConfidence.high);
+      },
+    );
 
     test('low: approximate duration downgrades', () {
       final c = deriveExerciseConfidence(

@@ -32,7 +32,11 @@ void main() {
     // 56 prior + 51 new across four added categories (combat_sport,
     // water_sport, athletics, indoor_game), all with unique ids and real
     // MET values -- verified deliberately, not just bumped to pass.
-    expect(activities.length, 107, reason: 'catalogue size changed -- update this test deliberately');
+    expect(
+      activities.length,
+      107,
+      reason: 'catalogue size changed -- update this test deliberately',
+    );
 
     final failures = <String>[];
     for (final raw in activities) {
@@ -52,7 +56,9 @@ void main() {
       final expectedKcal = met * weight * (20 / 60);
       if (result.calorieEstimateKcal == null ||
           (result.calorieEstimateKcal! - expectedKcal).abs() > 0.01) {
-        failures.add('$id: kcal ${result.calorieEstimateKcal} (expected $expectedKcal)');
+        failures.add(
+          '$id: kcal ${result.calorieEstimateKcal} (expected $expectedKcal)',
+        );
       }
       if (result.confidence != ParseConfidence.high) {
         failures.add('$id: confidence ${result.confidence} (expected high)');
@@ -80,32 +86,47 @@ void main() {
   });
 
   group('duration grammar (time_and_duration.json) is fully reachable', () {
-    test('every unit alias (min/mins/minutes/h/hr/hrs/...) parses a duration', () {
-      final units = json.decode(
-        File('assets/parser/en/lexicon/time_and_duration.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-      final failures = <String>[];
-      (units['units'] as Map<String, dynamic>).forEach((canonical, rawWords) {
-        for (final alias in (rawWords as List<dynamic>).cast<String>()) {
-          final result = parser.parse('20 $alias jogging', bodyWeightKg: weight);
-          if (result.durationMinutes == null) {
-            failures.add('"20 $alias jogging" -> no duration parsed (unit "$canonical")');
+    test(
+      'every unit alias (min/mins/minutes/h/hr/hrs/...) parses a duration',
+      () {
+        final units = json.decode(
+          File('assets/parser/en/lexicon/time_and_duration.json')
+              .readAsStringSync(),
+        ) as Map<String, dynamic>;
+        final failures = <String>[];
+        (units['units'] as Map<String, dynamic>).forEach((canonical, rawWords) {
+          for (final alias in (rawWords as List<dynamic>).cast<String>()) {
+            final result = parser.parse(
+              '20 $alias jogging',
+              bodyWeightKg: weight,
+            );
+            if (result.durationMinutes == null) {
+              failures.add(
+                '"20 $alias jogging" -> no duration parsed (unit "$canonical")',
+              );
+            }
           }
-        }
-      });
-      expect(failures, isEmpty, reason: failures.join('\n'));
-    });
+        });
+        expect(failures, isEmpty, reason: failures.join('\n'));
+      },
+    );
 
     test('every named duration phrase (half an hour, one and a half hours, '
         '...) resolves to its documented minute value', () {
       final duration = json.decode(
-        File('assets/parser/en/lexicon/time_and_duration.json').readAsStringSync(),
+        File('assets/parser/en/lexicon/time_and_duration.json')
+            .readAsStringSync(),
       ) as Map<String, dynamic>;
       final failures = <String>[];
-      (duration['fractions'] as Map<String, dynamic>).forEach((phrase, minutes) {
+      (duration['fractions'] as Map<String, dynamic>).forEach((
+        phrase,
+        minutes,
+      ) {
         final result = parser.parse('$phrase jogging', bodyWeightKg: weight);
         if (result.durationMinutes != (minutes as num).toDouble()) {
-          failures.add('"$phrase" -> ${result.durationMinutes} (expected $minutes)');
+          failures.add(
+            '"$phrase" -> ${result.durationMinutes} (expected $minutes)',
+          );
         }
       });
       expect(failures, isEmpty, reason: failures.join('\n'));
@@ -121,7 +142,8 @@ void main() {
     // lexicon appears in at least one real activity alias, so the
     // vocabulary is genuinely connected to the live catalogue.
     final modifiers = json.decode(
-      File('assets/parser/en/lexicon/intensity_modifiers.json').readAsStringSync(),
+      File('assets/parser/en/lexicon/intensity_modifiers.json')
+          .readAsStringSync(),
     ) as Map<String, dynamic>;
     final aliases = json.decode(
       File('assets/parser/en/activity_aliases.json').readAsStringSync(),
@@ -134,7 +156,9 @@ void main() {
     final unmatched = <String>[];
     modifiers.forEach((level, rawWords) {
       final anyMatch = (rawWords as List<dynamic>).cast<String>().any(
-        (word) => allActivityAliasWords.any((alias) => alias.contains(word.toLowerCase())),
+        (word) => allActivityAliasWords.any(
+          (alias) => alias.contains(word.toLowerCase()),
+        ),
       );
       if (!anyMatch) unmatched.add(level);
     });
@@ -144,10 +168,13 @@ void main() {
     expect(unmatched, isEmpty);
   });
 
-  test('missing body weight never invents a calorie number, for any activity', () {
-    final result = parser.parse('20 min jogging', bodyWeightKg: null);
-    expect(result.activityId, 'jogging');
-    expect(result.calorieEstimateKcal, null);
-    expect(result.confidence, ParseConfidence.incomplete);
-  });
+  test(
+    'missing body weight never invents a calorie number, for any activity',
+    () {
+      final result = parser.parse('20 min jogging', bodyWeightKg: null);
+      expect(result.activityId, 'jogging');
+      expect(result.calorieEstimateKcal, null);
+      expect(result.confidence, ParseConfidence.incomplete);
+    },
+  );
 }

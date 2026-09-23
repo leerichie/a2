@@ -68,7 +68,8 @@ class FoodCatalogue {
         category: m['category'] as String,
         region: m['region'] as String?,
         baseFoodId: m['base_food'] as String?,
-        modifiers: (m['modifiers'] as List<dynamic>?)?.cast<String>() ?? const [],
+        modifiers:
+            (m['modifiers'] as List<dynamic>?)?.cast<String>() ?? const [],
         aliases: mergedAliases[id] ?? const [],
         genericParent: m['genericParent'] as String?,
       );

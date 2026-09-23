@@ -2,7 +2,11 @@ import '../catalogue/lexicon.dart';
 import 'token_matching.dart';
 
 class DurationParseResult {
-  const DurationParseResult({this.minutes, required this.approximate, required this.remainder});
+  const DurationParseResult({
+    this.minutes,
+    required this.approximate,
+    required this.remainder,
+  });
   final double? minutes;
   final bool approximate;
   final String remainder;
@@ -14,7 +18,9 @@ DurationParseResult parseDuration(String text, Lexicon lexicon) {
   var remaining = text.trimLeft();
   var approximate = false;
 
-  final approxTable = PhraseTable({for (final w in lexicon.approximationWords) w: true});
+  final approxTable = PhraseTable({
+    for (final w in lexicon.approximationWords) w: true,
+  });
   while (true) {
     final match = approxTable.matchAtStart(remaining);
     if (match == null) break;
@@ -52,5 +58,9 @@ DurationParseResult parseDuration(String text, Lexicon lexicon) {
     }
   }
 
-  return DurationParseResult(minutes: null, approximate: approximate, remainder: remaining);
+  return DurationParseResult(
+    minutes: null,
+    approximate: approximate,
+    remainder: remaining,
+  );
 }

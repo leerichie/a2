@@ -1,9 +1,22 @@
 import 'alias_index.dart';
 
 const knownActivityCategories = {
-  'athletics', 'combat_sport', 'cycling', 'daily_activity', 'dance',
-  'fitness', 'gym', 'indoor_game', 'outdoor', 'racket_sport', 'running',
-  'swimming', 'team_sport', 'tennis', 'walking', 'water_sport',
+  'athletics',
+  'combat_sport',
+  'cycling',
+  'daily_activity',
+  'dance',
+  'fitness',
+  'gym',
+  'indoor_game',
+  'outdoor',
+  'racket_sport',
+  'running',
+  'swimming',
+  'team_sport',
+  'tennis',
+  'walking',
+  'water_sport',
   'winter_sport',
 };
 
@@ -30,9 +43,12 @@ List<String> validateParserDatasets({
     }
     final category = m['category'] as String;
     if (!taxonomy.contains(category)) {
-      issues.add('Food $id has category "$category" not in taxonomy_categories.json');
+      issues.add(
+        'Food $id has category "$category" not in taxonomy_categories.json',
+      );
     }
-    final aliasesForId = (foodAliases[id] as List<dynamic>?)?.cast<String>() ?? const [];
+    final aliasesForId =
+        (foodAliases[id] as List<dynamic>?)?.cast<String>() ?? const [];
     if (aliasesForId.isEmpty) {
       issues.add('Food $id has no aliases');
     }
@@ -41,7 +57,9 @@ List<String> validateParserDatasets({
     final m = raw as Map<String, dynamic>;
     final baseFood = m['base_food'] as String?;
     if (baseFood != null && !foodIds.contains(baseFood)) {
-      issues.add('Food ${m['id']} has base_food "$baseFood" which does not exist');
+      issues.add(
+        'Food ${m['id']} has base_food "$baseFood" which does not exist',
+      );
     }
   }
 
@@ -67,14 +85,17 @@ List<String> validateParserDatasets({
     if (met <= 0 || met > 20) {
       issues.add('Activity $id has out-of-range MET value $met');
     }
-    final aliasesForId = (activityAliases[id] as List<dynamic>?)?.cast<String>() ?? const [];
+    final aliasesForId =
+        (activityAliases[id] as List<dynamic>?)?.cast<String>() ?? const [];
     if (aliasesForId.isEmpty) {
       issues.add('Activity $id has no aliases');
     }
   }
 
   final activityAliasCollisions = AliasIndex.build(
-    activityAliases.map((k, v) => MapEntry(k, (v as List<dynamic>).cast<String>())),
+    activityAliases.map(
+      (k, v) => MapEntry(k, (v as List<dynamic>).cast<String>()),
+    ),
   ).collisions;
   for (final collision in activityAliasCollisions) {
     issues.add('Activity alias collision: $collision');
@@ -96,7 +117,9 @@ List<String> validateParserDatasets({
     }
     final confidence = m['confidence'] as String;
     if (!validPortionConfidenceValues.contains(confidence)) {
-      issues.add('food_portions.json has invalid confidence value: $confidence');
+      issues.add(
+        'food_portions.json has invalid confidence value: $confidence',
+      );
     }
   }
 

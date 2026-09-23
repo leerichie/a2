@@ -41,9 +41,10 @@ ExerciseQuantityResult parseExerciseQuantity(String text, Lexicon lexicon) {
     final match = phrasePattern.firstMatch(working);
     if (match != null) {
       phraseMinutes = lexicon.durationPhraseMinutes[match.group(0)];
-      working = '${working.substring(0, match.start)} ${working.substring(match.end)}'
-          .replaceAll(RegExp(r'\s+'), ' ')
-          .trim();
+      working =
+          '${working.substring(0, match.start)} ${working.substring(match.end)}'
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
     }
   }
 
@@ -59,7 +60,8 @@ ExerciseQuantityResult parseExerciseQuantity(String text, Lexicon lexicon) {
       remainder: working.trim(),
     );
   }
-  final units = unitToKind.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+  final units = unitToKind.keys.toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
   final unitAlternation = units.map(RegExp.escape).join('|');
   final approxAlternation = lexicon.approximationWords.isEmpty
       ? null
@@ -96,14 +98,19 @@ ExerciseQuantityResult parseExerciseQuantity(String text, Lexicon lexicon) {
           _ => value,
         };
       case 'distance':
-        distanceKm = lexicon.distanceUnitByAlias[unit] == 'km' ? value : value / 1000.0;
+        distanceKm = lexicon.distanceUnitByAlias[unit] == 'km'
+            ? value
+            : value / 1000.0;
       case 'steps':
         steps = value.round();
     }
   }
   keptSegments.add(working.substring(cursor));
 
-  final remainder = keptSegments.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+  final remainder = keptSegments
+      .join(' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
   return ExerciseQuantityResult(
     minutes: minutes,
     distanceKm: distanceKm,

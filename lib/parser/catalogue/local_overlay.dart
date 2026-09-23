@@ -119,10 +119,7 @@ class LocalCatalogueOverlay {
   /// makes a freshly-added food usable right away, before (or even without)
   /// any network sync.
   Future<LocalCatalogueOverlay> upsert(OverlayFoodEntry entry) async {
-    final updated = [
-      ...entries.where((e) => e.id != entry.id),
-      entry,
-    ];
+    final updated = [...entries.where((e) => e.id != entry.id), entry];
     final overlay = LocalCatalogueOverlay(updated);
     await overlay.save();
     return overlay;

@@ -4,7 +4,11 @@ import '../catalogue/activity_catalogue.dart';
 import '../catalogue/alias_index.dart';
 
 class ActivityResolution {
-  const ActivityResolution({this.entry, this.matchedAlias, this.suggestions = const []});
+  const ActivityResolution({
+    this.entry,
+    this.matchedAlias,
+    this.suggestions = const [],
+  });
   final ActivityCatalogueEntry? entry;
   final String? matchedAlias;
   final List<String> suggestions;

@@ -103,8 +103,14 @@ void main() {
       });
 
       test('quarter and three-quarters, not just half', () {
-        expect(parseQuantity('one and a quarter portions', lexicon).quantity, 1.25);
-        expect(parseQuantity('one and three quarters portions', lexicon).quantity, 1.75);
+        expect(
+          parseQuantity('one and a quarter portions', lexicon).quantity,
+          1.25,
+        );
+        expect(
+          parseQuantity('one and three quarters portions', lexicon).quantity,
+          1.75,
+        );
       });
 
       test('a bare "X and" with no fraction after it does not fire', () {

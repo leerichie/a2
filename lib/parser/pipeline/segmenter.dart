@@ -20,7 +20,8 @@ final _sentenceSplitPeriod = RegExp(r'(?<!\d)(?<!\btsp)(?<!\btbsp)\.(?=\s)\s*');
 bool _isCompoundQuantityAnd(List<String> words, int andIndex, Lexicon lexicon) {
   if (andIndex <= 0 || andIndex >= words.length - 1) return false;
   final before = words[andIndex - 1];
-  final beforeIsQuantity = lexicon.cardinals.containsKey(before) || _digit.hasMatch(before);
+  final beforeIsQuantity =
+      lexicon.cardinals.containsKey(before) || _digit.hasMatch(before);
   if (!beforeIsQuantity) return false;
 
   var afterIndex = andIndex + 1;
@@ -28,7 +29,9 @@ bool _isCompoundQuantityAnd(List<String> words, int andIndex, Lexicon lexicon) {
   if (afterIndex >= words.length) return false;
 
   final oneWord = words[afterIndex];
-  final twoWord = afterIndex + 1 < words.length ? '$oneWord ${words[afterIndex + 1]}' : null;
+  final twoWord = afterIndex + 1 < words.length
+      ? '$oneWord ${words[afterIndex + 1]}'
+      : null;
   return lexicon.fractions.containsKey(oneWord) ||
       (twoWord != null && lexicon.fractions.containsKey(twoWord));
 }
@@ -43,8 +46,14 @@ bool _isCompoundQuantityAnd(List<String> words, int andIndex, Lexicon lexicon) {
 /// heuristic, not a full grammar: a compound food name containing "and"/
 /// "with" that ISN'T a registered alias would still be mis-split. Refine
 /// this once real user input shows it matters.
-List<String> segmentPhrases(String normalizedText, Lexicon lexicon, AliasIndex aliasIndex) {
-  final commaParts = normalizedText.split(RegExp('\\s*[,;]\\s*|${_sentenceSplitPeriod.pattern}'));
+List<String> segmentPhrases(
+  String normalizedText,
+  Lexicon lexicon,
+  AliasIndex aliasIndex,
+) {
+  final commaParts = normalizedText.split(
+    RegExp('\\s*[,;]\\s*|${_sentenceSplitPeriod.pattern}'),
+  );
   final segments = <String>[];
   for (final part in commaParts) {
     for (final piece in _splitOnStandaloneAnd(part, lexicon)) {
@@ -55,7 +64,11 @@ List<String> segmentPhrases(String normalizedText, Lexicon lexicon, AliasIndex a
 }
 
 List<String> _splitOnStandaloneAnd(String text, Lexicon lexicon) {
-  final words = text.trim().split(_wordSplit).where((w) => w.isNotEmpty).toList();
+  final words = text
+      .trim()
+      .split(_wordSplit)
+      .where((w) => w.isNotEmpty)
+      .toList();
   if (words.isEmpty) return const [];
 
   final segments = <String>[];

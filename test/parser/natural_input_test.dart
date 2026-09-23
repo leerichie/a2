@@ -21,28 +21,44 @@ void main() {
   void expectSameFood(List<String> phrases, String expectedId) {
     for (final phrase in phrases) {
       final item = parser.parse(phrase).items.single;
-      expect(item.canonicalId, expectedId, reason: '"$phrase" should resolve to $expectedId');
+      expect(
+        item.canonicalId,
+        expectedId,
+        reason: '"$phrase" should resolve to $expectedId',
+      );
     }
   }
 
   group('coleslaw: compound-word, split-word and slang all agree', () {
     test('all phrasings resolve to the same canonical id', () {
       expectSameFood([
-        'coleslaw', 'cole slaw', 'slaw', '2 spoon coleslaw', '2 spoons coleslaw',
-        '2 spoon of slaw', 'two spoons of slaw',
+        'coleslaw',
+        'cole slaw',
+        'slaw',
+        '2 spoon coleslaw',
+        '2 spoons coleslaw',
+        '2 spoon of slaw',
+        'two spoons of slaw',
       ], 'coleslaw');
     });
 
-    test('quantity and unit still extracted regardless of slaw/coleslaw spelling', () {
-      for (final phrase in ['2 spoon coleslaw', '2 spoons coleslaw', '2 spoon of slaw']) {
-        final item = parser.parse(phrase).items.single;
-        expect(item.quantity, 2, reason: phrase);
-        expect(item.unit, 'spoonful', reason: phrase);
-      }
-      final worded = parser.parse('two spoons of slaw').items.single;
-      expect(worded.quantity, 2);
-      expect(worded.unit, 'spoonful');
-    });
+    test(
+      'quantity and unit still extracted regardless of slaw/coleslaw spelling',
+      () {
+        for (final phrase in [
+          '2 spoon coleslaw',
+          '2 spoons coleslaw',
+          '2 spoon of slaw',
+        ]) {
+          final item = parser.parse(phrase).items.single;
+          expect(item.quantity, 2, reason: phrase);
+          expect(item.unit, 'spoonful', reason: phrase);
+        }
+        final worded = parser.parse('two spoons of slaw').items.single;
+        expect(worded.quantity, 2);
+        expect(worded.unit, 'spoonful');
+      },
+    );
 
     test('bare mentions default to quantity 1 with no unit', () {
       for (final phrase in ['coleslaw', 'cole slaw', 'slaw']) {
@@ -53,36 +69,51 @@ void main() {
     });
   });
 
-  group('oats: singular/plural, split fraction, and porridge alias all agree', () {
-    test('all phrasings resolve to the same canonical id', () {
-      expectSameFood([
-        'half bowl oat', 'half bowl oats', 'half a bowl oats', 'half a bowl of oats',
-        '½ bowl porridge',
-      ], 'oats');
-    });
+  group(
+    'oats: singular/plural, split fraction, and porridge alias all agree',
+    () {
+      test('all phrasings resolve to the same canonical id', () {
+        expectSameFood([
+          'half bowl oat',
+          'half bowl oats',
+          'half a bowl oats',
+          'half a bowl of oats',
+          '½ bowl porridge',
+        ], 'oats');
+      });
 
-    test('quantity/unit are identical across every phrasing', () {
-      for (final phrase in [
-        'half bowl oat', 'half bowl oats', 'half a bowl oats',
-        'half a bowl of oats', '½ bowl porridge',
-      ]) {
-        final item = parser.parse(phrase).items.single;
-        expect(item.quantity, 0.5, reason: phrase);
-        expect(item.unit, 'bowl', reason: phrase);
-      }
-    });
-  });
+      test('quantity/unit are identical across every phrasing', () {
+        for (final phrase in [
+          'half bowl oat',
+          'half bowl oats',
+          'half a bowl oats',
+          'half a bowl of oats',
+          '½ bowl porridge',
+        ]) {
+          final item = parser.parse(phrase).items.single;
+          expect(item.quantity, 0.5, reason: phrase);
+          expect(item.unit, 'bowl', reason: phrase);
+        }
+      });
+    },
+  );
 
   group('cheese: singular/plural unit, cardinal vs digit, optional "of"', () {
     test('all phrasings resolve to the same canonical id', () {
       expectSameFood([
-        '2 slice cheese', '2 slices cheese', 'two slice cheese', 'two slices of cheese',
+        '2 slice cheese',
+        '2 slices cheese',
+        'two slice cheese',
+        'two slices of cheese',
       ], 'cheese');
     });
 
     test('quantity/unit are identical across every phrasing', () {
       for (final phrase in [
-        '2 slice cheese', '2 slices cheese', 'two slice cheese', 'two slices of cheese',
+        '2 slice cheese',
+        '2 slices cheese',
+        'two slice cheese',
+        'two slices of cheese',
       ]) {
         final item = parser.parse(phrase).items.single;
         expect(item.quantity, 2, reason: phrase);
@@ -91,33 +122,41 @@ void main() {
     });
   });
 
-  group('mayonnaise: abbreviation, full word, brand-free slang, and modifier', () {
-    test('all phrasings resolve to the same canonical id', () {
-      expectSameFood([
-        '2 tbsp mayo', '2 tablespoon mayo', '2 tablespoons mayonnaise',
-      ], 'mayonnaise');
-    });
+  group(
+    'mayonnaise: abbreviation, full word, brand-free slang, and modifier',
+    () {
+      test('all phrasings resolve to the same canonical id', () {
+        expectSameFood([
+          '2 tbsp mayo',
+          '2 tablespoon mayo',
+          '2 tablespoons mayonnaise',
+        ], 'mayonnaise');
+      });
 
-    test('"light"/"reduced fat" modifiers survive and still resolve to base mayonnaise', () {
-      for (final phrase in ['two tbsp light mayo', '2 spoon light mayo']) {
-        final item = parser.parse(phrase).items.single;
-        expect(item.canonicalId, 'mayonnaise', reason: phrase);
-        expect(item.modifiers, ['light'], reason: phrase);
-        expect(item.quantity, 2, reason: phrase);
-      }
-    });
+      test('"light"/"reduced fat" modifiers survive and still resolve to base mayonnaise', () {
+        for (final phrase in ['two tbsp light mayo', '2 spoon light mayo']) {
+          final item = parser.parse(phrase).items.single;
+          expect(item.canonicalId, 'mayonnaise', reason: phrase);
+          expect(item.modifiers, ['light'], reason: phrase);
+          expect(item.quantity, 2, reason: phrase);
+        }
+      });
 
-    test('"reduced fat mayo" keeps its modifier too', () {
-      final item = parser.parse('reduced fat mayo').items.single;
-      expect(item.canonicalId, 'mayonnaise');
-      expect(item.modifiers, ['reduced fat']);
-    });
-  });
+      test('"reduced fat mayo" keeps its modifier too', () {
+        final item = parser.parse('reduced fat mayo').items.single;
+        expect(item.canonicalId, 'mayonnaise');
+        expect(item.modifiers, ['reduced fat']);
+      });
+    },
+  );
 
   group('milk: size word, optional "of", and fraction all agree', () {
     test('all phrasings resolve to the same canonical id', () {
       expectSameFood([
-        'large glass milk', 'large glass of milk', 'half glass milk', 'half a glass of milk',
+        'large glass milk',
+        'large glass of milk',
+        'half glass milk',
+        'half a glass of milk',
       ], 'milk');
     });
 
@@ -160,14 +199,17 @@ void main() {
       }
     });
 
-    test('"Nx" multiplier works for both a unit-less food and a plural one', () {
-      final banana = parser.parse('1x banana').items.single;
-      expect(banana.canonicalId, 'banana');
-      expect(banana.quantity, 1);
-      final egg = parser.parse('2x egg').items.single;
-      expect(egg.canonicalId, 'egg');
-      expect(egg.quantity, 2);
-    });
+    test(
+      '"Nx" multiplier works for both a unit-less food and a plural one',
+      () {
+        final banana = parser.parse('1x banana').items.single;
+        expect(banana.canonicalId, 'banana');
+        expect(banana.quantity, 1);
+        final egg = parser.parse('2x egg').items.single;
+        expect(egg.canonicalId, 'egg');
+        expect(egg.quantity, 2);
+      },
+    );
   });
 
   group('regional English aliases resolve to one shared canonical id', () {
@@ -184,8 +226,14 @@ void main() {
       expect(parser.parse('shrimp').items.single.canonicalId, 'shrimp');
     });
     test('minced beef / ground beef', () {
-      expect(parser.parse('minced beef').items.single.canonicalId, 'minced_beef');
-      expect(parser.parse('ground beef').items.single.canonicalId, 'minced_beef');
+      expect(
+        parser.parse('minced beef').items.single.canonicalId,
+        'minced_beef',
+      );
+      expect(
+        parser.parse('ground beef').items.single.canonicalId,
+        'minced_beef',
+      );
     });
   });
 
@@ -216,21 +264,32 @@ void main() {
     collisions.forEach((word, expectedId) {
       test('bare "$word" resolves as food, not as an empty unit', () {
         final result = parser.parse(word);
-        expect(result.items, isNotEmpty, reason: '"$word" should not be unresolved');
+        expect(
+          result.items,
+          isNotEmpty,
+          reason: '"$word" should not be unresolved',
+        );
         final item = result.items.single;
         expect(item.canonicalId, expectedId);
-        expect(item.unit, null, reason: 'the word was consumed as the food, not left as a unit');
+        expect(
+          item.unit,
+          null,
+          reason: 'the word was consumed as the food, not left as a unit',
+        );
       });
     });
 
-    test('quantified collision words still resolve ("3 sausages", "2 wraps")', () {
-      final sausages = parser.parse('3 sausages').items.single;
-      expect(sausages.canonicalId, 'sausage');
-      expect(sausages.quantity, 3);
-      final wraps = parser.parse('2 wraps').items.single;
-      expect(wraps.canonicalId, 'wrap');
-      expect(wraps.quantity, 2);
-    });
+    test(
+      'quantified collision words still resolve ("3 sausages", "2 wraps")',
+      () {
+        final sausages = parser.parse('3 sausages').items.single;
+        expect(sausages.canonicalId, 'sausage');
+        expect(sausages.quantity, 3);
+        final wraps = parser.parse('2 wraps').items.single;
+        expect(wraps.canonicalId, 'wrap');
+        expect(wraps.quantity, 2);
+      },
+    );
 
     test('"wrap" still works as a genuine container unit when something follows it', () {
       final item = parser.parse('a wrap of hummus').items.single;
@@ -273,14 +332,24 @@ void main() {
   });
 
   group('a grammar-only fragment is unresolved, never a fake empty item', () {
-    test('a bare number/approximation word with no food is flagged unresolved', () {
-      for (final phrase in ['2', 'about', '2 x']) {
-        final result = parser.parse(phrase);
-        expect(result.items, isEmpty, reason: '"$phrase" carries no food identity');
-        expect(result.unresolved, isNotEmpty, reason: '"$phrase" should be flagged, not silently dropped');
-      }
-    });
-
+    test(
+      'a bare number/approximation word with no food is flagged unresolved',
+      () {
+        for (final phrase in ['2', 'about', '2 x']) {
+          final result = parser.parse(phrase);
+          expect(
+            result.items,
+            isEmpty,
+            reason: '"$phrase" carries no food identity',
+          );
+          expect(
+            result.unresolved,
+            isNotEmpty,
+            reason: '"$phrase" should be flagged, not silently dropped',
+          );
+        }
+      },
+    );
   });
 
   // Previously a known limitation: the segmenter split every standalone
@@ -303,8 +372,14 @@ void main() {
     });
 
     test('quarter and three-quarters fractions, not just half', () {
-      expect(parser.parse('one and a quarter bananas').items.single.quantity, 1.25);
-      expect(parser.parse('one and three quarters bananas').items.single.quantity, 1.75);
+      expect(
+        parser.parse('one and a quarter bananas').items.single.quantity,
+        1.25,
+      );
+      expect(
+        parser.parse('one and three quarters bananas').items.single.quantity,
+        1.75,
+      );
     });
 
     test('all resolve to the expected food, not just the right number', () {
@@ -343,15 +418,22 @@ void main() {
     });
   });
 
-  group('word multipliers ("couple") -- lexicon table now actually consulted', () {
-    test('couple / a couple / N and a word both resolve to quantity 2', () {
-      for (final phrase in ['couple of eggs', 'a couple of eggs', 'couple eggs']) {
-        final item = parser.parse(phrase).items.single;
-        expect(item.canonicalId, 'egg', reason: phrase);
-        expect(item.quantity, 2, reason: phrase);
-      }
-    });
-  });
+  group(
+    'word multipliers ("couple") -- lexicon table now actually consulted',
+    () {
+      test('couple / a couple / N and a word both resolve to quantity 2', () {
+        for (final phrase in [
+          'couple of eggs',
+          'a couple of eggs',
+          'couple eggs',
+        ]) {
+          final item = parser.parse(phrase).items.single;
+          expect(item.canonicalId, 'egg', reason: phrase);
+          expect(item.quantity, 2, reason: phrase);
+        }
+      });
+    },
+  );
 
   // Real live-input typos: conservative, generic word-level correction
   // (not one hardcoded alias per typo) applied before every remaining
@@ -367,8 +449,14 @@ void main() {
       expect(
         r.items.map((i) => i.canonicalId),
         containsAll([
-          'coleslaw', 'tomato', 'boiled_egg', 'cottage_cheese',
-          'smoked_salmon', 'coffee', 'smoothie', 'water',
+          'coleslaw',
+          'tomato',
+          'boiled_egg',
+          'cottage_cheese',
+          'smoked_salmon',
+          'coffee',
+          'smoothie',
+          'water',
         ]),
       );
     });
@@ -384,15 +472,24 @@ void main() {
       expect(parser.parse('xyzzyplonk').unresolved, isNotEmpty);
     });
 
-    test('Polish written with or without diacritics resolves the same way', () async {
-      final pl = await FoodParser.load(locale: 'pl');
-      for (final text in ['duża kawa, pół łyżki serek wiejski', 'duza kawa, pol lyzki serek wiejski']) {
-        final r = pl.parse(text);
-        expect(r.unresolved, isEmpty, reason: text);
-        expect(r.items.map((i) => i.canonicalId), ['coffee', 'cottage_cheese'], reason: text);
-        expect(r.items.first.size, 'large', reason: text);
-        expect(r.items.last.quantity, 0.5, reason: text);
-      }
-    });
+    test(
+      'Polish written with or without diacritics resolves the same way',
+      () async {
+        final pl = await FoodParser.load(locale: 'pl');
+        for (final text in [
+          'duża kawa, pół łyżki serek wiejski',
+          'duza kawa, pol lyzki serek wiejski',
+        ]) {
+          final r = pl.parse(text);
+          expect(r.unresolved, isEmpty, reason: text);
+          expect(r.items.map((i) => i.canonicalId), [
+            'coffee',
+            'cottage_cheese',
+          ], reason: text);
+          expect(r.items.first.size, 'large', reason: text);
+          expect(r.items.last.quantity, 0.5, reason: text);
+        }
+      },
+    );
   });
 }

@@ -48,5 +48,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'a2-platform.firebasestorage.app',
     iosBundleId: 'com.aaniaashley.a2',
   );
-
 }

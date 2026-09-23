@@ -11,15 +11,23 @@ void main() {
 
   test('shipped parser datasets have no validation issues', () {
     final issues = validateParserDatasets(
-      foodCatalogue: _readJson('$base/shared/food_catalogue.json') as List<dynamic>,
-      foodAliases: _readJson('$base/en/food_aliases.json') as Map<String, dynamic>,
+      foodCatalogue:
+          _readJson('$base/shared/food_catalogue.json') as List<dynamic>,
+      foodAliases:
+          _readJson('$base/en/food_aliases.json') as Map<String, dynamic>,
       taxonomyCategories:
-          (_readJson('$base/shared/taxonomy_categories.json') as Map<String, dynamic>)['categories']
+          (_readJson('$base/shared/taxonomy_categories.json')
+                  as Map<String, dynamic>)['categories']
               as List<dynamic>,
-      activityCatalogue: _readJson('$base/shared/activity_catalogue.json') as List<dynamic>,
-      activityAliases: _readJson('$base/en/activity_aliases.json') as Map<String, dynamic>,
-      nutrients: _readJson('$base/shared/nutrition/nutrients.json') as List<dynamic>,
-      portions: _readJson('$base/shared/nutrition/food_portions.json') as List<dynamic>,
+      activityCatalogue:
+          _readJson('$base/shared/activity_catalogue.json') as List<dynamic>,
+      activityAliases:
+          _readJson('$base/en/activity_aliases.json') as Map<String, dynamic>,
+      nutrients:
+          _readJson('$base/shared/nutrition/nutrients.json') as List<dynamic>,
+      portions: _readJson(
+        '$base/shared/nutrition/food_portions.json',
+      ) as List<dynamic>,
     );
     expect(issues, isEmpty, reason: issues.join('\n'));
   });
@@ -30,7 +38,9 @@ void main() {
         {'id': 'apple', 'canonical': 'apple', 'category': 'fruit'},
         {'id': 'apple', 'canonical': 'apple again', 'category': 'fruit'},
       ],
-      foodAliases: {'apple': ['apple']},
+      foodAliases: {
+        'apple': ['apple'],
+      },
       taxonomyCategories: ['fruit'],
       activityCatalogue: [],
       activityAliases: {},
@@ -77,6 +87,9 @@ void main() {
       ],
       portions: [],
     );
-    expect(issues, contains('nutrients.json references nonexistent food id: no_such_food'));
+    expect(
+      issues,
+      contains('nutrients.json references nonexistent food id: no_such_food'),
+    );
   });
 }

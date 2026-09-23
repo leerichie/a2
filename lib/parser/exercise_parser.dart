@@ -45,7 +45,10 @@ class ExerciseParser {
     AssetReader reader = defaultAssetReader,
     PersonalAliasRepository? personalAliases,
   }) async {
-    final bundledCatalogue = await ActivityCatalogue.load(locale: locale, reader: reader);
+    final bundledCatalogue = await ActivityCatalogue.load(
+      locale: locale,
+      reader: reader,
+    );
     final lexicon = await Lexicon.load(locale: locale, reader: reader);
 
     // The local overlay (activities AI has identified on this device, plus
@@ -56,7 +59,9 @@ class ExerciseParser {
     // exactly.
     final overlay = await LocalExerciseCatalogueOverlay.load();
     final bundledIds = bundledCatalogue.entries.map((e) => e.id).toSet();
-    final newOverlayEntries = overlay.entries.where((e) => !bundledIds.contains(e.id));
+    final newOverlayEntries = overlay.entries.where(
+      (e) => !bundledIds.contains(e.id),
+    );
     final catalogue = ActivityCatalogue([
       ...bundledCatalogue.entries,
       for (final o in newOverlayEntries)
@@ -68,7 +73,9 @@ class ExerciseParser {
           // descriptive only, never used in the calorie math itself (see
           // entry.met below), so deriving it from AI's own MET isn't
           // inventing a nutrition/portion figure, just labelling one.
-          intensity: o.met < 3 ? 'light' : (o.met < 6 ? 'moderate' : 'vigorous'),
+          intensity: o.met < 3
+              ? 'light'
+              : (o.met < 6 ? 'moderate' : 'vigorous'),
           met: o.met,
           aliases: [...o.aliasesEn, ...o.aliasesPl],
         ),
@@ -114,8 +121,10 @@ class ExerciseParser {
     final normalized = normalizeParserText(input);
     final quantity = parseExerciseQuantity(normalized, lexicon);
     final corrected = correctSpelling(quantity.remainder, vocabulary).trim();
-    final remaining =
-        removeFillerWords(corrected, lexicon.activityFillerWords).trim();
+    final remaining = removeFillerWords(
+      corrected,
+      lexicon.activityFillerWords,
+    ).trim();
 
     // Try the phrase before filler words are stripped first -- some real
     // aliases ("5 a side") are themselves built from filler words like "a",
@@ -123,22 +132,41 @@ class ExerciseParser {
     // one that no longer exists ("5 side"). Only fall back to the
     // filler-stripped phrase (needed for "played tennis" -> "tennis", etc.)
     // when the untouched phrase doesn't resolve on its own.
-    var resolution = resolveActivity(corrected, catalogue, aliasIndex,
-        personalAliases: personalAliases, locale: locale);
+    var resolution = resolveActivity(
+      corrected,
+      catalogue,
+      aliasIndex,
+      personalAliases: personalAliases,
+      locale: locale,
+    );
     if (resolution.entry == null) {
-      resolution = resolveActivity(remaining, catalogue, aliasIndex,
-          personalAliases: personalAliases, locale: locale);
+      resolution = resolveActivity(
+        remaining,
+        catalogue,
+        aliasIndex,
+        personalAliases: personalAliases,
+        locale: locale,
+      );
     }
 
     var minutes = quantity.minutes;
     var approximate = quantity.approximate;
     // Bare step count with no activity named at all defaults to walking --
     // steps are inherently a walking measure, not a guess at which sport.
-    if (resolution.entry == null && remaining.isEmpty && quantity.steps != null) {
-      resolution = resolveActivity('walking', catalogue, aliasIndex,
-          personalAliases: personalAliases, locale: locale);
+    if (resolution.entry == null &&
+        remaining.isEmpty &&
+        quantity.steps != null) {
+      resolution = resolveActivity(
+        'walking',
+        catalogue,
+        aliasIndex,
+        personalAliases: personalAliases,
+        locale: locale,
+      );
     }
-    if (minutes == null && quantity.steps != null && resolution.entry?.id == 'walking') {
+    if (minutes == null &&
+        quantity.steps != null &&
+        resolution.entry?.id == 'walking') {
       minutes = quantity.steps! / _stepsPerMinute;
       approximate = true;
     }

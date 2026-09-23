@@ -29,7 +29,11 @@ class PortionCatalogue {
 
   /// Pass `unit: null` to look up the bare-mention default portion for a
   /// food (no household unit/measurement was present in the text at all).
-  PortionRule? lookup({required String foodId, required String? unit, String? size}) {
+  PortionRule? lookup({
+    required String foodId,
+    required String? unit,
+    String? size,
+  }) {
     for (final rule in rules) {
       if (rule.foodId != foodId) continue;
       if (rule.unit != unit) continue;
@@ -42,7 +46,9 @@ class PortionCatalogue {
   static Future<PortionCatalogue> load({
     AssetReader reader = defaultAssetReader,
   }) async {
-    final raw = await reader('assets/parser/shared/nutrition/food_portions.json');
+    final raw = await reader(
+      'assets/parser/shared/nutrition/food_portions.json',
+    );
     final list = json.decode(raw) as List<dynamic>;
     final rules = list.map((raw) {
       final m = raw as Map<String, dynamic>;
@@ -72,7 +78,9 @@ class DrinkContainerCatalogue {
   static Future<DrinkContainerCatalogue> load({
     AssetReader reader = defaultAssetReader,
   }) async {
-    final raw = await reader('assets/parser/shared/nutrition/drink_container_ml.json');
+    final raw = await reader(
+      'assets/parser/shared/nutrition/drink_container_ml.json',
+    );
     final map = json.decode(raw) as Map<String, dynamic>;
     return DrinkContainerCatalogue(
       map.map((k, v) => MapEntry(k, (v as num).toDouble())),
@@ -102,7 +110,9 @@ class GenericVolumeCatalogue {
   static Future<GenericVolumeCatalogue> load({
     AssetReader reader = defaultAssetReader,
   }) async {
-    final raw = await reader('assets/parser/shared/nutrition/generic_volume_ml.json');
+    final raw = await reader(
+      'assets/parser/shared/nutrition/generic_volume_ml.json',
+    );
     final map = json.decode(raw) as Map<String, dynamic>;
     return GenericVolumeCatalogue(
       map.map((k, v) {

@@ -4,7 +4,11 @@ import '../catalogue/alias_index.dart';
 import '../catalogue/food_catalogue.dart';
 
 class FoodResolution {
-  const FoodResolution({this.entry, this.matchedAlias, this.suggestions = const []});
+  const FoodResolution({
+    this.entry,
+    this.matchedAlias,
+    this.suggestions = const [],
+  });
   final FoodCatalogueEntry? entry;
   final String? matchedAlias;
   final List<String> suggestions;
@@ -38,9 +42,11 @@ FoodResolution resolveFood(
 
   final lower = trimmed.toLowerCase();
   final suggestions = catalogue.entries
-      .where((e) =>
-          e.canonical.toLowerCase().contains(lower) ||
-          lower.contains(e.canonical.toLowerCase()))
+      .where(
+        (e) =>
+            e.canonical.toLowerCase().contains(lower) ||
+            lower.contains(e.canonical.toLowerCase()),
+      )
       .map((e) => e.id)
       .take(3)
       .toList();

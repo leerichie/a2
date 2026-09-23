@@ -135,13 +135,25 @@ class Lexicon {
     );
 
     final numbers = {
-      'cardinals': _mergeScalarMaps(numbersByLocale.map((m) => m['cardinals'] as Map<String, dynamic>)),
-      'multipliers': _mergeScalarMaps(numbersByLocale.map((m) => m['multipliers'] as Map<String, dynamic>)),
-      'accepted_patterns': _mergeLists(numbersByLocale.map((m) => m['accepted_patterns'] as List<dynamic>)),
-      'fractions': _mergeScalarMaps(numbersByLocale.map((m) => m['fractions'] as Map<String, dynamic>)),
+      'cardinals': _mergeScalarMaps(
+        numbersByLocale.map((m) => m['cardinals'] as Map<String, dynamic>),
+      ),
+      'multipliers': _mergeScalarMaps(
+        numbersByLocale.map((m) => m['multipliers'] as Map<String, dynamic>),
+      ),
+      'accepted_patterns': _mergeLists(
+        numbersByLocale.map((m) => m['accepted_patterns'] as List<dynamic>),
+      ),
+      'fractions': _mergeScalarMaps(
+        numbersByLocale.map((m) => m['fractions'] as Map<String, dynamic>),
+      ),
     };
-    final sizesCanonical = _mergeAliasGroups(sizesByLocale.map((m) => m['canonical'] as Map<String, dynamic>));
-    final sizesFullness = _mergeAliasGroups(sizesByLocale.map((m) => m['fullness'] as Map<String, dynamic>));
+    final sizesCanonical = _mergeAliasGroups(
+      sizesByLocale.map((m) => m['canonical'] as Map<String, dynamic>),
+    );
+    final sizesFullness = _mergeAliasGroups(
+      sizesByLocale.map((m) => m['fullness'] as Map<String, dynamic>),
+    );
     final unitGroups = _mergeAliasGroups([
       for (final m in unitsByLocale) ...[
         m['standard_volume'] as Map<String, dynamic>,
@@ -151,42 +163,68 @@ class Lexicon {
       ],
     ]);
     final approx = {
-      'approximation_words': _mergeLists(approxByLocale.map((m) => m['approximation_words'] as List<dynamic>)),
-      'amount_descriptors': _mergeLists(approxByLocale.map((m) => m['amount_descriptors'] as List<dynamic>)),
-      'connector_words': _mergeLists(approxByLocale.map((m) => m['connector_words'] as List<dynamic>)),
-      'activity_filler_words':
-          _mergeLists(approxByLocale.map((m) => m['activity_filler_words'] as List<dynamic>)),
+      'approximation_words': _mergeLists(
+        approxByLocale.map((m) => m['approximation_words'] as List<dynamic>),
+      ),
+      'amount_descriptors': _mergeLists(
+        approxByLocale.map((m) => m['amount_descriptors'] as List<dynamic>),
+      ),
+      'connector_words': _mergeLists(
+        approxByLocale.map((m) => m['connector_words'] as List<dynamic>),
+      ),
+      'activity_filler_words': _mergeLists(
+        approxByLocale.map((m) => m['activity_filler_words'] as List<dynamic>),
+      ),
     };
     final prepMod = {
-      'preparations': _mergeLists(prepModByLocale.map((m) => m['preparations'] as List<dynamic>)),
-      'modifiers': _mergeLists(prepModByLocale.map((m) => m['modifiers'] as List<dynamic>)),
+      'preparations': _mergeLists(
+        prepModByLocale.map((m) => m['preparations'] as List<dynamic>),
+      ),
+      'modifiers': _mergeLists(
+        prepModByLocale.map((m) => m['modifiers'] as List<dynamic>),
+      ),
     };
     final intensity = _mergeAliasGroups(intensityByLocale);
-    final durationUnits = _mergeAliasGroups(durationByLocale.map((m) => m['units'] as Map<String, dynamic>));
-    final durationFractions =
-        _mergeScalarMaps(durationByLocale.map((m) => m['fractions'] as Map<String, dynamic>));
-    final distanceUnits =
-        _mergeAliasGroups(durationByLocale.map((m) => m['distance_units'] as Map<String, dynamic>));
-    final stepUnits = _mergeLists(durationByLocale.map((m) => m['step_units'] as List<dynamic>));
+    final durationUnits = _mergeAliasGroups(
+      durationByLocale.map((m) => m['units'] as Map<String, dynamic>),
+    );
+    final durationFractions = _mergeScalarMaps(
+      durationByLocale.map((m) => m['fractions'] as Map<String, dynamic>),
+    );
+    final distanceUnits = _mergeAliasGroups(
+      durationByLocale.map((m) => m['distance_units'] as Map<String, dynamic>),
+    );
+    final stepUnits = _mergeLists(
+      durationByLocale.map((m) => m['step_units'] as List<dynamic>),
+    );
 
     return Lexicon(
       cardinals: _foldedKeys(
-        (numbers['cardinals'] as Map<String, dynamic>).map((k, v) => MapEntry(k, v as int)),
+        (numbers['cardinals'] as Map<String, dynamic>).map(
+          (k, v) => MapEntry(k, v as int),
+        ),
       ),
       multipliers: _foldedKeys(
-        (numbers['multipliers'] as Map<String, dynamic>).map((k, v) => MapEntry(k, v as int)),
+        (numbers['multipliers'] as Map<String, dynamic>).map(
+          (k, v) => MapEntry(k, v as int),
+        ),
       ),
       acceptedMultiplierPatterns:
           (numbers['accepted_patterns'] as List<dynamic>).cast<String>(),
       fractions: _foldedKeys(
-        (numbers['fractions'] as Map<String, dynamic>)
-            .map((k, v) => MapEntry(k, (v as num).toDouble())),
+        (numbers['fractions'] as Map<String, dynamic>).map(
+          (k, v) => MapEntry(k, (v as num).toDouble()),
+        ),
       ),
       sizeByAlias: _reverseIndex(sizesCanonical),
       fullnessByAlias: _reverseIndex(sizesFullness),
       unitByAlias: _reverseIndex(unitGroups),
-      approximationWords: _foldedList(approx['approximation_words'] as List<dynamic>),
-      amountDescriptors: _foldedList(approx['amount_descriptors'] as List<dynamic>),
+      approximationWords: _foldedList(
+        approx['approximation_words'] as List<dynamic>,
+      ),
+      amountDescriptors: _foldedList(
+        approx['amount_descriptors'] as List<dynamic>,
+      ),
       connectorWords: _foldedList(approx['connector_words'] as List<dynamic>),
       preparations: _foldedList(prepMod['preparations'] as List<dynamic>),
       modifiers: _foldedList(prepMod['modifiers'] as List<dynamic>),
@@ -197,7 +235,9 @@ class Lexicon {
       ),
       distanceUnitByAlias: _reverseIndex(distanceUnits),
       stepUnitWords: _foldedList(stepUnits),
-      activityFillerWords: _foldedList(approx['activity_filler_words'] as List<dynamic>),
+      activityFillerWords: _foldedList(
+        approx['activity_filler_words'] as List<dynamic>,
+      ),
     );
   }
 }

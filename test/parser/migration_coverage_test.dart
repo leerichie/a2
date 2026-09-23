@@ -21,48 +21,82 @@ void main() {
   // food-specific default-grams portion rule, at medium confidence (never
   // high -- no exact measurement was actually given).
   const migratedSolidFoods = {
-    'oats': (389, 40), 'peach': (39, 100), 'plum': (46, 80),
-    'crisps': (520, 25), 'raisins': (300, 30), 'coleslaw': (150, 70),
-    'ham': (145, 60), 'bacon': (450, 40), 'sausage': (300, 100),
-    'bread': (265, 40), 'banana': (89, 120), 'apple': (52, 150),
-    'chicken': (165, 150), 'salmon': (208, 150), 'trout': (148, 150),
-    'tuna': (132, 120), 'cod': (105, 150), 'rice': (130, 180),
-    'pasta': (158, 180), 'potato': (87, 180), 'cheese': (350, 30),
-    'avocado': (160, 100), 'mushroom': (22, 60), 'tomato': (18, 100),
-    'onion': (40, 50), 'carrot': (41, 80), 'bell_pepper': (31, 60),
-    'gherkin': (12, 50), 'cabbage': (25, 100), 'lettuce': (15, 60),
-    'salad': (60, 100), 'vinegar': (18, 15), 'beans': (127, 150),
-    'soup': (55, 250), 'milk': (50, 150), 'egg': (143, 60),
-    'yoghurt': (80, 100), 'cottage_cheese': (98, 60),
+    'oats': (389, 40),
+    'peach': (39, 100),
+    'plum': (46, 80),
+    'crisps': (520, 25),
+    'raisins': (300, 30),
+    'coleslaw': (150, 70),
+    'ham': (145, 60),
+    'bacon': (450, 40),
+    'sausage': (300, 100),
+    'bread': (265, 40),
+    'banana': (89, 120),
+    'apple': (52, 150),
+    'chicken': (165, 150),
+    'salmon': (208, 150),
+    'trout': (148, 150),
+    'tuna': (132, 120),
+    'cod': (105, 150),
+    'rice': (130, 180),
+    'pasta': (158, 180),
+    'potato': (87, 180),
+    'cheese': (350, 30),
+    'avocado': (160, 100),
+    'mushroom': (22, 60),
+    'tomato': (18, 100),
+    'onion': (40, 50),
+    'carrot': (41, 80),
+    'bell_pepper': (31, 60),
+    'gherkin': (12, 50),
+    'cabbage': (25, 100),
+    'lettuce': (15, 60),
+    'salad': (60, 100),
+    'vinegar': (18, 15),
+    'beans': (127, 150),
+    'soup': (55, 250),
+    'milk': (50, 150),
+    'egg': (143, 60),
+    'yoghurt': (80, 100),
+    'cottage_cheese': (98, 60),
   };
 
   group('bare mentions resolve via the food-specific default-grams portion', () {
     migratedSolidFoods.forEach((id, expected) {
       final (kcalPer100g, defaultGrams) = expected;
-      final phrase = id.replaceAll('_', ' '); // canonical ids are lowercase_snake; the word people type has spaces
-      test('bare "$phrase" -> $defaultGrams g, ${kcalPer100g}kcal/100g, medium confidence', () {
-        final item = parser.parse(phrase).items.single;
-        expect(item.canonicalId, id);
-        expect(item.grams, defaultGrams.toDouble(), reason: id);
-        expect(item.nutrition, isNotNull, reason: id);
-        expect(
-          item.nutrition!.kcal,
-          closeTo(kcalPer100g * defaultGrams / 100, 0.05),
-          reason: id,
-        );
-        expect(item.confidence, ParseConfidence.medium, reason: id);
-      });
+      final phrase = id.replaceAll(
+        '_',
+        ' ',
+      ); // canonical ids are lowercase_snake; the word people type has spaces
+      test(
+        'bare "$phrase" -> $defaultGrams g, ${kcalPer100g}kcal/100g, medium confidence',
+        () {
+          final item = parser.parse(phrase).items.single;
+          expect(item.canonicalId, id);
+          expect(item.grams, defaultGrams.toDouble(), reason: id);
+          expect(item.nutrition, isNotNull, reason: id);
+          expect(
+            item.nutrition!.kcal,
+            closeTo(kcalPer100g * defaultGrams / 100, 0.05),
+            reason: id,
+          );
+          expect(item.confidence, ParseConfidence.medium, reason: id);
+        },
+      );
 
       test('quantity scales the default for "$phrase" (2x)', () {
         final item = parser.parse('2 $phrase').items.single;
         expect(item.grams, defaultGrams * 2, reason: id);
       });
 
-      test('an explicit gram amount overrides the default for "$phrase" -> high', () {
-        final item = parser.parse('200g $phrase').items.single;
-        expect(item.grams, 200, reason: id);
-        expect(item.confidence, ParseConfidence.high, reason: id);
-      });
+      test(
+        'an explicit gram amount overrides the default for "$phrase" -> high',
+        () {
+          final item = parser.parse('200g $phrase').items.single;
+          expect(item.grams, 200, reason: id);
+          expect(item.confidence, ParseConfidence.high, reason: id);
+        },
+      );
     });
   });
 
@@ -76,8 +110,12 @@ void main() {
   // measure), the same way non-alcoholic drinks like cola already did --
   // an explicit ml/count amount always overrides it at high confidence.
   const migratedDrinks = {
-    'whisky': (220, 25.0), 'vodka': (220, 25.0), 'gin': (220, 25.0),
-    'rum': (220, 25.0), 'wine': (83, 150.0), 'beer': (43, 500.0),
+    'whisky': (220, 25.0),
+    'vodka': (220, 25.0),
+    'gin': (220, 25.0),
+    'rum': (220, 25.0),
+    'wine': (83, 150.0),
+    'beer': (43, 500.0),
   };
 
   group('every alcoholic drink defaults to a real standard serving size', () {
@@ -105,7 +143,11 @@ void main() {
           'at high confidence', () {
         final item = parser.parse('250ml $id').items.single;
         expect(item.grams, 250, reason: id);
-        expect(item.nutrition!.kcal, closeTo(kcalPer100ml * 2.5, 0.05), reason: id);
+        expect(
+          item.nutrition!.kcal,
+          closeTo(kcalPer100ml * 2.5, 0.05),
+          reason: id,
+        );
         expect(item.confidence, ParseConfidence.high, reason: id);
       });
     });
@@ -115,7 +157,13 @@ void main() {
   // WaterIntakeParser's own numbers, applied uniformly to every pourable
   // food (drink or dairy) that has real nutrient data but no food-specific
   // portion rule of its own.
-  const containerMl = {'glass': 250, 'mug': 250, 'cup': 250, 'bottle': 500, 'carton': 500};
+  const containerMl = {
+    'glass': 250,
+    'mug': 250,
+    'cup': 250,
+    'bottle': 500,
+    'carton': 500,
+  };
   const pourableFoods = ['wine', 'beer', 'milk']; // drink + dairy
 
   group('household container words resolve to a standard volume for pourable foods', () {
@@ -125,20 +173,27 @@ void main() {
           final item = parser.parse('$unit of $food').items.single;
           expect(item.canonicalId, food, reason: '$unit of $food');
           expect(item.grams, ml.toDouble(), reason: '$unit of $food');
-          expect(item.confidence, ParseConfidence.medium, reason: '$unit of $food');
+          expect(
+            item.confidence,
+            ParseConfidence.medium,
+            reason: '$unit of $food',
+          );
         });
       });
     }
 
-    test('a container word on a non-pourable solid food does not invent a volume', () {
-      // "glass of rice" -- rice has no glass-specific portion rule and
-      // isn't pourable, so this must stay incomplete, not silently use the
-      // 250ml container number for a solid.
-      final item = parser.parse('glass of rice').items.single;
-      expect(item.canonicalId, 'rice');
-      expect(item.grams, null);
-      expect(item.confidence, ParseConfidence.incomplete);
-    });
+    test(
+      'a container word on a non-pourable solid food does not invent a volume',
+      () {
+        // "glass of rice" -- rice has no glass-specific portion rule and
+        // isn't pourable, so this must stay incomplete, not silently use the
+        // 250ml container number for a solid.
+        final item = parser.parse('glass of rice').items.single;
+        expect(item.canonicalId, 'rice');
+        expect(item.grams, null);
+        expect(item.confidence, ParseConfidence.incomplete);
+      },
+    );
   });
 
   group('chips/crisps regional split is preserved through migration', () {

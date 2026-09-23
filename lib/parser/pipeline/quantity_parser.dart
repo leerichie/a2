@@ -64,7 +64,9 @@ QuantityParseResult parseQuantity(String text, Lexicon lexicon) {
   var approximate = false;
   double? quantity;
 
-  final approxTable = PhraseTable({for (final w in lexicon.approximationWords) w: true});
+  final approxTable = PhraseTable({
+    for (final w in lexicon.approximationWords) w: true,
+  });
   while (true) {
     final match = approxTable.matchAtStart(remaining);
     if (match == null) break;

@@ -8,7 +8,10 @@ class HouseholdPortionResult {
 }
 
 HouseholdPortionResult parseHouseholdPortion(String text, Lexicon lexicon) {
-  final remaining = consumeConnectorsAndWhitespace(text, lexicon.connectorWords);
+  final remaining = consumeConnectorsAndWhitespace(
+    text,
+    lexicon.connectorWords,
+  );
   final table = PhraseTable(lexicon.unitByAlias);
   final match = table.matchAtStart(remaining);
   if (match == null) {

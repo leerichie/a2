@@ -43,5 +43,9 @@ SizeFullnessResult parseSizeAndFullness(String text, Lexicon lexicon) {
     break;
   }
 
-  return SizeFullnessResult(size: size, fullness: fullness, remainder: remaining);
+  return SizeFullnessResult(
+    size: size,
+    fullness: fullness,
+    remainder: remaining,
+  );
 }

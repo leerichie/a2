@@ -8,7 +8,10 @@ class ModifierStripResult {
 }
 
 class PreparationStripResult {
-  const PreparationStripResult({required this.preparations, required this.remainder});
+  const PreparationStripResult({
+    required this.preparations,
+    required this.remainder,
+  });
   final List<String> preparations;
   final String remainder;
 }
@@ -47,12 +50,17 @@ ModifierStripResult stripModifiers(String text, Lexicon lexicon) {
 PreparationStripResult stripPreparations(String text, Lexicon lexicon) {
   var remaining = text.trimLeft();
   final preparations = <String>[];
-  final preparationTable = PhraseTable({for (final w in lexicon.preparations) w: w});
+  final preparationTable = PhraseTable({
+    for (final w in lexicon.preparations) w: w,
+  });
   while (true) {
     final match = preparationTable.matchAtStart(remaining);
     if (match == null) break;
     preparations.add(match.$1);
     remaining = remaining.substring(match.$2).trimLeft();
   }
-  return PreparationStripResult(preparations: preparations, remainder: remaining);
+  return PreparationStripResult(
+    preparations: preparations,
+    remainder: remaining,
+  );
 }

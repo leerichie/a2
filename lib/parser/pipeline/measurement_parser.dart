@@ -3,7 +3,11 @@
 /// this stage uses its own regex, the same way `FoodEstimator` already does
 /// today -- just centralized here instead of duplicated per call site.
 class MeasurementParseResult {
-  const MeasurementParseResult({this.grams, this.millilitres, required this.remainder});
+  const MeasurementParseResult({
+    this.grams,
+    this.millilitres,
+    required this.remainder,
+  });
   final double? grams;
   final double? millilitres;
   final String remainder;
@@ -28,7 +32,9 @@ MeasurementParseResult parseMeasurement(String text) {
   if (unit.startsWith('g') || unit.startsWith('gram')) {
     return MeasurementParseResult(grams: value, remainder: rest);
   }
-  if (unit.startsWith('l') || unit.startsWith('litre') || unit.startsWith('liter')) {
+  if (unit.startsWith('l') ||
+      unit.startsWith('litre') ||
+      unit.startsWith('liter')) {
     return MeasurementParseResult(millilitres: value * 1000, remainder: rest);
   }
   return MeasurementParseResult(millilitres: value, remainder: rest);

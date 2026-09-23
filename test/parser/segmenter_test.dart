@@ -14,57 +14,95 @@ void main() {
 
   group('normal food separation on "and"/","', () {
     test('two foods joined by "and"', () {
-      expect(segmentPhrases('egg and cheese', lexicon, aliasIndex), ['egg', 'cheese']);
+      expect(segmentPhrases('egg and cheese', lexicon, aliasIndex), [
+        'egg',
+        'cheese',
+      ]);
     });
 
     test('comma-and list of three foods', () {
-      expect(segmentPhrases('egg, cheese and ham', lexicon, aliasIndex), ['egg', 'cheese', 'ham']);
+      expect(segmentPhrases('egg, cheese and ham', lexicon, aliasIndex), [
+        'egg',
+        'cheese',
+        'ham',
+      ]);
     });
 
     test('quantities on each side of "and" stay in their own segment', () {
-      expect(segmentPhrases('2 eggs and 1 banana', lexicon, aliasIndex), ['2 eggs', '1 banana']);
+      expect(segmentPhrases('2 eggs and 1 banana', lexicon, aliasIndex), [
+        '2 eggs',
+        '1 banana',
+      ]);
     });
   });
 
   group('compound quantities protect their "and" from the food-list split', () {
     test('word cardinal + half is kept as one segment', () {
-      expect(segmentPhrases('one and a half eggs', lexicon, aliasIndex), ['one and a half eggs']);
+      expect(segmentPhrases('one and a half eggs', lexicon, aliasIndex), [
+        'one and a half eggs',
+      ]);
     });
 
     test('digit cardinal + half is kept as one segment', () {
-      expect(segmentPhrases('2 and a half eggs', lexicon, aliasIndex), ['2 and a half eggs']);
+      expect(segmentPhrases('2 and a half eggs', lexicon, aliasIndex), [
+        '2 and a half eggs',
+      ]);
     });
 
     test('quarter and three-quarters are protected too, not just half', () {
-      expect(segmentPhrases('one and a quarter bananas', lexicon, aliasIndex), ['one and a quarter bananas']);
+      expect(segmentPhrases('one and a quarter bananas', lexicon, aliasIndex), [
+        'one and a quarter bananas',
+      ]);
       expect(
         segmentPhrases('one and three quarters bananas', lexicon, aliasIndex),
         ['one and three quarters bananas'],
       );
     });
 
-    test('a protected compound quantity can still be followed by more foods', () {
-      expect(
-        segmentPhrases('one and a half eggs and a banana', lexicon, aliasIndex),
-        ['one and a half eggs', 'a banana'],
+    test(
+      'a protected compound quantity can still be followed by more foods',
+      () {
+        expect(
+          segmentPhrases(
+            'one and a half eggs and a banana',
+            lexicon,
+            aliasIndex,
+          ),
+          ['one and a half eggs', 'a banana'],
+        );
+      },
+    );
+  });
+
+  group(
+    'an "and" only counts as compound when both sides actually look like one',
+    () {
+      test(
+        'a cardinal followed by a non-fraction word still splits normally',
+        () {
+          expect(segmentPhrases('one and cheese', lexicon, aliasIndex), [
+            'one',
+            'cheese',
+          ]);
+        },
       );
-    });
-  });
 
-  group('an "and" only counts as compound when both sides actually look like one', () {
-    test('a cardinal followed by a non-fraction word still splits normally', () {
-      expect(segmentPhrases('one and cheese', lexicon, aliasIndex), ['one', 'cheese']);
-    });
+      test('a fraction-looking word with no cardinal before it still splits normally', () {
+        expect(segmentPhrases('cheese and a half', lexicon, aliasIndex), [
+          'cheese',
+          'a half',
+        ]);
+      });
 
-    test('a fraction-looking word with no cardinal before it still splits normally', () {
-      expect(segmentPhrases('cheese and a half', lexicon, aliasIndex), ['cheese', 'a half']);
-    });
-
-    test('"and" at the very start or end of text does not crash and just drops', () {
-      expect(segmentPhrases('and cheese', lexicon, aliasIndex), ['cheese']);
-      expect(segmentPhrases('cheese and', lexicon, aliasIndex), ['cheese']);
-    });
-  });
+      test(
+        '"and" at the very start or end of text does not crash and just drops',
+        () {
+          expect(segmentPhrases('and cheese', lexicon, aliasIndex), ['cheese']);
+          expect(segmentPhrases('cheese and', lexicon, aliasIndex), ['cheese']);
+        },
+      );
+    },
+  );
 
   group('a known compound dish name containing "with" is not torn apart', () {
     final compoundAliasIndex = AliasIndex.build({
@@ -73,7 +111,11 @@ void main() {
 
     test('the bare compound name is kept as one segment', () {
       expect(
-        segmentPhrases('cottage cheese with chives', lexicon, compoundAliasIndex),
+        segmentPhrases(
+          'cottage cheese with chives',
+          lexicon,
+          compoundAliasIndex,
+        ),
         ['cottage cheese with chives'],
       );
     });
@@ -87,20 +129,28 @@ void main() {
     // finally got real nutrition data to check against.
     test('the same compound name with a leading gram measurement is also kept whole', () {
       expect(
-        segmentPhrases('100g cottage cheese with chives', lexicon, compoundAliasIndex),
+        segmentPhrases(
+          '100g cottage cheese with chives',
+          lexicon,
+          compoundAliasIndex,
+        ),
         ['100g cottage cheese with chives'],
       );
       expect(
-        segmentPhrases('250 g cottage cheese with chives', lexicon, compoundAliasIndex),
+        segmentPhrases(
+          '250 g cottage cheese with chives',
+          lexicon,
+          compoundAliasIndex,
+        ),
         ['250 g cottage cheese with chives'],
       );
     });
 
     test('an unrecognized "X with Y" phrase still splits normally', () {
-      expect(
-        segmentPhrases('chicken with rice', lexicon, compoundAliasIndex),
-        ['chicken', 'rice'],
-      );
+      expect(segmentPhrases('chicken with rice', lexicon, compoundAliasIndex), [
+        'chicken',
+        'rice',
+      ]);
     });
   });
 }

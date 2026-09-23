@@ -93,10 +93,7 @@ class LocalExerciseCatalogueOverlay {
   Future<LocalExerciseCatalogueOverlay> upsert(
     OverlayExerciseEntry entry,
   ) async {
-    final updated = [
-      ...entries.where((e) => e.id != entry.id),
-      entry,
-    ];
+    final updated = [...entries.where((e) => e.id != entry.id), entry];
     final overlay = LocalExerciseCatalogueOverlay(updated);
     await overlay.save();
     return overlay;

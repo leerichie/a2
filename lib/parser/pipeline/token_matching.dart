@@ -1,13 +1,14 @@
 class PhraseTable<T> {
   PhraseTable(Map<String, T> byPhrase)
-      : _entries = byPhrase.entries.toList()
-          ..sort((a, b) => b.key.length.compareTo(a.key.length));
+    : _entries = byPhrase.entries.toList()
+        ..sort((a, b) => b.key.length.compareTo(a.key.length));
 
   final List<MapEntry<String, T>> _entries;
 
   // Unicode-aware so this still works correctly for any locale word that,
   // for whatever reason, wasn't fully folded to plain ASCII.
-  static bool _isWordChar(String ch) => RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(ch);
+  static bool _isWordChar(String ch) =>
+      RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(ch);
 
   /// Matches the longest known phrase at the start of [text] (already
   /// lowercased/trimmed), requiring a word boundary right after it so
@@ -26,7 +27,10 @@ class PhraseTable<T> {
   }
 }
 
-String consumeConnectorsAndWhitespace(String text, List<String> connectorWords) {
+String consumeConnectorsAndWhitespace(
+  String text,
+  List<String> connectorWords,
+) {
   var remaining = text.trimLeft();
   final table = PhraseTable({for (final w in connectorWords) w: true});
   while (true) {

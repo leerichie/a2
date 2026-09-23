@@ -28,13 +28,16 @@ void main() {
   });
 
   group('the original bug: jam is no longer a bare-mention 400g guess', () {
-    test('a bare "jam" mention resolves to a realistic spread portion, not a jar', () {
-      final item = parser.parse('jam').items.single;
-      expect(item.canonicalId, 'jam');
-      expect(item.grams, 15);
-      expect(item.nutrition!.kcal, closeTo(37.5, 0.01));
-      expect(item.confidence, ParseConfidence.medium);
-    });
+    test(
+      'a bare "jam" mention resolves to a realistic spread portion, not a jar',
+      () {
+        final item = parser.parse('jam').items.single;
+        expect(item.canonicalId, 'jam');
+        expect(item.grams, 15);
+        expect(item.nutrition!.kcal, closeTo(37.5, 0.01));
+        expect(item.confidence, ParseConfidence.medium);
+      },
+    );
 
     test('"strawberry jam" resolves the same way as bare "jam"', () {
       final item = parser.parse('strawberry jam').items.single;
@@ -89,24 +92,31 @@ void main() {
   });
 
   group('Polish dishes that used to have zero nutrition/portion data', () {
-    test('common Polish dishes now resolve with real nutrition, not "incomplete"', () {
-      for (final text in [
-        'pierogi',
-        'bigos',
-        'barszcz',
-        'żurek',
-        'rosół',
-        'gołąbki',
-        'flaki',
-        'kotlet schabowy',
-      ]) {
-        final result = plParser.parse(text);
-        expect(result.unresolved, isEmpty, reason: '"$text" should resolve');
-        final item = result.items.single;
-        expect(item.confidence, isNot(ParseConfidence.incomplete), reason: '"$text"');
-        expect(item.nutrition, isNotNull, reason: '"$text"');
-      }
-    });
+    test(
+      'common Polish dishes now resolve with real nutrition, not "incomplete"',
+      () {
+        for (final text in [
+          'pierogi',
+          'bigos',
+          'barszcz',
+          'żurek',
+          'rosół',
+          'gołąbki',
+          'flaki',
+          'kotlet schabowy',
+        ]) {
+          final result = plParser.parse(text);
+          expect(result.unresolved, isEmpty, reason: '"$text" should resolve');
+          final item = result.items.single;
+          expect(
+            item.confidence,
+            isNot(ParseConfidence.incomplete),
+            reason: '"$text"',
+          );
+          expect(item.nutrition, isNotNull, reason: '"$text"');
+        }
+      },
+    );
 
     test('kopytka is a brand-new entry and resolves too', () {
       final item = plParser.parse('kopytka').items.single;
@@ -126,10 +136,13 @@ void main() {
   });
 
   group('"mashed" joins "boiled" as a recognized preparation', () {
-    test('mashed potato now resolves the same way boiled potato already did', () {
-      final mashed = parser.parse('mashed potato').items.single;
-      expect(mashed.canonicalId, 'potato');
-      expect(mashed.preparations, contains('mashed'));
-    });
+    test(
+      'mashed potato now resolves the same way boiled potato already did',
+      () {
+        final mashed = parser.parse('mashed potato').items.single;
+        expect(mashed.canonicalId, 'potato');
+        expect(mashed.preparations, contains('mashed'));
+      },
+    );
   });
 }

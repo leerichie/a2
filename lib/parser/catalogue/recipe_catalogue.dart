@@ -7,7 +7,11 @@ import 'asset_reader.dart';
 /// catalogues as if it had been typed on its own, so a recipe never carries
 /// its own invented numbers, only a composition of already-real ones.
 class RecipeIngredient {
-  const RecipeIngredient({required this.foodId, required this.quantity, this.unit});
+  const RecipeIngredient({
+    required this.foodId,
+    required this.quantity,
+    this.unit,
+  });
   final String foodId;
   final double quantity;
   // Null means the ingredient's own bare-mention default portion.
@@ -32,7 +36,9 @@ class RecipeCatalogue {
   static Future<RecipeCatalogue> load({
     AssetReader reader = defaultAssetReader,
   }) async {
-    final raw = await reader('assets/parser/shared/nutrition/food_recipes.json');
+    final raw = await reader(
+      'assets/parser/shared/nutrition/food_recipes.json',
+    );
     final list = json.decode(raw) as List<dynamic>;
     final recipes = list.map((raw) {
       final m = raw as Map<String, dynamic>;

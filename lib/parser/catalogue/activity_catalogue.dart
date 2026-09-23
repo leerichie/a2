@@ -32,11 +32,15 @@ class ActivityCatalogue {
     String locale = 'en',
     AssetReader reader = defaultAssetReader,
   }) async {
-    final sharedRaw = await reader('assets/parser/shared/activity_catalogue.json');
+    final sharedRaw = await reader(
+      'assets/parser/shared/activity_catalogue.json',
+    );
     final shared = json.decode(sharedRaw) as List<dynamic>;
 
     final aliasesByLocale = await Future.wait(
-      installedLocales.map((l) => reader('assets/parser/$l/activity_aliases.json')),
+      installedLocales.map(
+        (l) => reader('assets/parser/$l/activity_aliases.json'),
+      ),
     );
     final mergedAliases = <String, List<String>>{};
     for (final raw in aliasesByLocale) {

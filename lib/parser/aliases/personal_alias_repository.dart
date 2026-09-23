@@ -41,7 +41,11 @@ class PersonalAliasRepository {
     return includeDeleted ? all : all.where((a) => !a.isDeleted).toList();
   }
 
-  String? resolve(String normalizedPhrase, PersonalAliasKind kind, String locale) {
+  String? resolve(
+    String normalizedPhrase,
+    PersonalAliasKind kind,
+    String locale,
+  ) {
     for (final alias in _readAll()) {
       if (alias.isDeleted) continue;
       if (alias.kind != kind) continue;
