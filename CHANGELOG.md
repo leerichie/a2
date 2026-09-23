@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.0+83 — 2026-09-23
+
+- Strengthened the Add Meal keyboard handling: the primary action is kept in
+  view throughout the keyboard's resize animation, including on short phones.
+- Enlarged the Add companion emoji and made its animation repeat every four
+  seconds instead of running only when the screen opens or its mood changes.
+- Made the companion less sensitive to hydration by showing the thirsty state
+  only below 25% of the daily target from 14:00 onward.
+
+## 1.0.0+82 — 2026-09-23
+
+- Restored immediate timeline insertion after confirming a scanned or manual
+  food entry. Local persistence is queued without holding the add UI open, and
+  private-server upload remains a background operation.
+- Made the local entry-save queue recover after a storage failure so one failed
+  write cannot permanently block every later entry save.
+
+## 1.0.0+81 — 2026-09-23
+
+- Restored the intentional scanned-label naming rule: OCR fills nutrition
+  values only, while the food name always starts blank and must be entered
+  manually.
+
+## 1.0.0+80 — 2026-09-23
+
+- Fixed successful nutrition-label recognition being discarded on devices
+  where ML Kit reports an error while closing its native recognizer. Cleanup
+  remains bounded and best-effort, but can no longer replace scanned values
+  with a scan-failed message.
+
 ## 1.0.0+79 — 2026-09-23
 
 - Fixed nutrition-label scans opening an empty confirmation form when on-device

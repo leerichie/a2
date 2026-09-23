@@ -1356,11 +1356,19 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     // alter an in-flight persistence operation.
     final snapshot = List<FoodEntry>.of(entries);
     _pendingEntrySaves++;
-    final queuedSave = _entrySaveQueue = _entrySaveQueue.then(
-      (_) => const DailyEntryRepository().save(DateTime.now(), snapshot),
-    );
+    // Recover the queue after a failed write. Without this, Future.then never
+    // runs again and one storage error permanently blocks every later entry.
+    final queuedSave = _entrySaveQueue = _entrySaveQueue
+        .catchError((_) {})
+        .then(
+          (_) => const DailyEntryRepository().save(DateTime.now(), snapshot),
+        );
     try {
       await queuedSave;
+    } catch (_) {
+      // The entry is already visible in memory. A later mutation/refresh gets
+      // another persistence attempt; never turn a local write error into a
+      // stuck add flow or remove the optimistic timeline entry.
     } finally {
       _pendingEntrySaves--;
     }
@@ -1593,12 +1601,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                   final index = entries.indexOf(outcome.original);
                   if (index != -1) {
                     setState(() => entries[index] = outcome.updated);
-                    await _saveTodayEntries();
+                    unawaited(_saveTodayEntries());
                   }
                 } else if (result case final FoodEntry e) {
+                  // The timeline is authoritative immediately. Persistence is
+                  // queued locally and private-server upload happens after it;
+                  // neither is allowed to hold this UI path open.
                   setState(() => entries.add(e));
-                  await _saveTodayEntries();
-                  _checkAchievements();
+                  unawaited(_saveTodayEntries());
+                  unawaited(_checkAchievements());
                 } else if (result is DayPhotoSaved) {
                   await _loadTodayPhotos();
                 }
@@ -1633,7 +1644,9 @@ enum AddCompanionMood {
     final calorieProgress = calorieTarget <= 0 ? 1.0 : calories / calorieTarget;
 
     if (!hasFood) return AddCompanionMood.hungry;
-    if (waterProgress < .4 && now.hour >= 11) {
+    // Avoid nagging about hydration around lunchtime: reserve the thirsty
+    // state for a clearly low total later in the day.
+    if (waterProgress < .25 && now.hour >= 14) {
       return AddCompanionMood.thirsty;
     }
     if (!hasExercise && now.hour >= 16) return AddCompanionMood.move;
@@ -1656,6 +1669,7 @@ class _AddCompanionEmojiState extends State<AddCompanionEmoji>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scale;
+  Timer? _animationTimer;
 
   @override
   void initState() {
@@ -1668,6 +1682,10 @@ class _AddCompanionEmojiState extends State<AddCompanionEmoji>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
     );
     _animate();
+    _animationTimer = Timer.periodic(
+      const Duration(seconds: 4),
+      (_) => _animate(),
+    );
   }
 
   @override
@@ -1677,13 +1695,15 @@ class _AddCompanionEmojiState extends State<AddCompanionEmoji>
   }
 
   void _animate() {
+    if (!mounted) return;
     _controller
       ..reset()
-      ..repeat(reverse: true, count: 6);
+      ..repeat(reverse: true, count: 4);
   }
 
   @override
   void dispose() {
+    _animationTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -1703,7 +1723,7 @@ class _AddCompanionEmojiState extends State<AddCompanionEmoji>
       child: FittedBox(
         key: ValueKey(widget.mood),
         fit: BoxFit.scaleDown,
-        child: Text(widget.mood.emoji, style: const TextStyle(fontSize: 38)),
+        child: Text(widget.mood.emoji, style: const TextStyle(fontSize: 48)),
       ),
     ),
   );
@@ -6409,6 +6429,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
   final photoCaption = TextEditingController();
   final descriptionFocus = FocusNode();
   final sheetScroll = ScrollController();
+  final addButtonKey = GlobalKey();
   int mode = 0;
   bool aiAvailable = false;
   bool busy = false;
@@ -6439,16 +6460,22 @@ class _AddMealSheetState extends State<AddMealSheet> {
   }
 
   void _revealAddButton() {
-    // Wait for the keyboard and bottom-sheet inset animations to finish, then
-    // bring the primary action above the keyboard automatically.
-    Future<void>.delayed(const Duration(milliseconds: 350), () {
-      if (!mounted || !sheetScroll.hasClients) return;
-      sheetScroll.animateTo(
-        sheetScroll.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-      );
-    });
+    // Keyboard inset animation timing differs by device. Re-check while it is
+    // opening and target the actual action instead of a possibly stale scroll
+    // extent, so the button remains visible on short screens too.
+    for (final delay in [100, 350, 650]) {
+      Future<void>.delayed(Duration(milliseconds: delay), () {
+        if (!mounted || !descriptionFocus.hasFocus) return;
+        final buttonContext = addButtonKey.currentContext;
+        if (buttonContext == null || !buttonContext.mounted) return;
+        Scrollable.ensureVisible(
+          buttonContext,
+          alignment: 1,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    }
   }
 
   @override
@@ -6488,7 +6515,12 @@ class _AddMealSheetState extends State<AddMealSheet> {
       );
       return LabelParser.parse(result.text);
     } finally {
-      await recognizer.close();
+      // Releasing native ML Kit resources is best-effort. Some devices can
+      // report a platform-channel error while closing an otherwise successful
+      // recognizer; that must never replace the reading we already obtained.
+      try {
+        await recognizer.close();
+      } catch (_) {}
     }
   }
 
@@ -6542,7 +6574,9 @@ class _AddMealSheetState extends State<AddMealSheet> {
       backgroundColor: Colors.transparent,
       builder: (_) => AddFoodSheet(
         title: 'Confirm scanned label',
-        suggestedName: reading.productName ?? '',
+        // A label's first OCR line is often a heading or brand, not a reliable
+        // food name. Scans populate nutrition only; the user names the entry.
+        suggestedName: '',
         initialCalories: reading.caloriesPer100,
         initialProtein: reading.proteinPer100,
         initialCarbs: reading.carbsPer100,
@@ -7164,6 +7198,7 @@ class _AddMealSheetState extends State<AddMealSheet> {
               ),
             const SizedBox(height: 20),
             SizedBox(
+              key: addButtonKey,
               width: double.infinity,
               child: FilledButton.icon(
                 style: FilledButton.styleFrom(

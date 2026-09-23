@@ -1059,13 +1059,24 @@ void main() {
     expect(
       AddCompanionMood.forToday(
         entries: const [meal],
-        waterMl: 200,
+        waterMl: 300,
+        waterTargetMl: 2000,
+        calories: 1400,
+        calorieTarget: 2000,
+        now: DateTime(2026, 9, 22, 15),
+      ),
+      AddCompanionMood.thirsty,
+    );
+    expect(
+      AddCompanionMood.forToday(
+        entries: const [meal],
+        waterMl: 700,
         waterTargetMl: 2000,
         calories: 1400,
         calorieTarget: 2000,
         now: DateTime(2026, 9, 22, 13),
       ),
-      AddCompanionMood.thirsty,
+      AddCompanionMood.happy,
     );
     expect(
       AddCompanionMood.forToday(
