@@ -842,6 +842,20 @@ const server = createServer(async (req, res) => {
           });
           const mergedDaily = {...incomingDaily};
           for (const [key, existingList] of Object.entries(existingDaily)) {
+            // A day key genuinely ABSENT from this push (as opposed to
+            // present with an explicit empty array) means this device has
+            // no local knowledge of that day at all -- a fresh install, a
+            // partial/incomplete sync, a device that just hasn't loaded
+            // that far back. That must never be treated as "delete this
+            // day": only an explicit empty array (the device DOES know
+            // about the day and it's now empty) or a deletedDailyEntries
+            // tombstone actually removes entries. Confirmed live 2026-09-24:
+            // a stale/partial push from a freshly-reinstalled device wiped
+            // an already-synced day server-side under the old logic here.
+            if (!Object.prototype.hasOwnProperty.call(incomingDaily, key)) {
+              mergedDaily[key] = existingList;
+              continue;
+            }
             const incomingList = incomingDaily[key] || [];
             const incomingSerialized = new Set(incomingList.map(item => JSON.stringify(item)));
             const missingShared = (existingList || []).filter(item => item?.sharedFrom && !incomingSerialized.has(JSON.stringify(item)) && !wasDeleted(key, item));

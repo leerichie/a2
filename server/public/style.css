@@ -6,3 +6,20 @@
 .summary-pills{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .catalogue-rows{display:grid;gap:10px;max-height:520px;overflow-y:auto}
 .item.attention{border-color:#e0b45c;background:#fdf6e8}
+.entries-days{max-height:420px;overflow-y:auto;margin:10px 0;padding-right:2px}
+.entry-day{border:1px solid var(--line);border-radius:12px;padding:0;background:#fff}
+.entry-day+.entry-day{margin-top:8px}
+.entry-day summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:10px 13px;gap:10px}
+.entry-day summary::-webkit-details-marker{display:none}
+.entry-day-date{font-weight:800;font-size:13px}
+.entry-day-meta{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.entry-day-body{border-top:1px solid var(--line);padding:8px 13px;display:grid;gap:2px}
+.entry-row{display:flex;gap:10px;align-items:center;padding:5px 0;font-size:12px}
+.entry-row+.entry-row{border-top:1px dashed var(--line)}
+.entry-time{color:var(--muted);width:52px;flex-shrink:0}
+.entry-name{flex:1;font-weight:600}
+.entry-cal{color:var(--forest);font-weight:800;flex-shrink:0}
+.json-toggle{margin-top:10px}
+.json-toggle summary{cursor:pointer;color:var(--forest);font-weight:800;font-size:12px;list-style:none}
+.json-toggle summary::-webkit-details-marker{display:none}
+.json-toggle[open] summary{margin-bottom:4px}
