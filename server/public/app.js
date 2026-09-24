@@ -47,6 +47,21 @@ function renderHistoryReadable(history){
   }).join('')}</div>`;
 }
 const message=(id,text,ok=false)=>{const node=$(id);node.textContent=text;node.className=`message ${ok?'success':'error'}`;};const toast=text=>{const node=$('toast');node.textContent=text;node.classList.add('show');setTimeout(()=>node.classList.remove('show'),2600);};
+// Persist open/collapsed state of the top-level card sections (Your account,
+// Team access, Access list, App access, New app account) across refreshes.
+// These elements exist statically in index.html at load time, so we can
+// wire listeners once here rather than re-binding on every render.
+const CARD_COLLAPSE_KEY='a2-admin-card-state';
+const loadCardState=()=>{try{return JSON.parse(localStorage.getItem(CARD_COLLAPSE_KEY)||'{}');}catch(error){return{};}};
+const saveCardState=state=>{try{localStorage.setItem(CARD_COLLAPSE_KEY,JSON.stringify(state));}catch(error){}};
+function initCollapsibleCards(){
+  const state=loadCardState();
+  document.querySelectorAll('details.card[id]').forEach(node=>{
+    if(Object.prototype.hasOwnProperty.call(state,node.id)) node.open=state[node.id];
+    node.addEventListener('toggle',()=>{const current=loadCardState();current[node.id]=node.open;saveCardState(current);});
+  });
+}
+initCollapsibleCards();
 async function load(){const[account,list,appList,settingsResult,activityResult,modulesResult]=await Promise.all([api('me'),api('users'),api('app-users'),api('settings'),api('activity'),api('modules')]);currentUser=account.user;isAdmin=currentUser.role==='admin';users=list.users;appUsers=appList.users;settings=settingsResult;activity=activityResult.entries;modules=modulesResult.modules;$('login').hidden=true;$('login').style.display='none';$('console').hidden=false;$('console').style.display='grid';$('side-user').textContent=currentUser.username;$('side-avatar').textContent=currentUser.username[0];document.querySelector('.side-bottom small').textContent=isAdmin?'Administrator':'Restricted · view only';$('account-username').value=currentUser.username;$('account-username').disabled=!isAdmin;$('team-access-card').hidden=!isAdmin;$('add-app-user-card').hidden=!isAdmin;$('account-form').querySelector('button[type="submit"]').hidden=!isAdmin;$('current-password').disabled=!isAdmin;$('new-password').disabled=!isAdmin;renderUsers();renderAppUsers();renderSettings();renderActivity();}
 function relativeTime(iso){const diff=Date.now()-new Date(iso).getTime();const mins=Math.round(diff/60000);if(mins<1)return'just now';if(mins<60)return`${mins} min${mins===1?'':'s'} ago`;const hours=Math.round(mins/60);if(hours<24)return`${hours} hour${hours===1?'':'s'} ago`;const days=Math.round(hours/24);if(days<30)return`${days} day${days===1?'':'s'} ago`;return new Date(iso).toLocaleDateString();}
 function renderActivity(){
