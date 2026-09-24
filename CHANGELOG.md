@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0+85 — 2026-09-24
+
+- Fixed "Scan label" always failing with "The label could not be scanned"
+  on real release builds (worked fine in debug, which is what made this so
+  hard to catch). R8 was stripping the `google_mlkit_commons` plugin's
+  `InputImageConverter` class entirely as unreachable dead code, since it's
+  only called through a platform-channel dispatch R8's static analysis
+  can't trace — every scan attempt threw immediately as a result. Added
+  explicit ProGuard keep rules for the ML Kit plugin packages.
+
 ## 1.0.0+84 — 2026-09-24
 
 - Fixed Progress and Journey only ever showing today's entries plus the
