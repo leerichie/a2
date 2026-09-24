@@ -23,3 +23,21 @@
 .json-toggle summary{cursor:pointer;color:var(--forest);font-weight:800;font-size:12px;list-style:none}
 .json-toggle summary::-webkit-details-marker{display:none}
 .json-toggle[open] summary{margin-bottom:4px}
+.entry-day.water-day{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;gap:10px;cursor:default}
+details.card{padding:0}
+details.card>summary{list-style:none;cursor:pointer;padding:22px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:'▾';font-size:13px;color:var(--muted);flex-shrink:0;transition:transform .2s;margin-top:6px}
+details.card[open]>summary::after{transform:rotate(180deg)}
+details.card>summary>.card-summary-inner,details.card>summary>.card-heading{flex:1;min-width:0}
+details.card>summary h2{margin-top:0}
+details.card .card-body{padding:0 22px 22px}
+.activity-rows{text-align:left;font-size:12px}
+.activity-row{display:grid;grid-template-columns:70px 100px 150px 1fr;gap:14px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line)}
+.activity-row:last-child{border-bottom:0}
+.activity-header{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;padding-bottom:8px}
+.activity-time{color:var(--muted);font-weight:700}
+.activity-date{color:var(--muted)}
+.activity-user{font-weight:800;color:var(--forest);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.activity-message{color:var(--ink)}
+@media(max-width:720px){.activity-row{grid-template-columns:1fr 1fr;grid-template-areas:"time date" "user message";row-gap:2px}.activity-time{grid-area:time}.activity-date{grid-area:date;text-align:right}.activity-user{grid-area:user}.activity-message{grid-area:message;text-align:right}.activity-header{display:none}}
