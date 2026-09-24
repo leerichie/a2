@@ -1118,6 +1118,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Future<void> _entrySaveQueue = Future<void>.value();
   List<DayPhoto> photos = [];
   List<HistoryRecord> history = [];
+  // Every PAST day's live diary entries (daily_entries_YYYY-MM-DD for every
+  // date, not just today) converted into HistoryRecords — separate from
+  // `history` (the one-time imported pre-app data, [[personal_history_cache]])
+  // and from `entries` (today only, kept reactive for instant Add feedback).
+  // Progress/Journey used to only ever show `history` plus today, so
+  // everything logged live in the app for a past day was invisible there
+  // forever once the day rolled over, even though it was correctly saved
+  // and synced the whole time.
+  List<HistoryRecord> liveDiaryHistory = [];
   int get calories => entries
       .where((entry) => !entry.isExercise)
       .fold(0, (sum, entry) => sum + entry.calories);
@@ -1132,7 +1141,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     final todayRecords = entries
         .map((e) => HistoryRecord.fromFoodEntry(e, today))
         .toList();
-    return [...todayRecords, ...withoutToday]
+    final pastLiveDiary = liveDiaryHistory
+        .where((r) => dayOnly(r.at) != today)
+        .toList();
+    return [...todayRecords, ...pastLiveDiary, ...withoutToday]
       ..sort((a, b) => b.at.compareTo(a.at));
   }
 
@@ -1246,6 +1258,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       _loadTodayPhotos(),
       _loadImports(),
       _loadHistory(),
+      _loadAllDailyEntries(),
       _loadPlan(),
       _loadWater(),
       _loadEntrySyncAvailability(),
@@ -1283,6 +1296,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       await Future.wait([
         _loadTodayEntries(),
         _loadHistory(),
+        _loadAllDailyEntries(),
         _loadPlan(),
         _loadWater(),
         _loadEntrySyncAvailability(),
@@ -1456,6 +1470,29 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         importedCount = loaded.length;
       });
     }
+  }
+
+  // Every daily_entries_* key is one past day's live diary -- unlike
+  // _loadTodayEntries (today only, kept separately for instant Add
+  // feedback), this walks all of them so Progress/Journey can show what was
+  // actually logged on every past day, not just the one-time imported
+  // history. DailyEntryRepository.load already tolerates a malformed/
+  // partially-synced entry per day rather than failing the whole load.
+  Future<void> _loadAllDailyEntries() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dateKeys = prefs.getKeys().where(
+      (key) => key.startsWith('daily_entries_'),
+    );
+    final records = <HistoryRecord>[];
+    for (final key in dateKeys) {
+      final date = DateTime.tryParse(key.substring('daily_entries_'.length));
+      if (date == null) continue;
+      final dayEntries = await const DailyEntryRepository().load(date);
+      records.addAll(
+        dayEntries.map((entry) => HistoryRecord.fromFoodEntry(entry, date)),
+      );
+    }
+    if (mounted) setState(() => liveDiaryHistory = records);
   }
 
   Future<void> _loadImports() async {

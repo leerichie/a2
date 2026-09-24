@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0+84 — 2026-09-24
+
+- Fixed Progress and Journey only ever showing today's entries plus the
+  one-time imported history, so anything logged live in the app for a past
+  day (e.g. since 13 Sept) became permanently invisible there once the day
+  rolled over — even though it was saved and synced correctly the whole
+  time. Every day's live diary entries now show up there too.
+
 ## 1.0.0+83 — 2026-09-23
 
 - Strengthened the Add Meal keyboard handling: the primary action is kept in
