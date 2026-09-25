@@ -1,6 +1,6 @@
 {
   "name": "a2-content-server",
-  "version": "1.0.0+84",
+  "version": "1.0.0+86",
   "private": true,
   "type": "module",
   "scripts": {
