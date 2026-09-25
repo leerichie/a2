@@ -5896,6 +5896,7 @@ class _EditEntrySheetState extends State<EditEntrySheet> {
   late final salt = TextEditingController(text: _fmt(widget.entry.salt));
   String? notice;
   bool busy = false;
+  bool aiAvailable = false;
   FoodParser? foodParser;
   ExerciseParser? exerciseParser;
   double _oldWaterMl = 0;
@@ -5918,6 +5919,9 @@ class _EditEntrySheetState extends State<EditEntrySheet> {
         if (mounted) setState(() => exerciseParser = value);
       });
     } else {
+      const AiService().isAvailable().then((value) {
+        if (mounted) setState(() => aiAvailable = value);
+      });
       FoodParser.load(locale: widget.locale).then((value) {
         if (!mounted) return;
         // Water isn't persisted on the entry itself (its own running
@@ -6062,7 +6066,37 @@ class _EditEntrySheetState extends State<EditEntrySheet> {
     final (explicitCategory, explicitTime, textToParse) = extractMealContext(
       text,
     );
-    final result = parser.parse(textToParse);
+    final localResult = parser.parse(textToParse);
+    // Once the user has directly touched any number field, that always
+    // wins on save regardless of what parsing finds -- so there is no
+    // point spending an AI round trip on a result that will be discarded.
+    final canCallAi = aiAvailable && !_macrosDirty && textToParse.isNotEmpty;
+    final needsAi =
+        canCallAi &&
+        (localResult.items.any(
+              (item) => item.confidence == ParseConfidence.incomplete,
+            ) ||
+            localResult.unresolved.isNotEmpty);
+    // A retyped/edited description gets the SAME local-first-then-AI
+    // resolution a brand-new entry gets (see resolveFoodWithAiFallback),
+    // so adjusting a quantity or adding/removing an item actually
+    // recalculates the total instead of silently keeping the entry's old
+    // numbers just because the edited text doesn't fully resolve locally.
+    if (needsAi) setState(() => busy = true);
+    FoodParseResult result;
+    try {
+      result = needsAi
+          ? await resolveFoodWithAiFallback(
+              localResult: localResult,
+              localParser: parser,
+              canCallAi: canCallAi,
+              locale: widget.locale,
+            )
+          : localResult;
+    } finally {
+      if (needsAi && mounted) setState(() => busy = false);
+    }
+    if (!mounted) return;
     // Once the user has directly touched any number field, that's always
     // trusted over a fresh re-parse -- even if the (unchanged) text still
     // happens to fully resolve against the dataset -- so a manual
@@ -6451,6 +6485,175 @@ String _describeIncompleteFood(FoodParseResult result) {
   return parts.join(' ');
 }
 
+// Writes an AI-resolved item local truly didn't know into the SAME shared
+// catalogue the manual "Add new food" sheet contributes to (see
+// CatalogueSyncService.contribute), on AI's own real servingGrams basis --
+// never a guessed weight. Best-effort: a failure here just means this one
+// item stays AI-only a bit longer, never blocks logging the entry.
+Future<void> _contributeAiFood(
+  NutritionEstimate aiResult,
+  String originalPhrase,
+  String locale,
+) async {
+  try {
+    final overlay = await LocalCatalogueOverlay.load();
+    await overlay.upsert(
+      OverlayFoodEntry(
+        id: OverlayFoodEntry.idFor(aiResult.name),
+        canonical: aiResult.name,
+        // Keep the exact wording that needed AI as an alias. The overlay
+        // parser merges aliases independently of the current UI language,
+        // so this also works for German/French/Spanish/Italian input.
+        aliasesEn: originalPhrase.trim().isEmpty
+            ? const []
+            : [originalPhrase.trim()],
+        kcalPer100g: aiResult.calories * 100 / aiResult.servingGrams,
+        proteinPer100g: aiResult.protein * 100 / aiResult.servingGrams,
+        carbsPer100g: aiResult.carbs * 100 / aiResult.servingGrams,
+        servingAmount: aiResult.servingGrams,
+        servingUnit: 'g',
+        source: 'ai',
+      ),
+    );
+    unawaited(
+      const CatalogueSyncService().contribute(
+        defaultServerUrl,
+        name: aiResult.name,
+        kcal: aiResult.calories.toDouble(),
+        protein: aiResult.protein.toDouble(),
+        carbs: aiResult.carbs.toDouble(),
+        servingAmount: aiResult.servingGrams,
+        servingUnit: 'g',
+        locale: locale,
+      ),
+    );
+  } catch (_) {
+    // Offline or the server is unreachable -- stays AI-only for now.
+  }
+}
+
+// Reconstructs a natural phrase for a locally-recognized-but-incomplete item
+// (e.g. "4 slice smoked salmon") so a component-level AI fallback call gets
+// the same context a person typed, not just the bare canonical name.
+String _phraseForItem(FoodParseItem item) {
+  final words = <String>[];
+  if (item.quantity != 1) {
+    final q = item.quantity;
+    words.add(q == q.roundToDouble() ? q.toInt().toString() : q.toString());
+  }
+  if (item.unit != null) words.add(item.unit!);
+  words.addAll(item.modifiers);
+  words.addAll(item.preparations);
+  final name = item.canonicalName ?? item.canonicalId;
+  if (name != null) words.add(name);
+  return words.join(' ');
+}
+
+// Local-first, component-level AI fallback: resolves ONLY the pieces the
+// local parser genuinely couldn't (an incomplete item's nutrition/portion,
+// or a whole unrecognized span), leaving every already-resolved local
+// component untouched -- never re-decides something local already
+// understood just because a sibling component failed. Shared by
+// AddFoodSheet (new entries) and EditEntrySheet (editing an existing
+// entry's description), so editing recalculates the same way adding does
+// instead of silently keeping stale numbers when the edited text doesn't
+// fully resolve locally.
+Future<FoodParseResult> resolveFoodWithAiFallback({
+  required FoodParseResult localResult,
+  required FoodParser localParser,
+  required bool canCallAi,
+  required String locale,
+}) async {
+  Future<List<FoodParseItem>?> aiResolveComponent(String phrase) async {
+    if (!canCallAi || phrase.trim().isEmpty) return null;
+    try {
+      final aiResult = await const AiService().describe(
+        serverUrl: defaultServerUrl,
+        kind: 'food',
+        text: phrase,
+      );
+      final reResolved = localParser.parse(aiResult.name);
+      if (_isFullyResolvedFood(reResolved)) {
+        if (reResolved.items.length == 1 &&
+            reResolved.items.single.canonicalId != null) {
+          await localParser.rememberAlias(
+            phrase,
+            reResolved.items.single.canonicalId!,
+          );
+        }
+        return reResolved.items;
+      }
+      // Local truly has no entry for this one (re-parsing AI's own
+      // canonical name still didn't resolve it) -- teach the global
+      // catalogue about it now, using AI's own servingGrams so the
+      // per-100g figures are real, not a guessed weight. Every other
+      // phone picks this up next time CatalogueSyncService.sync() runs,
+      // the same path the manual "Add new food" entry uses.
+      if (aiResult.servingGrams > 0) {
+        await _contributeAiFood(aiResult, phrase, locale);
+      }
+      return [
+        FoodParseItem(
+          quantity: 1,
+          canonicalName: aiResult.name,
+          nutrition: NutrientTotals(
+            kcal: aiResult.calories.toDouble(),
+            proteinG: aiResult.protein.toDouble(),
+            carbsG: aiResult.carbs.toDouble(),
+          ),
+          confidence: ParseConfidence.medium,
+        ),
+      ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  final items = <FoodParseItem>[];
+  final unresolvedTexts = <String>[];
+  // Every incomplete item/unresolved span local couldn't handle is
+  // independent of every other one, so their AI calls run concurrently
+  // (Future.wait) rather than one after another -- a sentence with two
+  // unrecognized dishes previously meant two AI round trips back to back,
+  // doubling the wait for no reason.
+  final itemResolutions = await Future.wait(
+    localResult.items.map(
+      (item) => item.confidence == ParseConfidence.incomplete
+          ? aiResolveComponent(_phraseForItem(item))
+          : Future<List<FoodParseItem>?>.value(null),
+    ),
+  );
+  for (var i = 0; i < localResult.items.length; i++) {
+    final item = localResult.items[i];
+    if (item.confidence != ParseConfidence.incomplete) {
+      items.add(item);
+    } else if (itemResolutions[i] != null) {
+      items.addAll(itemResolutions[i]!);
+    } else {
+      items.add(item);
+    }
+  }
+  final spanResolutions = await Future.wait(
+    localResult.unresolved.map((span) => aiResolveComponent(span.text)),
+  );
+  for (var i = 0; i < localResult.unresolved.length; i++) {
+    final resolved = spanResolutions[i];
+    if (resolved != null) {
+      items.addAll(resolved);
+    } else {
+      unresolvedTexts.add(localResult.unresolved[i].text);
+    }
+  }
+
+  // Combine only once every component has a usable result: if anything is
+  // still stuck, this stays reflected in the returned result rather than
+  // silently dropped -- callers use _isFullyResolvedFood to decide whether
+  // to block saving on what's left.
+  return FoodParseResult(items, [
+    for (final t in unresolvedTexts) UnresolvedSpan(t, 0, t.length),
+  ]);
+}
+
 class AddMealSheet extends StatefulWidget {
   const AddMealSheet({super.key, this.locale = 'en', required this.entries});
   final String locale;
@@ -6681,24 +6884,6 @@ class _AddMealSheetState extends State<AddMealSheet> {
     );
   }
 
-  // Reconstructs a natural phrase for a locally-recognized-but-incomplete
-  // item (e.g. "4 slice smoked salmon") so a component-level AI fallback
-  // call gets the same context a person typed, not just the bare
-  // canonical name.
-  String _phraseForItem(FoodParseItem item) {
-    final words = <String>[];
-    if (item.quantity != 1) {
-      final q = item.quantity;
-      words.add(q == q.roundToDouble() ? q.toInt().toString() : q.toString());
-    }
-    if (item.unit != null) words.add(item.unit!);
-    words.addAll(item.modifiers);
-    words.addAll(item.preparations);
-    final name = item.canonicalName ?? item.canonicalId;
-    if (name != null) words.add(name);
-    return words.join(' ');
-  }
-
   // The first food this sheet's own local parser genuinely couldn't find
   // nutrition data for, or the first stretch of text it couldn't recognize
   // as food at all -- either way, the thing the "Add this food" offer
@@ -6741,52 +6926,6 @@ class _AddMealSheetState extends State<AddMealSheet> {
         notice = null;
       });
       await _addToDay();
-    }
-  }
-
-  // Writes an AI-resolved item local truly didn't know into the SAME
-  // shared catalogue the manual "Add new food" sheet contributes to (see
-  // CatalogueSyncService.contribute), on AI's own real servingGrams basis
-  // -- never a guessed weight. Best-effort: a failure here just means this
-  // one item stays AI-only a bit longer, never blocks logging the entry.
-  Future<void> _contributeAiFood(
-    NutritionEstimate aiResult,
-    String originalPhrase,
-  ) async {
-    try {
-      final overlay = await LocalCatalogueOverlay.load();
-      await overlay.upsert(
-        OverlayFoodEntry(
-          id: OverlayFoodEntry.idFor(aiResult.name),
-          canonical: aiResult.name,
-          // Keep the exact wording that needed AI as an alias. The overlay
-          // parser merges aliases independently of the current UI language,
-          // so this also works for German/French/Spanish/Italian input.
-          aliasesEn: originalPhrase.trim().isEmpty
-              ? const []
-              : [originalPhrase.trim()],
-          kcalPer100g: aiResult.calories * 100 / aiResult.servingGrams,
-          proteinPer100g: aiResult.protein * 100 / aiResult.servingGrams,
-          carbsPer100g: aiResult.carbs * 100 / aiResult.servingGrams,
-          servingAmount: aiResult.servingGrams,
-          servingUnit: 'g',
-          source: 'ai',
-        ),
-      );
-      unawaited(
-        const CatalogueSyncService().contribute(
-          defaultServerUrl,
-          name: aiResult.name,
-          kcal: aiResult.calories.toDouble(),
-          protein: aiResult.protein.toDouble(),
-          carbs: aiResult.carbs.toDouble(),
-          servingAmount: aiResult.servingGrams,
-          servingUnit: 'g',
-          locale: widget.locale,
-        ),
-      );
-    } catch (_) {
-      // Offline or the server is unreachable -- stays AI-only for now.
     }
   }
 
@@ -6900,99 +7039,21 @@ class _AddMealSheetState extends State<AddMealSheet> {
             ) ||
             localResult.unresolved.isNotEmpty);
 
-    Future<List<FoodParseItem>?> aiResolveComponent(String phrase) async {
-      if (!canCallAi || phrase.trim().isEmpty) return null;
-      try {
-        final aiResult = await const AiService().describe(
-          serverUrl: defaultServerUrl,
-          kind: 'food',
-          text: phrase,
-        );
-        final reResolved = localParser.parse(aiResult.name);
-        if (_isFullyResolvedFood(reResolved)) {
-          if (reResolved.items.length == 1 &&
-              reResolved.items.single.canonicalId != null) {
-            await localParser.rememberAlias(
-              phrase,
-              reResolved.items.single.canonicalId!,
-            );
-          }
-          return reResolved.items;
-        }
-        // Local truly has no entry for this one (re-parsing AI's own
-        // canonical name still didn't resolve it) -- teach the global
-        // catalogue about it now, using AI's own servingGrams so the
-        // per-100g figures are real, not a guessed weight. Every other
-        // phone picks this up next time CatalogueSyncService.sync() runs,
-        // the same path the manual "Add new food" entry uses.
-        if (aiResult.servingGrams > 0) {
-          await _contributeAiFood(aiResult, phrase);
-        }
-        return [
-          FoodParseItem(
-            quantity: 1,
-            canonicalName: aiResult.name,
-            nutrition: NutrientTotals(
-              kcal: aiResult.calories.toDouble(),
-              proteinG: aiResult.protein.toDouble(),
-              carbsG: aiResult.carbs.toDouble(),
-            ),
-            confidence: ParseConfidence.medium,
-          ),
-        ];
-      } catch (_) {
-        return null;
-      }
-    }
-
     if (needsAi) setState(() => busy = true);
-    final items = <FoodParseItem>[];
-    final unresolvedTexts = <String>[];
+    FoodParseResult result;
     try {
-      // Every incomplete item/unresolved span local couldn't handle is
-      // independent of every other one, so their AI calls run concurrently
-      // (Future.wait) rather than one after another -- a sentence with two
-      // unrecognized dishes previously meant two AI round trips back to
-      // back, doubling the wait for no reason.
-      final itemResolutions = await Future.wait(
-        localResult.items.map(
-          (item) => item.confidence == ParseConfidence.incomplete
-              ? aiResolveComponent(_phraseForItem(item))
-              : Future<List<FoodParseItem>?>.value(null),
-        ),
-      );
-      for (var i = 0; i < localResult.items.length; i++) {
-        final item = localResult.items[i];
-        if (item.confidence != ParseConfidence.incomplete) {
-          items.add(item);
-        } else if (itemResolutions[i] != null) {
-          items.addAll(itemResolutions[i]!);
-        } else {
-          items.add(item);
-        }
-      }
-      final spanResolutions = await Future.wait(
-        localResult.unresolved.map((span) => aiResolveComponent(span.text)),
-      );
-      for (var i = 0; i < localResult.unresolved.length; i++) {
-        final resolved = spanResolutions[i];
-        if (resolved != null) {
-          items.addAll(resolved);
-        } else {
-          unresolvedTexts.add(localResult.unresolved[i].text);
-        }
-      }
+      result = needsAi
+          ? await resolveFoodWithAiFallback(
+              localResult: localResult,
+              localParser: localParser,
+              canCallAi: canCallAi,
+              locale: widget.locale,
+            )
+          : localResult;
     } finally {
       if (needsAi && mounted) setState(() => busy = false);
     }
     if (!mounted) return;
-
-    // Combine only once every component has a usable result: if anything
-    // is still stuck, this stays reflected below rather than silently
-    // dropped -- _isFullyResolvedFood blocks saving until it's resolved.
-    final result = FoodParseResult(items, [
-      for (final t in unresolvedTexts) UnresolvedSpan(t, 0, t.length),
-    ]);
 
     // FoodEstimator is kept only as a transitional comparison signal --
     // never as the saved result, even if AI is unavailable or fails.

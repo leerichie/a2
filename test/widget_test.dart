@@ -5,6 +5,7 @@ import 'package:a2/main.dart';
 import 'package:a2/l10n.dart';
 import 'package:a2/parser/catalogue/local_overlay.dart';
 import 'package:a2/parser/food_parser.dart';
+import 'package:a2/parser/models/food_parse_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -1313,6 +1314,42 @@ void main() {
     expect(MealCategory.detect('orange juice', false), 'Drinks');
     expect(MealCategory.detect('coffee', false), 'Drinks');
   });
+
+  testWidgets(
+    'resolveFoodWithAiFallback is a pass-through when AI cannot be called '
+    '(EditEntrySheet and AddFoodSheet share this resolver, see 1.0.0+86)',
+    (tester) async {
+      // Mirrors the established pre-warm pattern used throughout this file
+      // (see the "shows dashboard and adds a meal" test above): only the
+      // real asset read goes inside runAsync, nothing else -- an extra
+      // SharedPreferences.setMockInitialValues call inside runAsync here
+      // previously caused this test (and whichever ran right after it) to
+      // hang for the full 10-minute suite timeout when run as part of the
+      // full suite, even though it passed fine in isolation.
+      rootBundle.clear();
+      late FoodParser parser;
+      await tester.runAsync(() async {
+        parser = await FoodParser.load();
+      });
+      // Deliberately a description the local dataset can't fully resolve
+      // (no portion rule for "triangles" of camembert) -- exactly the
+      // shape of entry that used to silently keep stale numbers on edit
+      // because nothing ever re-tried AI for it.
+      final local = parser.parse('1 egg and 2 triangles camembert');
+      final merged = await resolveFoodWithAiFallback(
+        localResult: local,
+        localParser: parser,
+        canCallAi: false,
+        locale: 'en',
+      );
+      expect(local.unresolved, isNotEmpty);
+      expect(merged.items.length, local.items.length);
+      expect(
+        merged.unresolved.map((u) => u.text).toList(),
+        local.unresolved.map((u) => u.text).toList(),
+      );
+    },
+  );
 
   testWidgets('AddFoodSheet quantity field scales what gets logged, never the '
       'catalogue basis (the AI "recipe/batch" confirmation flow)', (

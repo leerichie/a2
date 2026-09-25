@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0+86 — 2026-09-25
+
+- Fixed editing an existing food entry not recalculating calories/macros
+  when you change quantities or add/remove an item in the description.
+  Editing now gets the same local-first-then-AI resolution a brand-new
+  entry gets, instead of silently keeping the entry's old numbers whenever
+  the edited text didn't fully resolve against the local dataset (which is
+  common for verbose home-cooked descriptions with composite items like
+  "2 triangles camembert" or a mixed-fruit smoothie).
+
 ## 1.0.0+85 — 2026-09-24
 
 - Fixed "Scan label" always failing with "The label could not be scanned"
